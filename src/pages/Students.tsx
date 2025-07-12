@@ -35,16 +35,16 @@ export default function Students() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingStudent, setEditingStudent] = useState(null);
 
-  const { data: students = [], isLoading } = useStudents();
+  const { data: students = [], isLoading, deleteMutation } = useStudents();
 
   const filteredStudents = students.filter((student) => {
-    const matchesSearch = 
+    const matchesSearch =
       student.profiles.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       student.profiles.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       student.admission_number.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     const matchesClass = selectedClass === "all" || student.class_id === selectedClass;
-    
+
     return matchesSearch && matchesClass;
   });
 
@@ -53,15 +53,19 @@ export default function Students() {
       title: "Total Students",
       value: students.length,
       icon: GraduationCap,
-      color: "text-blue-600"
+      color: "text-blue-600",
     },
     {
       title: "Active Students",
       value: students.length, // You can add an active status field
       icon: GraduationCap,
-      color: "text-green-600"
-    }
+      color: "text-green-600",
+    },
   ];
+
+  const handleDelete = (id) => {
+    deleteMutation.mutate(id);
+  };
 
   if (isLoading) {
     return <div className="flex items-center justify-center h-96">Loading...</div>;
@@ -159,15 +163,14 @@ export default function Students() {
                     <Badge variant="secondary">{student.admission_number}</Badge>
                   </TableCell>
                   <TableCell>
-                    {student.classes ? 
-                      `${student.classes.name}${student.classes.section ? ` - ${student.classes.section}` : ''}` : 
-                      "Not assigned"
-                    }
+                    {student.classes
+                      ? `${student.classes.name}${
+                          student.classes.section ? ` - ${student.classes.section}` : ""
+                        }`
+                      : "Not assigned"}
                   </TableCell>
                   <TableCell>
-                    <div className="text-sm">
-                      {student.profiles.phone || "N/A"}
-                    </div>
+                    <div className="text-sm">{student.profiles.phone || "N/A"}</div>
                   </TableCell>
                   <TableCell>
                     <div className="text-sm">
@@ -192,12 +195,18 @@ export default function Students() {
                           Edit
                         </DropdownMenuItem>
                         <DropdownMenuItem>
-                          <a href={`/students/${student.id}/report-card`} className="flex items-center">
+                          <a
+                            href={`/students/${student.id}/report-card`}
+                            className="flex items-center"
+                          >
                             <GraduationCap className="h-4 w-4 mr-2" />
                             View Report Card
                           </a>
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive">
+                        <DropdownMenuItem
+                          className="text-destructive"
+                          onClick={() => handleDelete(student.id)}
+                        >
                           <Trash2 className="h-4 w-4 mr-2" />
                           Delete
                         </DropdownMenuItem>
@@ -219,12 +228,11 @@ export default function Students() {
               <DialogTitle>Edit Student</DialogTitle>
               <DialogDescription>
                 Update student information below.
-              </D
-ialogDescription>
+              </DialogDescription>
             </DialogHeader>
-            <StudentForm 
-              student={editingStudent} 
-              onSuccess={() => setEditingStudent(null)} 
+            <StudentForm
+              student={editingStudent}
+              onSuccess={() => setEditingStudent(null)}
             />
           </DialogContent>
         </Dialog>
