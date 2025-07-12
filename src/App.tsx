@@ -8,7 +8,7 @@ import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { Header } from "@/components/layout/Header";
 import { AuthPage } from "@/components/auth/AuthPage.tsx";
-import Dashboard from "./pages/Dashboard";
+import DashboardPage from "./pages/DashboardPage";
 import Students from "./pages/Students";
 import Classes from "./pages/Classes";
 import Teachers from "./pages/Teachers";
@@ -62,7 +62,7 @@ const App = () => (
             <Route path="/dashboard" element={
               <ProtectedRoute>
                 <AppLayout>
-                  <Dashboard />
+                  <DashboardPage />
                 </AppLayout>
               </ProtectedRoute>
             } />
