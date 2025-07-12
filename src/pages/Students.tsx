@@ -191,6 +191,12 @@ export default function Students() {
                           <Pencil className="h-4 w-4 mr-2" />
                           Edit
                         </DropdownMenuItem>
+                        <DropdownMenuItem>
+                          <a href={`/students/${student.id}/report-card`} className="flex items-center">
+                            <GraduationCap className="h-4 w-4 mr-2" />
+                            View Report Card
+                          </a>
+                        </DropdownMenuItem>
                         <DropdownMenuItem className="text-destructive">
                           <Trash2 className="h-4 w-4 mr-2" />
                           Delete

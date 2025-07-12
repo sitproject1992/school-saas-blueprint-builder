@@ -8,6 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 
 type Student = Database["public"]["Tables"]["students"]["Row"] & {
   profiles: Database["public"]["Tables"]["profiles"]["Row"] | null;
@@ -127,8 +128,15 @@ export function StudentInfo({ student }: { student: Student }) {
             </TableBody>
           </Table>
         </div>
-        <div className="mt-4">
+        <div className="flex justify-between items-center mt-4">
           <h3 className="text-lg font-semibold">Exam Results</h3>
+          <a href={`/students/${student.id}/report-card`} target="_blank" rel="noopener noreferrer">
+            <Button variant="outline" size="sm">
+              View Report Card
+            </Button>
+          </a>
+        </div>
+        <div className="mt-4">
           <Table>
             <TableHeader>
               <TableRow>

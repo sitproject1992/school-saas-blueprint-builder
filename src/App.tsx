@@ -20,6 +20,9 @@ import FeeStructures from "./pages/FeeStructures";
 import Invoices from "./pages/Invoices";
 import Syllabus from "./pages/Syllabus";
 import LessonPlans from "./pages/LessonPlans";
+import Exams from "./pages/Exams";
+import ExamResults from "./pages/ExamResults";
+import ReportCard from "./pages/ReportCard";
 
 const queryClient = new QueryClient();
 
@@ -67,6 +70,20 @@ const App = () => (
               <ProtectedRoute>
                 <AppLayout>
                   <DashboardPage />
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/students/:studentId/report-card" element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <ReportCard />
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/exams/:examId/classes/:classId/results" element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <ExamResults />
                 </AppLayout>
               </ProtectedRoute>
             } />
@@ -122,7 +139,7 @@ const App = () => (
             <Route path="/exams" element={
               <ProtectedRoute>
                 <AppLayout>
-                  <div>Exams Module - Coming Soon</div>
+                  <Exams />
                 </AppLayout>
               </ProtectedRoute>
             } />

@@ -75,6 +75,11 @@ const menuItems = [
         url: "/lesson-plans",
         icon: ClipboardList,
       },
+      {
+        title: "Exams",
+        url: "/exams",
+        icon: TestTube,
+      },
     ],
   },
   {
