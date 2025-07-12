@@ -11,6 +11,10 @@ import { AuthPage } from "@/components/auth/AuthPage";
 import Dashboard from "./pages/Dashboard";
 import Students from "./pages/Students";
 import Classes from "./pages/Classes";
+import Teachers from "./pages/Teachers";
+import Attendance from "./pages/Attendance";
+import ParentPortal from "./pages/ParentPortal";
+import FeeManagement from "./pages/FeeManagement";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 
@@ -73,7 +77,7 @@ const App = () => (
             <Route path="/teachers" element={
               <ProtectedRoute>
                 <AppLayout>
-                  <div>Teachers Module - Coming Soon</div>
+                  <Teachers />
                 </AppLayout>
               </ProtectedRoute>
             } />
@@ -94,7 +98,7 @@ const App = () => (
             <Route path="/attendance" element={
               <ProtectedRoute>
                 <AppLayout>
-                  <div>Attendance Module - Coming Soon</div>
+                  <Attendance />
                 </AppLayout>
               </ProtectedRoute>
             } />
@@ -122,7 +126,7 @@ const App = () => (
             <Route path="/fees" element={
               <ProtectedRoute>
                 <AppLayout>
-                  <div>Fee Management Module - Coming Soon</div>
+                  <FeeManagement />
                 </AppLayout>
               </ProtectedRoute>
             } />
@@ -165,6 +169,13 @@ const App = () => (
               <ProtectedRoute>
                 <AppLayout>
                   <div>Users Management Module - Coming Soon</div>
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/parent-portal" element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <ParentPortal />
                 </AppLayout>
               </ProtectedRoute>
             } />
