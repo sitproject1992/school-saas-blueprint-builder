@@ -1,305 +1,94 @@
-// Simple student creation for now - will be enhanced later
-import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { CalendarIcon } from "lucide-react";
-import { format } from "date-fns";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { useClasses } from "@/hooks/useClasses";
+import * as z from "zod";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { useQueryClient } from "@tanstack/react-query";
 
 const studentSchema = z.object({
   first_name: z.string().min(1, "First name is required"),
   last_name: z.string().min(1, "Last name is required"),
   email: z.string().email("Invalid email address"),
-  phone: z.string().optional(),
-  date_of_birth: z.date().optional(),
-  address: z.string().optional(),
-  admission_number: z.string().min(1, "Admission number is required"),
-  admission_date: z.date().optional(),
-  class_id: z.string().optional(),
-  blood_group: z.string().optional(),
-  medical_conditions: z.string().optional(),
-  emergency_contact_name: z.string().optional(),
-  emergency_contact_phone: z.string().optional(),
+  date_of_birth: z.string().min(1, "Date of birth is required"),
+  class_id: z.coerce.number().optional(),
 });
 
-type StudentFormData = z.infer<typeof studentSchema>;
+type StudentFormValues = z.infer<typeof studentSchema>;
 
 interface StudentFormProps {
-  student?: any;
+  student?: StudentFormValues & { id: number };
   onSuccess: () => void;
 }
 
 export function StudentForm({ student, onSuccess }: StudentFormProps) {
-  const [loading, setLoading] = useState(false);
-  const { data: classes = [] } = useClasses();
-  const { toast } = useToast();
-
-  const form = useForm<StudentFormData>({
+  const queryClient = useQueryClient();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<StudentFormValues>({
     resolver: zodResolver(studentSchema),
-    defaultValues: {
-      first_name: student?.profiles?.first_name || "",
-      last_name: student?.profiles?.last_name || "",
-      email: student?.profiles?.email || "",
-      phone: student?.profiles?.phone || "",
-      date_of_birth: student?.profiles?.date_of_birth ? new Date(student.profiles.date_of_birth) : undefined,
-      address: student?.profiles?.address || "",
-      admission_number: student?.admission_number || "",
-      admission_date: student?.admission_date ? new Date(student.admission_date) : undefined,
-      class_id: student?.class_id || "",
-      blood_group: student?.blood_group || "",
-      medical_conditions: student?.medical_conditions || "",
-      emergency_contact_name: student?.emergency_contact_name || "",
-      emergency_contact_phone: student?.emergency_contact_phone || "",
-    },
+    defaultValues: student || {},
   });
 
-  const onSubmit = async (data: StudentFormData) => {
-    setLoading(true);
+  const onSubmit = async (data: StudentFormValues) => {
     try {
       if (student) {
-        // Update existing student
-        const { error } = await supabase
-          .from('students')
-          .update({
-            admission_number: data.admission_number,
-            admission_date: data.admission_date?.toISOString().split('T')[0],
-            class_id: data.class_id || null,
-            blood_group: data.blood_group || null,
-            medical_conditions: data.medical_conditions || null,
-            emergency_contact_name: data.emergency_contact_name || null,
-            emergency_contact_phone: data.emergency_contact_phone || null,
-          })
-          .eq('id', student.id);
-
+        const { error } = await supabase.from("students").update(data).eq("id", student.id);
         if (error) throw error;
-        
-        toast({
-          title: "Success",
-          description: "Student updated successfully"
-        });
       } else {
-        // For now, just show a message that this needs admin setup
-        toast({
-          title: "Feature Coming Soon",
-          description: "Student creation will be available once admin authentication is fully configured"
-        });
+        const { error } = await supabase.from("students").insert(data);
+        if (error) throw error;
       }
+      queryClient.invalidateQueries({ queryKey: ["students"] });
       onSuccess();
     } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.message
-      });
-    } finally {
-      setLoading(false);
+      alert(error.message);
     }
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="first_name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>First Name</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="last_name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Last Name</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input type="email" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="phone"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Phone</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="admission_number"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Admission Number</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="class_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Class</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a class" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {classes.map((cls) => (
-                      <SelectItem key={cls.id} value={cls.id}>
-                        {cls.name}{cls.section ? ` - ${cls.section}` : ''}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="blood_group"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Blood Group</FormLabel>
-                <FormControl>
-                  <Input {...field} placeholder="e.g., A+, B-, O+" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="emergency_contact_name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Emergency Contact Name</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="emergency_contact_phone"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Emergency Contact Phone</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <FormField
-          control={form.control}
-          name="address"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Address</FormLabel>
-              <FormControl>
-                <Textarea {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="medical_conditions"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Medical Conditions</FormLabel>
-              <FormControl>
-                <Textarea {...field} placeholder="Any medical conditions or allergies" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <div className="flex justify-end space-x-2">
-          <Button type="submit" disabled={loading}>
-            {loading ? "Saving..." : student ? "Update Student" : "Create Student"}
-          </Button>
-        </div>
-      </form>
-    </Form>
+    <Card>
+      <CardHeader>
+        <CardTitle>{student ? "Edit Student" : "Add Student"}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="grid gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="first_name">First Name</Label>
+              <Input id="first_name" {...register("first_name")} />
+              {errors.first_name && <p className="text-red-500 text-sm">{errors.first_name.message}</p>}
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="last_name">Last Name</Label>
+              <Input id="last_name" {...register("last_name")} />
+              {errors.last_name && <p className="text-red-500 text-sm">{errors.last_name.message}</p>}
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="email">Email</Label>
+              <Input id="email" type="email" {...register("email")} />
+              {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="date_of_birth">Date of Birth</Label>
+              <Input id="date_of_birth" type="date" {...register("date_of_birth")} />
+              {errors.date_of_birth && <p className="text-red-500 text-sm">{errors.date_of_birth.message}</p>}
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="class_id">Class</Label>
+              {/* In a real app, this would be a select with a list of classes */}
+              <Input id="class_id" type="number" {...register("class_id")} />
+            </div>
+            <Button type="submit" className="w-full">
+              {student ? "Update Student" : "Add Student"}
+            </Button>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
   );
 }
