@@ -8,15 +8,17 @@ import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { Header } from "@/components/layout/Header";
 import { AuthPage } from "@/components/auth/AuthPage";
-import Dashboard from "./pages/Dashboard";
-import Students from "./pages/Students";
-import Classes from "./pages/Classes";
-import Teachers from "./pages/Teachers";
+import DashboardPage from "./pages/DashboardPage";
+import StudentsPage from "./pages/Students";
+import ClassesPage from "./pages/Classes";
+import TeachersPage from "./pages/Teachers";
 import Attendance from "./pages/Attendance";
 import ParentPortal from "./pages/ParentPortal";
 import FeeManagement from "./pages/FeeManagement";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import FeeStructures from "./pages/FeeStructures";
+import Invoices from "./pages/Invoices";
 
 const queryClient = new QueryClient();
 
@@ -63,28 +65,28 @@ const App = () => (
             <Route path="/dashboard" element={
               <ProtectedRoute>
                 <AppLayout>
-                  <Dashboard />
+                  <DashboardPage />
                 </AppLayout>
               </ProtectedRoute>
             } />
             <Route path="/students" element={
               <ProtectedRoute>
                 <AppLayout>
-                  <Students />
+                  <StudentsPage />
                 </AppLayout>
               </ProtectedRoute>
             } />
             <Route path="/teachers" element={
               <ProtectedRoute>
                 <AppLayout>
-                  <Teachers />
+                  <TeachersPage />
                 </AppLayout>
               </ProtectedRoute>
             } />
             <Route path="/classes" element={
               <ProtectedRoute>
                 <AppLayout>
-                  <Classes />
+                  <ClassesPage />
                 </AppLayout>
               </ProtectedRoute>
             } />
@@ -126,7 +128,14 @@ const App = () => (
             <Route path="/fees" element={
               <ProtectedRoute>
                 <AppLayout>
-                  <FeeManagement />
+                  <FeeStructures />
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/invoices" element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <Invoices />
                 </AppLayout>
               </ProtectedRoute>
             } />
