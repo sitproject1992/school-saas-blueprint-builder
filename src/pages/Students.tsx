@@ -67,6 +67,16 @@ export default function Students() {
     deleteMutation.mutate(id);
   };
 
+  const openForm = (student = null) => {
+    setEditingStudent(student);
+    setIsCreateDialogOpen(true);
+  };
+
+  const closeForm = () => {
+    setEditingStudent(null);
+    setIsCreateDialogOpen(false);
+  };
+
   if (isLoading) {
     return <div className="flex items-center justify-center h-96">Loading...</div>;
   }
@@ -78,23 +88,10 @@ export default function Students() {
           <h1 className="text-3xl font-bold tracking-tight">Students</h1>
           <p className="text-muted-foreground">Manage your school's students</p>
         </div>
-        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Student
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Add New Student</DialogTitle>
-              <DialogDescription>
-                Fill in the student information below.
-              </DialogDescription>
-            </DialogHeader>
-            <StudentForm onSuccess={() => setIsCreateDialogOpen(false)} />
-          </DialogContent>
-        </Dialog>
+        <Button onClick={() => openForm()}>
+          <Plus className="h-4 w-4 mr-2" />
+          Add Student
+        </Button>
       </div>
 
       {/* Stats Cards */}
@@ -190,7 +187,7 @@ export default function Students() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => setEditingStudent(student)}>
+                        <DropdownMenuItem onClick={() => openForm(student)}>
                           <Pencil className="h-4 w-4 mr-2" />
                           Edit
                         </DropdownMenuItem>
@@ -221,22 +218,20 @@ export default function Students() {
       </Card>
 
       {/* Edit Dialog */}
-      {editingStudent && (
-        <Dialog open={!!editingStudent} onOpenChange={() => setEditingStudent(null)}>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Edit Student</DialogTitle>
-              <DialogDescription>
-                Update student information below.
-              </DialogDescription>
-            </DialogHeader>
-            <StudentForm
-              student={editingStudent}
-              onSuccess={() => setEditingStudent(null)}
-            />
-          </DialogContent>
-        </Dialog>
-      )}
+      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{editingStudent ? "Edit Student" : "Add New Student"}</DialogTitle>
+            <DialogDescription>
+              {editingStudent ? "Update student information below." : "Fill in the student information below."}
+            </DialogDescription>
+          </DialogHeader>
+          <StudentForm
+            student={editingStudent}
+            onSuccess={closeForm}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
