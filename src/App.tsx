@@ -1,26 +1,185 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider, useAuth } from "@/hooks/useAuth";
+import { AppSidebar } from "@/components/layout/AppSidebar";
+import { Header } from "@/components/layout/Header";
+import { AuthPage } from "@/components/auth/AuthPage";
+import Dashboard from "./pages/Dashboard";
+import Students from "./pages/Students";
+import Classes from "./pages/Classes";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth();
+  
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
+  
+  if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
+  
+  return <>{children}</>;
+}
+
+function AppLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <SidebarProvider>
+      <div className="flex min-h-screen w-full">
+        <AppSidebar />
+        <div className="flex-1 flex flex-col">
+          <Header />
+          <main className="flex-1 p-6 bg-background">
+            {children}
+          </main>
+        </div>
+      </div>
+    </SidebarProvider>
+  );
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/auth" element={<AuthPage />} />
+            <Route path="/dashboard" element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <Dashboard />
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/students" element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <Students />
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/teachers" element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <div>Teachers Module - Coming Soon</div>
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/classes" element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <Classes />
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/subjects" element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <div>Subjects Module - Coming Soon</div>
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/attendance" element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <div>Attendance Module - Coming Soon</div>
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/syllabus" element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <div>Syllabus Module - Coming Soon</div>
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/lesson-plans" element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <div>Lesson Plans Module - Coming Soon</div>
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/exams" element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <div>Exams Module - Coming Soon</div>
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/fees" element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <div>Fee Management Module - Coming Soon</div>
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/payments" element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <div>Payments Module - Coming Soon</div>
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/inventory" element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <div>Inventory Module - Coming Soon</div>
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/announcements" element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <div>Announcements Module - Coming Soon</div>
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/reports" element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <div>Reports Module - Coming Soon</div>
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/schools" element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <div>Schools Management Module - Coming Soon</div>
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/users" element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <div>Users Management Module - Coming Soon</div>
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/settings" element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <div>Settings Module - Coming Soon</div>
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 
