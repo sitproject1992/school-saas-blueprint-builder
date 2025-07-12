@@ -7,28 +7,32 @@ import { ParentDashboard } from "@/components/dashboard/ParentDashboard";
 export default function DashboardPage() {
   const { user } = useAuth();
 
-  // In a real application, you would have a more robust way to determine the user's role.
-  // For now, we'll use a simple logic based on the email address.
-  const getRole = () => {
-    if (user?.email?.includes('admin')) {
-      return 'admin';
-    } else if (user?.email?.includes('teacher')) {
-      return 'teacher';
-    } else if (user?.email?.includes('student')) {
-      return 'student';
-    } else {
-      return 'parent';
+  const renderDashboard = () => {
+    if (!user || !user.roles || user.roles.length === 0) {
+      return <div>No role assigned. Please contact an administrator.</div>;
+    }
+
+    // For simplicity, we'll just use the first role.
+    // In a real application, you might want to allow users to switch roles.
+    const role = user.roles[0];
+
+    switch (role) {
+      case 'admin':
+        return <AdminDashboard />;
+      case 'teacher':
+        return <TeacherDashboard />;
+      case 'student':
+        return <StudentDashboard />;
+      case 'parent':
+        return <ParentDashboard />;
+      default:
+        return <div>Invalid role.</div>;
     }
   };
 
-  const role = getRole();
-
   return (
     <div>
-      {role === 'admin' && <AdminDashboard />}
-      {role === 'teacher' && <TeacherDashboard />}
-      {role === 'student' && <StudentDashboard />}
-      {role === 'parent' && <ParentDashboard />}
+      {renderDashboard()}
     </div>
   );
 }
