@@ -28,14 +28,17 @@ import {
 } from "@/components/ui/dialog";
 import { useStudents } from "@/hooks/useStudents";
 import { StudentForm } from "@/components/students/StudentForm";
+import { useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function Students() {
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedClass, setSelectedClass] = useState("all");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingStudent, setEditingStudent] = useState(null);
 
-  const { data: students = [], isLoading, deleteMutation } = useStudents();
+  const { data: students = [], isLoading, error } = useStudents();
 
   const filteredStudents = students.filter((student) => {
     const matchesSearch =
@@ -63,8 +66,16 @@ export default function Students() {
     },
   ];
 
-  const handleDelete = (id) => {
-    deleteMutation.mutate(id);
+  const handleDelete = async (id) => {
+    if (window.confirm("Are you sure you want to delete this student?")) {
+      try {
+        const { error } = await supabase.from("students").delete().eq("id", id);
+        if (error) throw error;
+        queryClient.invalidateQueries({ queryKey: ["students"] });
+      } catch (error) {
+        alert(error.message);
+      }
+    }
   };
 
   const openForm = (student = null) => {
@@ -77,9 +88,8 @@ export default function Students() {
     setIsCreateDialogOpen(false);
   };
 
-  if (isLoading) {
-    return <div className="flex items-center justify-center h-96">Loading...</div>;
-  }
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
 
   return (
     <div className="space-y-6">
@@ -174,7 +184,7 @@ export default function Students() {
                       <div>{student.emergency_contact_name || "N/A"}</div>
                       {student.emergency_contact_phone && (
                         <div className="text-muted-foreground">
-                          {student.emergency_contact_phone}
+                          {student.emergency__contact_phone}
                         </div>
                       )}
                     </div>
