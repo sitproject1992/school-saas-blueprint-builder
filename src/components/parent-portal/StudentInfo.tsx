@@ -13,6 +13,9 @@ type Student = Database["public"]["Tables"]["students"]["Row"] & {
   profiles: Database["public"]["Tables"]["profiles"]["Row"] | null;
   classes: Database["public"]["Tables"]["classes"]["Row"] | null;
   attendance: Database["public"]["Tables"]["attendance"]["Row"][];
+  exam_results: (Database["public"]["Tables"]["exam_results"]["Row"] & {
+    subjects: Database["public"]["Tables"]["subjects"]["Row"] | null;
+  })[];
 };
 
 export function StudentInfo({ student }: { student: Student }) {
@@ -48,6 +51,29 @@ export function StudentInfo({ student }: { student: Student }) {
                 <TableRow key={att.id}>
                   <TableCell>{new Date(att.date).toLocaleDateString()}</TableCell>
                   <TableCell>{att.status}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+        <div className="mt-4">
+          <h3 className="text-lg font-semibold">Exam Results</h3>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Subject</TableHead>
+                <TableHead>Marks</TableHead>
+                <TableHead>Max Marks</TableHead>
+                <TableHead>Grade</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {student.exam_results.map((result) => (
+                <TableRow key={result.id}>
+                  <TableCell>{result.subjects?.name}</TableCell>
+                  <TableCell>{result.marks_obtained}</TableCell>
+                  <TableCell>{result.max_marks}</TableCell>
+                  <TableCell>{result.grade}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
