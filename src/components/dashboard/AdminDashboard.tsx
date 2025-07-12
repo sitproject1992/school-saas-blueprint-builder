@@ -47,7 +47,7 @@ export function AdminDashboard() {
           <CardTitle className="text-sm font-medium">
             Total Revenue
           </CardTitle>
-        </Header>
+        </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">$45,231.89</div>
           <p className="text-xs text-muted-foreground">
