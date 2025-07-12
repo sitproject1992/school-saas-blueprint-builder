@@ -184,7 +184,7 @@ export default function Students() {
                       <div>{student.emergency_contact_name || "N/A"}</div>
                       {student.emergency_contact_phone && (
                         <div className="text-muted-foreground">
-                          {student.emergency__contact_phone}
+                          {student.emergency_contact_phone}
                         </div>
                       )}
                     </div>
