@@ -1,148 +1,93 @@
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { useCreateClass, useUpdateClass } from "@/hooks/useClasses";
+import * as z from "zod";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const classSchema = z.object({
   name: z.string().min(1, "Class name is required"),
-  section: z.string().optional(),
-  grade_level: z.number().min(1).max(12).optional(),
-  capacity: z.number().min(1, "Capacity must be at least 1").default(30),
+  teacher_id: z.coerce.number().optional(),
 });
 
-type ClassFormData = z.infer<typeof classSchema>;
+type ClassFormValues = z.infer<typeof classSchema>;
 
 interface ClassFormProps {
-  classData?: any;
+  classItem?: ClassFormValues & { id: number };
   onSuccess: () => void;
 }
 
-export function ClassForm({ classData, onSuccess }: ClassFormProps) {
-  const createClass = useCreateClass();
-  const updateClass = useUpdateClass();
+const fetchTeachers = async () => {
+  const { data, error } = await supabase.from("teachers").select("id, first_name, last_name");
+  if (error) throw new Error(error.message);
+  return data;
+};
 
-  const form = useForm<ClassFormData>({
-    resolver: zodResolver(classSchema),
-    defaultValues: {
-      name: classData?.name || "",
-      section: classData?.section || "",
-      grade_level: classData?.grade_level || undefined,
-      capacity: classData?.capacity || 30,
-    },
+export function ClassForm({ classItem, onSuccess }: ClassFormProps) {
+  const queryClient = useQueryClient();
+  const { data: teachers } = useQuery({
+    queryKey: ["teachers"],
+    queryFn: fetchTeachers,
   });
 
-  const onSubmit = async (data: ClassFormData) => {
-    try {
-      const formData = {
-        name: data.name,
-        section: data.section,
-        grade_level: data.grade_level,
-        capacity: data.capacity
-      };
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<ClassFormValues>({
+    resolver: zodResolver(classSchema),
+    defaultValues: classItem || {},
+  });
 
-      if (classData) {
-        // Update existing class
-        await updateClass.mutateAsync({
-          id: classData.id,
-          updates: formData
-        });
+  const onSubmit = async (data: ClassFormValues) => {
+    try {
+      if (classItem) {
+        const { error } = await supabase.from("classes").update(data).eq("id", classItem.id);
+        if (error) throw error;
       } else {
-        // Create new class
-        await createClass.mutateAsync(formData);
+        const { error } = await supabase.from("classes").insert(data);
+        if (error) throw error;
       }
+      queryClient.invalidateQueries({ queryKey: ["classes"] });
       onSuccess();
-    } catch (error) {
-      console.error("Error saving class:", error);
+    } catch (error: any) {
+      alert(error.message);
     }
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Class Name</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="e.g., Mathematics, Science" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="section"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Section</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="e.g., A, B, C" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="grade_level"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Grade Level</FormLabel>
-                <FormControl>
-                  <Input 
-                    type="number" 
-                    {...field} 
-                    onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
-                    placeholder="1-12" 
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="capacity"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Capacity</FormLabel>
-                <FormControl>
-                  <Input 
-                    type="number" 
-                    {...field} 
-                    onChange={(e) => field.onChange(parseInt(e.target.value))}
-                    placeholder="30" 
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <div className="flex justify-end space-x-2">
-          <Button type="submit" disabled={createClass.isPending || updateClass.isPending}>
-            {createClass.isPending || updateClass.isPending ? "Saving..." : classData ? "Update Class" : "Create Class"}
-          </Button>
-        </div>
-      </form>
-    </Form>
+    <Card>
+      <CardHeader>
+        <CardTitle>{classItem ? "Edit Class" : "Add Class"}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="grid gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="name">Class Name</Label>
+              <Input id="name" {...register("name")} />
+              {errors.name && <p className="text-red-500 text-sm">{errors.name.message}</p>}
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="teacher_id">Teacher</Label>
+              <select id="teacher_id" {...register("teacher_id")} className="w-full p-2 border rounded">
+                <option value="">Select a teacher</option>
+                {teachers?.map((teacher) => (
+                  <option key={teacher.id} value={teacher.id}>
+                    {teacher.first_name} {teacher.last_name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <Button type="submit" className="w-full">
+              {classItem ? "Update Class" : "Add Class"}
+            </Button>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
   );
 }
