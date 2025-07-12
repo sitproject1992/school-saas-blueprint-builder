@@ -11,7 +11,14 @@ import {
 
 type Student = Database["public"]["Tables"]["students"]["Row"] & {
   profiles: Database["public"]["Tables"]["profiles"]["Row"] | null;
-  classes: Database["public"]["Tables"]["classes"]["Row"] | null;
+  classes: Database["public"]["Tables"]["classes"]["Row"] & {
+    syllabus: (Database["public"]["Tables"]["syllabus"]["Row"] & {
+      subjects: Database["public"]["Tables"]["subjects"]["Row"];
+    })[];
+    lesson_plans: (Database["public"]["Tables"]["lesson_plans"]["Row"] & {
+      subjects: Database["public"]["Tables"]["subjects"]["Row"];
+    })[];
+  } | null;
   attendance: Database["public"]["Tables"]["attendance"]["Row"][];
   exam_results: (Database["public"]["Tables"]["exam_results"]["Row"] & {
     subjects: Database["public"]["Tables"]["subjects"]["Row"] | null;
@@ -54,6 +61,46 @@ export function StudentInfo({ student }: { student: Student }) {
                 <TableRow key={att.id}>
                   <TableCell>{new Date(att.date).toLocaleDateString()}</TableCell>
                   <TableCell>{att.status}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+        <div className="mt-4">
+          <h3 className="text-lg font-semibold">Syllabus</h3>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Title</TableHead>
+                <TableHead>Subject</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {student.classes.syllabus.map((s) => (
+                <TableRow key={s.id}>
+                  <TableCell>{s.title}</TableCell>
+                  <TableCell>{s.subjects.name}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+        <div className="mt-4">
+          <h3 className="text-lg font-semibold">Lesson Plans</h3>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Title</TableHead>
+                <TableHead>Subject</TableHead>
+                <TableHead>Planned Date</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {student.classes.lesson_plans.map((lp) => (
+                <TableRow key={lp.id}>
+                  <TableCell>{lp.title}</TableCell>
+                  <TableCell>{lp.subjects.name}</TableCell>
+                  <TableCell>{new Date(lp.planned_date).toLocaleDateString()}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

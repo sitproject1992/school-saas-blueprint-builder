@@ -18,6 +18,8 @@ import NotFound from "./pages/NotFound";
 import ParentPortal from "./pages/ParentPortal";
 import FeeStructures from "./pages/FeeStructures";
 import Invoices from "./pages/Invoices";
+import Syllabus from "./pages/Syllabus";
+import LessonPlans from "./pages/LessonPlans";
 
 const queryClient = new QueryClient();
 
@@ -106,14 +108,14 @@ const App = () => (
             <Route path="/syllabus" element={
               <ProtectedRoute>
                 <AppLayout>
-                  <div>Syllabus Module - Coming Soon</div>
+                  <Syllabus />
                 </AppLayout>
               </ProtectedRoute>
             } />
             <Route path="/lesson-plans" element={
               <ProtectedRoute>
                 <AppLayout>
-                  <div>Lesson Plans Module - Coming Soon</div>
+                  <LessonPlans />
                 </AppLayout>
               </ProtectedRoute>
             } />
