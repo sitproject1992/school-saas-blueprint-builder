@@ -11,6 +11,7 @@ import { AuthPage } from "@/components/auth/AuthPage";
 import Dashboard from "./pages/Dashboard";
 import Students from "./pages/Students";
 import Classes from "./pages/Classes";
+import Teachers from "./pages/Teachers";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 
@@ -73,7 +74,7 @@ const App = () => (
             <Route path="/teachers" element={
               <ProtectedRoute>
                 <AppLayout>
-                  <div>Teachers Module - Coming Soon</div>
+                  <Teachers />
                 </AppLayout>
               </ProtectedRoute>
             } />
