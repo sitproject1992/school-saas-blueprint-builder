@@ -16,6 +16,7 @@ import Attendance from "./pages/Attendance";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import ParentPortal from "./pages/ParentPortal";
+import FeeManagement from "./pages/FeeManagement";
 
 const queryClient = new QueryClient();
 
@@ -175,6 +176,13 @@ const App = () => (
               <ProtectedRoute>
                 <AppLayout>
                   <ParentPortal />
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/fees" element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <FeeManagement />
                 </AppLayout>
               </ProtectedRoute>
             } />
