@@ -147,61 +147,60 @@ export default function FeeStructures() {
             <DialogTrigger asChild>
               <Button onClick={handleAddNew}>Add New Fee Structure</Button>
             </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>{selectedFeeStructure ? "Edit" : "Add"} Fee Structure</DialogTitle>
+              </DialogHeader>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g., Tution Fee" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="amount"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Amount</FormLabel>
+                        <FormControl>
+                          <Input type="number" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="frequency"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Frequency</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g., Monthly" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <Button type="submit">
+                    {selectedFeeStructure ? "Update" : "Create"}
+                  </Button>
+                </form>
+              </Form>
+            </DialogContent>
           </Dialog>
         </div>
       </div>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{selectedFeeStructure ? "Edit" : "Add"} Fee Structure</DialogTitle>
-          </DialogHeader>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g., Tution Fee" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="amount"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Amount</FormLabel>
-                    <FormControl>
-                      <Input type="number" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="frequency"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Frequency</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g., Monthly" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit">
-                {selectedFeeStructure ? "Update" : "Create"}
-              </Button>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
       <Table>
         <TableHeader>
           <TableRow>
@@ -212,26 +211,28 @@ export default function FeeStructures() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {feeStructures?.map((fs) => (
-            <TableRow key={fs.id}>
-              <TableCell>{fs.name}</TableCell>
-              <TableCell>{fs.amount}</TableCell>
-              <TableCell>{fs.frequency}</TableCell>
-              <TableCell>
-                <Button variant="outline" size="sm" onClick={() => handleEdit(fs)}>
-                  Edit
-                </Button>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => deleteMutation.mutate(fs.id)}
-                  className="ml-2"
-                >
-                  Delete
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
+          {feeStructures?.map((fs) => {
+            return (
+              <TableRow key={fs.id}>
+                <TableCell>{fs.name}</TableCell>
+                <TableCell>{fs.amount}</TableCell>
+                <TableCell>{fs.frequency}</TableCell>
+                <TableCell>
+                  <Button variant="outline" size="sm" onClick={() => handleEdit(fs)}>
+                    Edit
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => deleteMutation.mutate(fs.id)}
+                    className="ml-2"
+                  >
+                    Delete
+                  </Button>
+                </TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
     </div>
