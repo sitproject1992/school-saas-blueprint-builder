@@ -12,7 +12,7 @@ import DashboardPage from "./pages/DashboardPage";
 import StudentsPage from "./pages/Students";
 import ClassesPage from "./pages/Classes";
 import TeachersPage from "./pages/Teachers";
-import Attendance from "./pages/Attendance";
+import AttendancePage from "./pages/Attendance";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import ParentPortal from "./pages/ParentPortal";
@@ -99,7 +99,7 @@ const App = () => (
             <Route path="/attendance" element={
               <ProtectedRoute>
                 <AppLayout>
-                  <Attendance />
+                  <AttendancePage />
                 </AppLayout>
               </ProtectedRoute>
             } />
