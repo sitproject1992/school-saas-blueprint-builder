@@ -14,6 +14,7 @@ import {
   Building2,
   Settings,
   Home,
+  School,
 } from "lucide-react";
 
 import {
@@ -55,29 +56,14 @@ const menuItems = [
         icon: BookOpen,
       },
       {
-        title: "Subjects",
-        url: "/subjects",
-        icon: BookOpen,
-      },
-      {
         title: "Attendance",
         url: "/attendance",
         icon: ClipboardList,
       },
       {
-        title: "Syllabus",
-        url: "/syllabus",
-        icon: FileText,
-      },
-      {
-        title: "Lesson Plans",
-        url: "/lesson-plans",
-        icon: Calendar,
-      },
-      {
-        title: "Exams",
-        url: "/exams",
-        icon: TestTube,
+        title: "Parent Portal",
+        url: "/parent-portal",
+        icon: Users,
       },
     ],
   },
@@ -90,26 +76,6 @@ const menuItems = [
         icon: DollarSign,
       },
       {
-        title: "Payments",
-        url: "/payments",
-        icon: CreditCard,
-      },
-    ],
-  },
-  {
-    title: "Operations",
-    items: [
-      {
-        title: "Inventory",
-        url: "/inventory",
-        icon: Package,
-      },
-      {
-        title: "Announcements",
-        url: "/announcements",
-        icon: Megaphone,
-      },
-      {
         title: "Reports",
         url: "/reports",
         icon: BarChart3,
@@ -119,16 +85,6 @@ const menuItems = [
   {
     title: "Administration",
     items: [
-      {
-        title: "Schools",
-        url: "/schools",
-        icon: Building2,
-      },
-      {
-        title: "Users",
-        url: "/users",
-        icon: Users,
-      },
       {
         title: "Settings",
         url: "/settings",
@@ -145,8 +101,8 @@ export function AppSidebar() {
     <Sidebar>
       <SidebarHeader>
         <div className="flex items-center gap-2 px-4 py-2">
-          <GraduationCap className="h-6 w-6" />
-          <span className="font-semibold">School SaaS</span>
+          <School className="h-6 w-6 text-primary" />
+          <span className="font-semibold text-lg">Skooler</span>
         </div>
       </SidebarHeader>
       <SidebarContent>
@@ -161,10 +117,10 @@ export function AppSidebar() {
                       <SidebarMenuItem key={item.title}>
                         <SidebarMenuButton
                           asChild
-                          isActive={location.pathname === item.url}
+                          isActive={location.pathname.startsWith(item.url)}
                         >
                           <Link to={item.url}>
-                            <item.icon />
+                            <item.icon className="h-4 w-4" />
                             <span>{item.title}</span>
                           </Link>
                         </SidebarMenuButton>
@@ -182,7 +138,7 @@ export function AppSidebar() {
                       isActive={location.pathname === section.url}
                     >
                       <Link to={section.url}>
-                        <section.icon />
+                        <section.icon className="h-4 w-4" />
                         <span>{section.title}</span>
                       </Link>
                     </SidebarMenuButton>
@@ -195,7 +151,7 @@ export function AppSidebar() {
       </SidebarContent>
       <SidebarFooter>
         <div className="p-4 text-xs text-muted-foreground">
-          © 2024 School SaaS
+          © {new Date().getFullYear()} Skooler Inc.
         </div>
       </SidebarFooter>
     </Sidebar>
