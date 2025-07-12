@@ -10,7 +10,7 @@ import { Header } from "@/components/layout/Header";
 import { AuthPage } from "@/components/auth/AuthPage.tsx";
 import DashboardPage from "./pages/DashboardPage";
 import StudentsPage from "./pages/Students";
-import Classes from "./pages/Classes";
+import ClassesPage from "./pages/Classes";
 import TeachersPage from "./pages/Teachers";
 import Attendance from "./pages/Attendance";
 import Index from "./pages/Index";
@@ -85,7 +85,7 @@ const App = () => (
             <Route path="/classes" element={
               <ProtectedRoute>
                 <AppLayout>
-                  <Classes />
+                  <ClassesPage />
                 </AppLayout>
               </ProtectedRoute>
             } />
