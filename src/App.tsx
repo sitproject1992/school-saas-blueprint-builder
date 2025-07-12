@@ -9,7 +9,7 @@ import { AppSidebar } from "@/components/layout/AppSidebar";
 import { Header } from "@/components/layout/Header";
 import { AuthPage } from "@/components/auth/AuthPage.tsx";
 import DashboardPage from "./pages/DashboardPage";
-import Students from "./pages/Students";
+import StudentsPage from "./pages/Students";
 import Classes from "./pages/Classes";
 import Teachers from "./pages/Teachers";
 import Attendance from "./pages/Attendance";
@@ -69,7 +69,7 @@ const App = () => (
             <Route path="/students" element={
               <ProtectedRoute>
                 <AppLayout>
-                  <Students />
+                  <StudentsPage />
                 </AppLayout>
               </ProtectedRoute>
             } />
