@@ -219,7 +219,8 @@ export default function Students() {
               <DialogTitle>Edit Student</DialogTitle>
               <DialogDescription>
                 Update student information below.
-              </DialogDescription>
+              </D
+ialogDescription>
             </DialogHeader>
             <StudentForm 
               student={editingStudent} 
