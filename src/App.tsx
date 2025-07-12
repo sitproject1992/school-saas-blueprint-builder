@@ -7,15 +7,19 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { Header } from "@/components/layout/Header";
-import { AuthPage } from "@/components/auth/AuthPage";
-import Dashboard from "./pages/Dashboard";
-import Students from "./pages/Students";
-import Classes from "./pages/Classes";
-import Teachers from "./pages/Teachers";
-import Attendance from "./pages/Attendance";
+import { AuthPage } from "@/components/auth/AuthPage.tsx";
+import DashboardPage from "./pages/DashboardPage";
+import StudentsPage from "./pages/Students";
+import ClassesPage from "./pages/Classes";
+import TeachersPage from "./pages/Teachers";
+import AttendancePage from "./pages/Attendance";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import ParentPortalPage from "./pages/ParentPortal";
+import FeeStructures from "./pages/FeeStructures";
+import Invoices from "./pages/Invoices";
+import Syllabus from "./pages/Syllabus";
+import LessonPlans from "./pages/LessonPlans";
 
 const queryClient = new QueryClient();
 
@@ -62,28 +66,28 @@ const App = () => (
             <Route path="/dashboard" element={
               <ProtectedRoute>
                 <AppLayout>
-                  <Dashboard />
+                  <DashboardPage />
                 </AppLayout>
               </ProtectedRoute>
             } />
             <Route path="/students" element={
               <ProtectedRoute>
                 <AppLayout>
-                  <Students />
+                  <StudentsPage />
                 </AppLayout>
               </ProtectedRoute>
             } />
             <Route path="/teachers" element={
               <ProtectedRoute>
                 <AppLayout>
-                  <Teachers />
+                  <TeachersPage />
                 </AppLayout>
               </ProtectedRoute>
             } />
             <Route path="/classes" element={
               <ProtectedRoute>
                 <AppLayout>
-                  <Classes />
+                  <ClassesPage />
                 </AppLayout>
               </ProtectedRoute>
             } />
@@ -97,21 +101,21 @@ const App = () => (
             <Route path="/attendance" element={
               <ProtectedRoute>
                 <AppLayout>
-                  <Attendance />
+                  <AttendancePage />
                 </AppLayout>
               </ProtectedRoute>
             } />
             <Route path="/syllabus" element={
               <ProtectedRoute>
                 <AppLayout>
-                  <div>Syllabus Module - Coming Soon</div>
+                  <Syllabus />
                 </AppLayout>
               </ProtectedRoute>
             } />
             <Route path="/lesson-plans" element={
               <ProtectedRoute>
                 <AppLayout>
-                  <div>Lesson Plans Module - Coming Soon</div>
+                  <LessonPlans />
                 </AppLayout>
               </ProtectedRoute>
             } />
@@ -125,14 +129,14 @@ const App = () => (
             <Route path="/fees" element={
               <ProtectedRoute>
                 <AppLayout>
-                  <div>Fee Management Module - Coming Soon</div>
+                  <FeeStructures />
                 </AppLayout>
               </ProtectedRoute>
             } />
-            <Route path="/payments" element={
+            <Route path="/invoices" element={
               <ProtectedRoute>
                 <AppLayout>
-                  <div>Payments Module - Coming Soon</div>
+                  <Invoices />
                 </AppLayout>
               </ProtectedRoute>
             } />

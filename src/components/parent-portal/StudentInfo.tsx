@@ -1,43 +1,153 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Database } from "@/integrations/supabase/types";
+
+type Student = Database["public"]["Tables"]["students"]["Row"] & {
+  profiles: Database["public"]["Tables"]["profiles"]["Row"] | null;
+  classes: Database["public"]["Tables"]["classes"]["Row"] & {
+    syllabus: (Database["public"]["Tables"]["syllabus"]["Row"] & {
+      subjects: Database["public"]["Tables"]["subjects"]["Row"];
+    })[];
+    lesson_plans: (Database["public"]["Tables"]["lesson_plans"]["Row"] & {
+      subjects: Database["public"]["Tables"]["subjects"]["Row"];
+    })[];
+  } | null;
+  attendance: Database["public"]["Tables"]["attendance"]["Row"][];
+  exam_results: (Database["public"]["Tables"]["exam_results"]["Row"] & {
+    subjects: Database["public"]["Tables"]["subjects"]["Row"] | null;
+  })[];
+  invoices: (Database["public"]["Tables"]["invoices"]["Row"] & {
+    fee_structures: Database["public"]["Tables"]["fee_structures"]["Row"];
+  })[];
+};
 
 interface StudentInfoProps {
-  student: any;
+  student: Student;
 }
 
 export function StudentInfo({ student }: StudentInfoProps) {
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold">{student.first_name} {student.last_name}'s Dashboard</h2>
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <Card>
-          <CardHeader>
-            <CardTitle>Grades</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>Overall GPA: <strong>A-</strong></p>
-            {/* Placeholder for detailed grades */}
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Attendance</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>Overall: <strong>95%</strong></p>
-            {/* Placeholder for detailed attendance */}
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Schedule</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {/* Placeholder for schedule */}
-            <p>Monday: Math, Science, English</p>
-            <p>Tuesday: History, Art, P.E.</p>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>
+          {student.profiles?.first_name} {student.profiles?.last_name}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <p>
+              <strong>Admission Number:</strong> {student.admission_number}
+            </p>
+            <p>
+              <strong>Class:</strong> {student.classes?.name}
+            </p>
+          </div>
+        </div>
+        <div className="mt-4">
+          <h3 className="text-lg font-semibold">Recent Attendance</h3>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Date</TableHead>
+                <TableHead>Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {student.attendance.slice(0, 5).map((att) => (
+                <TableRow key={att.id}>
+                  <TableCell>{new Date(att.date).toLocaleDateString()}</TableCell>
+                  <TableCell>{att.status}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+        <div className="mt-4">
+          <h3 className="text-lg font-semibold">Syllabus</h3>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Title</TableHead>
+                <TableHead>Subject</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {student.classes?.syllabus.map((s) => (
+                <TableRow key={s.id}>
+                  <TableCell>{s.title}</TableCell>
+                  <TableCell>{s.subjects.name}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+        <div className="mt-4">
+          <h3 className="text-lg font-semibold">Lesson Plans</h3>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Title</TableHead>
+                <TableHead>Subject</TableHead>
+                <TableHead>Planned Date</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {student.classes?.lesson_plans.map((lp) => (
+                <TableRow key={lp.id}>
+                  <TableCell>{lp.title}</TableCell>
+                  <TableCell>{lp.subjects.name}</TableCell>
+                  <TableCell>{new Date(lp.planned_date).toLocaleDateString()}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+        <div className="mt-4">
+          <h3 className="text-lg font-semibold">Invoices</h3>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Fee Structure</TableHead>
+                <TableHead>Amount</TableHead>
+                <TableHead>Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {student.invoices.map((invoice) => (
+                <TableRow key={invoice.id}>
+                  <TableCell>{invoice.fee_structures.name}</TableCell>
+                  <TableCell>{invoice.amount}</TableCell>
+                  <TableCell>{invoice.status}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+        <div className="mt-4">
+          <h3 className="text-lg font-semibold">Exam Results</h3>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Subject</TableHead>
+                <TableHead>Marks</TableHead>
+                <TableHead>Max Marks</TableHead>
+                <TableHead>Grade</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {student.exam_results.map((result) => (
+                <TableRow key={result.id}>
+                  <TableCell>{result.subjects?.name}</TableCell>
+                  <TableCell>{result.marks_obtained}</TableCell>
+                  <TableCell>{result.max_marks}</TableCell>
+                  <TableCell>{result.grade}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
