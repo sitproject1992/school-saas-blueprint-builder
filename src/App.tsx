@@ -15,7 +15,7 @@ import TeachersPage from "./pages/Teachers";
 import AttendancePage from "./pages/Attendance";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
-import ParentPortal from "./pages/ParentPortal";
+import ParentPortalPage from "./pages/ParentPortal";
 
 const queryClient = new QueryClient();
 
@@ -174,7 +174,7 @@ const App = () => (
             <Route path="/parent-portal" element={
               <ProtectedRoute>
                 <AppLayout>
-                  <ParentPortal />
+                  <ParentPortalPage />
                 </AppLayout>
               </ProtectedRoute>
             } />

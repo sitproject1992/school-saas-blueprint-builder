@@ -1,59 +1,43 @@
-import { type Database } from "@/integrations/supabase/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 
-type Student = Database["public"]["Tables"]["students"]["Row"] & {
-  profiles: Database["public"]["Tables"]["profiles"]["Row"] | null;
-  classes: Database["public"]["Tables"]["classes"]["Row"] | null;
-  attendance: Database["public"]["Tables"]["attendance"]["Row"][];
-};
+interface StudentInfoProps {
+  student: any;
+}
 
-export function StudentInfo({ student }: { student: Student }) {
+export function StudentInfo({ student }: StudentInfoProps) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>
-          {student.profiles?.first_name} {student.profiles?.last_name}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <p>
-              <strong>Admission Number:</strong> {student.admission_number}
-            </p>
-            <p>
-              <strong>Class:</strong> {student.classes?.name}
-            </p>
-          </div>
-        </div>
-        <div className="mt-4">
-          <h3 className="text-lg font-semibold">Recent Attendance</h3>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Date</TableHead>
-                <TableHead>Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {student.attendance.slice(0, 5).map((att) => (
-                <TableRow key={att.id}>
-                  <TableCell>{new Date(att.date).toLocaleDateString()}</TableCell>
-                  <TableCell>{att.status}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      </CardContent>
-    </Card>
+    <div className="space-y-6">
+      <h2 className="text-2xl font-bold">{student.first_name} {student.last_name}'s Dashboard</h2>
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <Card>
+          <CardHeader>
+            <CardTitle>Grades</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p>Overall GPA: <strong>A-</strong></p>
+            {/* Placeholder for detailed grades */}
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Attendance</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p>Overall: <strong>95%</strong></p>
+            {/* Placeholder for detailed attendance */}
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Schedule</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {/* Placeholder for schedule */}
+            <p>Monday: Math, Science, English</p>
+            <p>Tuesday: History, Art, P.E.</p>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 }
