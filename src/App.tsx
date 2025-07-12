@@ -16,6 +16,8 @@ import Attendance from "./pages/Attendance";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import ParentPortal from "./pages/ParentPortal";
+import FeeStructures from "./pages/FeeStructures";
+import Invoices from "./pages/Invoices";
 
 const queryClient = new QueryClient();
 
@@ -125,7 +127,14 @@ const App = () => (
             <Route path="/fees" element={
               <ProtectedRoute>
                 <AppLayout>
-                  <div>Fee Management Module - Coming Soon</div>
+                  <FeeStructures />
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/invoices" element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <Invoices />
                 </AppLayout>
               </ProtectedRoute>
             } />

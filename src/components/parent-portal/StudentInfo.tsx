@@ -16,6 +16,9 @@ type Student = Database["public"]["Tables"]["students"]["Row"] & {
   exam_results: (Database["public"]["Tables"]["exam_results"]["Row"] & {
     subjects: Database["public"]["Tables"]["subjects"]["Row"] | null;
   })[];
+  invoices: (Database["public"]["Tables"]["invoices"]["Row"] & {
+    fee_structures: Database["public"]["Tables"]["fee_structures"]["Row"];
+  })[];
 };
 
 export function StudentInfo({ student }: { student: Student }) {
@@ -51,6 +54,27 @@ export function StudentInfo({ student }: { student: Student }) {
                 <TableRow key={att.id}>
                   <TableCell>{new Date(att.date).toLocaleDateString()}</TableCell>
                   <TableCell>{att.status}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+        <div className="mt-4">
+          <h3 className="text-lg font-semibold">Invoices</h3>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Fee Structure</TableHead>
+                <TableHead>Amount</TableHead>
+                <TableHead>Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {student.invoices.map((invoice) => (
+                <TableRow key={invoice.id}>
+                  <TableCell>{invoice.fee_structures.name}</TableCell>
+                  <TableCell>{invoice.amount}</TableCell>
+                  <TableCell>{invoice.status}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
