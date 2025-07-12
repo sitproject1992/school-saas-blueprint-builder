@@ -1,139 +1,88 @@
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { useTeachers } from "@/hooks/useTeachers";
-import { type Teacher } from "@/integrations/supabase/types";
+import * as z from "zod";
+import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 
-const formSchema = z.object({
-  first_name: z.string().min(2, "First name is required"),
-  last_name: z.string().min(2, "Last name is required"),
+const teacherSchema = z.object({
+  first_name: z.string().min(1, "First name is required"),
+  last_name: z.string().min(1, "Last name is required"),
   email: z.string().email("Invalid email address"),
-  phone: z.string().optional(),
-  subject: z.string().optional(),
+  date_of_birth: z.string().min(1, "Date of birth is required"),
 });
 
-export function TeacherForm({ teacher }: { teacher?: Teacher }) {
-  const { addTeacher, updateTeacher } = useTeachers();
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: teacher || {
-      first_name: "",
-      last_name: "",
-      email: "",
-      phone: "",
-      subject: "",
-    },
+type TeacherFormValues = z.infer<typeof teacherSchema>;
+
+interface TeacherFormProps {
+  teacher?: TeacherFormValues & { id: number };
+  onSuccess: () => void;
+}
+
+export function TeacherForm({ teacher, onSuccess }: TeacherFormProps) {
+  const queryClient = useQueryClient();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<TeacherFormValues>({
+    resolver: zodResolver(teacherSchema),
+    defaultValues: teacher || {},
   });
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    if (teacher) {
-      updateTeacher({ ...teacher, ...values });
-    } else {
-      addTeacher(values);
+  const onSubmit = async (data: TeacherFormValues) => {
+    try {
+      if (teacher) {
+        const { error } = await supabase.from("teachers").update(data).eq("id", teacher.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("teachers").insert(data);
+        if (error) throw error;
+      }
+      queryClient.invalidateQueries({ queryKey: ["teachers"] });
+      onSuccess();
+    } catch (error: any) {
+      alert(error.message);
     }
   };
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant={teacher ? "outline" : "default"}>
-          {teacher ? "Edit Teacher" : "Add Teacher"}
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{teacher ? "Edit Teacher" : "Add New Teacher"}</DialogTitle>
-        </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="first_name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>First Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="John" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="last_name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Last Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Doe" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input placeholder="john.doe@example.com" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="phone"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Phone</FormLabel>
-                  <FormControl>
-                    <Input placeholder="+1234567890" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="subject"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Subject</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Mathematics" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button type="submit">
-              {teacher ? "Update Teacher" : "Create Teacher"}
+    <Card>
+      <CardHeader>
+        <CardTitle>{teacher ? "Edit Teacher" : "Add Teacher"}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="grid gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="first_name">First Name</Label>
+              <Input id="first_name" {...register("first_name")} />
+              {errors.first_name && <p className="text-red-500 text-sm">{errors.first_name.message}</p>}
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="last_name">Last Name</Label>
+              <Input id="last_name" {...register("last_name")} />
+              {errors.last_name && <p className="text-red-500 text-sm">{errors.last_name.message}</p>}
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="email">Email</Label>
+              <Input id="email" type="email" {...register("email")} />
+              {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="date_of_birth">Date of Birth</Label>
+              <Input id="date_of_birth" type="date" {...register("date_of_birth")} />
+              {errors.date_of_birth && <p className="text-red-500 text-sm">{errors.date_of_birth.message}</p>}
+            </div>
+            <Button type="submit" className="w-full">
+              {teacher ? "Update Teacher" : "Add Teacher"}
             </Button>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
   );
 }

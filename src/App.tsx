@@ -11,7 +11,7 @@ import { AuthPage } from "@/components/auth/AuthPage.tsx";
 import DashboardPage from "./pages/DashboardPage";
 import StudentsPage from "./pages/Students";
 import Classes from "./pages/Classes";
-import Teachers from "./pages/Teachers";
+import TeachersPage from "./pages/Teachers";
 import Attendance from "./pages/Attendance";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
@@ -76,7 +76,7 @@ const App = () => (
             <Route path="/teachers" element={
               <ProtectedRoute>
                 <AppLayout>
-                  <Teachers />
+                  <TeachersPage />
                 </AppLayout>
               </ProtectedRoute>
             } />
