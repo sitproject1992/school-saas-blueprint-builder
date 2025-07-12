@@ -9,15 +9,21 @@ import { useNavigate } from "react-router-dom";
 export function AuthPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { signIn } = useAuth();
+  const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
+  const [isLogin, setIsLogin] = useState(true);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { error } = await signIn({ email, password });
-    if (!error) {
+    try {
+      if (isLogin) {
+        await signIn(email, password);
+      } else {
+        await signUp(email, password);
+        alert('Check your email for a confirmation link!');
+      }
       navigate('/dashboard');
-    } else {
+    } catch (error: any) {
       alert(error.message);
     }
   };
@@ -26,11 +32,13 @@ export function AuthPage() {
     <div className="min-h-screen flex items-center justify-center bg-background">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle>Login</CardTitle>
-          <CardDescription>Enter your email and password to login.</CardDescription>
+          <CardTitle>{isLogin ? 'Login' : 'Sign Up'}</CardTitle>
+          <CardDescription>
+            {isLogin ? 'Enter your email and password to login.' : 'Create an account to get started.'}
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleLogin}>
+          <form onSubmit={handleSubmit}>
             <div className="grid gap-4">
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
@@ -54,10 +62,13 @@ export function AuthPage() {
                 />
               </div>
               <Button type="submit" className="w-full">
-                Login
+                {isLogin ? 'Login' : 'Sign Up'}
               </Button>
             </div>
           </form>
+          <Button variant="link" onClick={() => setIsLogin(!isLogin)} className="w-full mt-4">
+            {isLogin ? "Don't have an account? Sign Up" : "Already have an account? Login"}
+          </Button>
         </CardContent>
       </Card>
     </div>
