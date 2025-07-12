@@ -12,8 +12,10 @@ import Dashboard from "./pages/Dashboard";
 import Students from "./pages/Students";
 import Classes from "./pages/Classes";
 import Teachers from "./pages/Teachers";
+import Attendance from "./pages/Attendance";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import ParentPortal from "./pages/ParentPortal";
 
 const queryClient = new QueryClient();
 
@@ -95,7 +97,7 @@ const App = () => (
             <Route path="/attendance" element={
               <ProtectedRoute>
                 <AppLayout>
-                  <div>Attendance Module - Coming Soon</div>
+                  <Attendance />
                 </AppLayout>
               </ProtectedRoute>
             } />
@@ -166,6 +168,13 @@ const App = () => (
               <ProtectedRoute>
                 <AppLayout>
                   <div>Users Management Module - Coming Soon</div>
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/parent-portal" element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <ParentPortal />
                 </AppLayout>
               </ProtectedRoute>
             } />
