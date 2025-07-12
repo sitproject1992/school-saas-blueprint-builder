@@ -23,7 +23,7 @@ const getParentData = async (userId: string) => {
 
   const studentIds = parentStudents.map((ps) => ps.student_id);
 
-  // Finally, get the full student data, including their class, profile, attendance, and exam results
+  // Finally, get the full student data, including their class, profile, attendance, exam results, and invoices
   const { data: students, error: studentsError } = await supabase
     .from("students")
     .select(
@@ -38,6 +38,10 @@ const getParentData = async (userId: string) => {
         marks_obtained,
         max_marks,
         subjects (name)
+      ),
+      invoices (
+        *,
+        fee_structures (*)
       )
     `
     )

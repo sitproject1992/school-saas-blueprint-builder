@@ -71,9 +71,9 @@ const menuItems = [
     title: "Financial",
     items: [
       {
-        title: "Fee Management",
-        url: "/fees",
-        icon: DollarSign,
+        title: "Invoices",
+        url: "/invoices",
+        icon: CreditCard,
       },
       {
         title: "Reports",
@@ -85,6 +85,11 @@ const menuItems = [
   {
     title: "Administration",
     items: [
+      {
+        title: "Fee Structures",
+        url: "/fees",
+        icon: DollarSign,
+      },
       {
         title: "Settings",
         url: "/settings",
