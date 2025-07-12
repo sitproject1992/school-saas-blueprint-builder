@@ -65,6 +65,16 @@ const menuItems = [
         url: "/parent-portal",
         icon: Users,
       },
+      {
+        title: "Syllabus",
+        url: "/syllabus",
+        icon: FileText,
+      },
+      {
+        title: "Lesson Plans",
+        url: "/lesson-plans",
+        icon: ClipboardList,
+      },
     ],
   },
   {
