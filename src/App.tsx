@@ -192,7 +192,7 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <AppLayout>
-                    <div>Inventory Module - Coming Soon</div>
+                    <Inventory />
                   </AppLayout>
                 </ProtectedRoute>
               }
