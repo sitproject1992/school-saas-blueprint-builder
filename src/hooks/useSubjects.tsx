@@ -1,53 +1,67 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useToast } from '@/hooks/use-toast';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 export interface Subject {
   id: string;
   name: string;
   teacher_id: string | null;
   class_id: string | null;
+  school_id?: string | null;
+  created_at?: string;
+  updated_at?: string;
 }
-
-const mockSubjects: Subject[] = [
-  { id: '1', name: 'Mathematics', teacher_id: '1', class_id: '1' },
-  { id: '2', name: 'English', teacher_id: '2', class_id: '1' },
-  { id: '3', name: 'Science', teacher_id: '1', class_id: '2' },
-];
 
 async function getSubjects(): Promise<Subject[]> {
-  console.log('Fetching subjects...');
-  await new Promise(resolve => setTimeout(resolve, 500));
-  console.log('Fetched subjects:', mockSubjects);
-  return mockSubjects;
+  const { data, error } = await supabase
+    .from("subjects")
+    .select("*")
+    .order("name", { ascending: true });
+
+  if (error) throw new Error(error.message);
+  return data || [];
 }
 
-async function createSubject(subject: Omit<Subject, 'id'>): Promise<Subject> {
-  await new Promise(resolve => setTimeout(resolve, 500));
-  const newSubject = { ...subject, id: Date.now().toString() };
-  mockSubjects.push(newSubject);
-  return newSubject;
+async function createSubject(
+  subject: Omit<Subject, "id" | "created_at" | "updated_at">,
+): Promise<Subject> {
+  const { data, error } = await supabase
+    .from("subjects")
+    .insert(subject)
+    .select()
+    .single();
+
+  if (error) throw new Error(error.message);
+  return data;
 }
 
-async function updateSubject({ id, updates }: { id: string; updates: Partial<Subject> }): Promise<Subject> {
-  await new Promise(resolve => setTimeout(resolve, 500));
-  const index = mockSubjects.findIndex(s => s.id === id);
-  if (index === -1) throw new Error('Subject not found');
+async function updateSubject({
+  id,
+  updates,
+}: {
+  id: string;
+  updates: Partial<Subject>;
+}): Promise<Subject> {
+  const { data, error } = await supabase
+    .from("subjects")
+    .update(updates)
+    .eq("id", id)
+    .select()
+    .single();
 
-  mockSubjects[index] = { ...mockSubjects[index], ...updates };
-  return mockSubjects[index];
+  if (error) throw new Error(error.message);
+  return data;
 }
 
 async function deleteSubject(id: string): Promise<void> {
-  await new Promise(resolve => setTimeout(resolve, 500));
-  const index = mockSubjects.findIndex(s => s.id === id);
-  if (index === -1) throw new Error('Subject not found');
+  const { error } = await supabase.from("subjects").delete().eq("id", id);
 
-  mockSubjects.splice(index, 1);
+  if (error) throw new Error(error.message);
 }
 
 export function useSubjects() {
   return useQuery({
-    queryKey: ['subjects'],
+    queryKey: ["subjects"],
     queryFn: getSubjects,
   });
 }
@@ -59,17 +73,17 @@ export function useCreateSubject() {
   return useMutation({
     mutationFn: createSubject,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['subjects'] });
+      queryClient.invalidateQueries({ queryKey: ["subjects"] });
       toast({
-        title: 'Success',
-        description: 'Subject created successfully',
+        title: "Success",
+        description: "Subject created successfully",
       });
     },
     onError: (error: any) => {
       toast({
-        title: 'Error',
-        description: error.message || 'Failed to create subject',
-        variant: 'destructive',
+        title: "Error",
+        description: error.message || "Failed to create subject",
+        variant: "destructive",
       });
     },
   });
@@ -82,17 +96,17 @@ export function useUpdateSubject() {
   return useMutation({
     mutationFn: updateSubject,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['subjects'] });
+      queryClient.invalidateQueries({ queryKey: ["subjects"] });
       toast({
-        title: 'Success',
-        description: 'Subject updated successfully',
+        title: "Success",
+        description: "Subject updated successfully",
       });
     },
     onError: (error: any) => {
       toast({
-        title: 'Error',
-        description: error.message || 'Failed to update subject',
-        variant: 'destructive',
+        title: "Error",
+        description: error.message || "Failed to update subject",
+        variant: "destructive",
       });
     },
   });
@@ -105,17 +119,17 @@ export function useDeleteSubject() {
   return useMutation({
     mutationFn: deleteSubject,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['subjects'] });
+      queryClient.invalidateQueries({ queryKey: ["subjects"] });
       toast({
-        title: 'Success',
-        description: 'Subject deleted successfully',
+        title: "Success",
+        description: "Subject deleted successfully",
       });
     },
     onError: (error: any) => {
       toast({
-        title: 'Error',
-        description: error.message || 'Failed to delete subject',
-        variant: 'destructive',
+        title: "Error",
+        description: error.message || "Failed to delete subject",
+        variant: "destructive",
       });
     },
   });

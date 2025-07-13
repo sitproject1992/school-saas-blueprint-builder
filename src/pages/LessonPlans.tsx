@@ -29,6 +29,13 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useAuth } from "@/hooks/useAuth";
 
 const lessonPlanSchema = z.object({
@@ -41,26 +48,42 @@ const lessonPlanSchema = z.object({
 });
 
 const getLessonPlans = async () => {
-  const { data, error } = await supabase.from("lesson_plans").select("*, classes(name), subjects(name)");
+  const { data, error } = await supabase
+    .from("lesson_plans")
+    .select("*, classes(name), subjects(name)");
   if (error) throw new Error(error.message);
   return data;
 };
 
-const createLessonPlan = async (newLessonPlan: z.infer<typeof lessonPlanSchema> & { teacher_id: string }) => {
-  const { data, error } = await supabase.from("lesson_plans").insert(newLessonPlan).select();
+const createLessonPlan = async (
+  newLessonPlan: z.infer<typeof lessonPlanSchema> & { teacher_id: string },
+) => {
+  const { data, error } = await supabase
+    .from("lesson_plans")
+    .insert(newLessonPlan)
+    .select();
   if (error) throw new Error(error.message);
   return data;
 };
 
-const updateLessonPlan = async (updatedLessonPlan: { id: string } & z.infer<typeof lessonPlanSchema>) => {
+const updateLessonPlan = async (
+  updatedLessonPlan: { id: string } & z.infer<typeof lessonPlanSchema>,
+) => {
   const { id, ...rest } = updatedLessonPlan;
-  const { data, error } = await supabase.from("lesson_plans").update(rest).eq("id", id).select();
+  const { data, error } = await supabase
+    .from("lesson_plans")
+    .update(rest)
+    .eq("id", id)
+    .select();
   if (error) throw new Error(error.message);
   return data;
 };
 
 const deleteLessonPlan = async (id: string) => {
-  const { data, error } = await supabase.from("lesson_plans").delete().eq("id", id);
+  const { data, error } = await supabase
+    .from("lesson_plans")
+    .delete()
+    .eq("id", id);
   if (error) throw new Error(error.message);
   return data;
 };
@@ -71,7 +94,11 @@ export default function LessonPlans() {
   const [open, setOpen] = useState(false);
   const [selectedLessonPlan, setSelectedLessonPlan] = useState<any>(null);
 
-  const { data: lessonPlans, isLoading, error } = useQuery({
+  const {
+    data: lessonPlans,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["lessonPlans"],
     queryFn: getLessonPlans,
   });
@@ -169,7 +196,9 @@ export default function LessonPlans() {
         </DialogTrigger>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{selectedLessonPlan ? "Edit" : "Add"} Lesson Plan</DialogTitle>
+            <DialogTitle>
+              {selectedLessonPlan ? "Edit" : "Add"} Lesson Plan
+            </DialogTitle>
           </DialogHeader>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -231,16 +260,20 @@ export default function LessonPlans() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Class</FormLabel>
-                    <FormControl>
-                      <select {...field}>
-                        <option value="">Select Class</option>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Class" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
                         {classes?.map((c) => (
-                          <option key={c.id} value={c.id}>
+                          <SelectItem key={c.id} value={c.id}>
                             {c.name}
-                          </option>
+                          </SelectItem>
                         ))}
-                      </select>
-                    </FormControl>
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -251,16 +284,20 @@ export default function LessonPlans() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Subject</FormLabel>
-                    <FormControl>
-                      <select {...field}>
-                        <option value="">Select Subject</option>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Subject" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
                         {subjects?.map((s) => (
-                          <option key={s.id} value={s.id}>
+                          <SelectItem key={s.id} value={s.id}>
                             {s.name}
-                          </option>
+                          </SelectItem>
                         ))}
-                      </select>
-                    </FormControl>
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -288,9 +325,15 @@ export default function LessonPlans() {
               <TableCell>{lp.title}</TableCell>
               <TableCell>{lp.classes.name}</TableCell>
               <TableCell>{lp.subjects.name}</TableCell>
-              <TableCell>{new Date(lp.planned_date).toLocaleDateString()}</TableCell>
               <TableCell>
-                <Button variant="outline" size="sm" onClick={() => handleEdit(lp)}>
+                {new Date(lp.planned_date).toLocaleDateString()}
+              </TableCell>
+              <TableCell>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleEdit(lp)}
+                >
                   Edit
                 </Button>
                 <Button

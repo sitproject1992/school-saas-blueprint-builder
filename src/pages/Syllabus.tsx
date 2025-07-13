@@ -30,6 +30,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useAuth } from "@/hooks/useAuth";
+import { useSchool } from "@/hooks/useSchool";
 
 const syllabusSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -40,20 +41,33 @@ const syllabusSchema = z.object({
 });
 
 const getSyllabuses = async () => {
-  const { data, error } = await supabase.from("syllabus").select("*, classes(name), subjects(name)");
+  const { data, error } = await supabase
+    .from("syllabus")
+    .select("*, classes(name), subjects(name)");
   if (error) throw new Error(error.message);
   return data;
 };
 
-const createSyllabus = async (newSyllabus: z.infer<typeof syllabusSchema> & { school_id: string }) => {
-  const { data, error } = await supabase.from("syllabus").insert(newSyllabus).select();
+const createSyllabus = async (
+  newSyllabus: z.infer<typeof syllabusSchema> & { school_id: string },
+) => {
+  const { data, error } = await supabase
+    .from("syllabus")
+    .insert(newSyllabus)
+    .select();
   if (error) throw new Error(error.message);
   return data;
 };
 
-const updateSyllabus = async (updatedSyllabus: { id: string } & z.infer<typeof syllabusSchema>) => {
+const updateSyllabus = async (
+  updatedSyllabus: { id: string } & z.infer<typeof syllabusSchema>,
+) => {
   const { id, ...rest } = updatedSyllabus;
-  const { data, error } = await supabase.from("syllabus").update(rest).eq("id", id).select();
+  const { data, error } = await supabase
+    .from("syllabus")
+    .update(rest)
+    .eq("id", id)
+    .select();
   if (error) throw new Error(error.message);
   return data;
 };
@@ -67,10 +81,15 @@ const deleteSyllabus = async (id: string) => {
 export default function Syllabus() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const { schoolId } = useSchool();
   const [open, setOpen] = useState(false);
   const [selectedSyllabus, setSelectedSyllabus] = useState<any>(null);
 
-  const { data: syllabuses, isLoading, error } = useQuery({
+  const {
+    data: syllabuses,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["syllabus"],
     queryFn: getSyllabuses,
   });
@@ -132,7 +151,7 @@ export default function Syllabus() {
     if (selectedSyllabus) {
       updateMutation.mutate({ id: selectedSyllabus.id, ...values });
     } else {
-      createMutation.mutate({ ...values, school_id: "your_school_id" });
+      createMutation.mutate({ ...values, school_id: schoolId || null });
     }
   };
 
@@ -166,7 +185,9 @@ export default function Syllabus() {
         </DialogTrigger>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{selectedSyllabus ? "Edit" : "Add"} Syllabus</DialogTitle>
+            <DialogTitle>
+              {selectedSyllabus ? "Edit" : "Add"} Syllabus
+            </DialogTitle>
           </DialogHeader>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -259,7 +280,11 @@ export default function Syllabus() {
               <TableCell>{s.classes.name}</TableCell>
               <TableCell>{s.subjects.name}</TableCell>
               <TableCell>
-                <Button variant="outline" size="sm" onClick={() => handleEdit(s)}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleEdit(s)}
+                >
                   Edit
                 </Button>
                 <Button

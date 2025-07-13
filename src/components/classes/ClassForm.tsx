@@ -2,7 +2,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -10,9 +16,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Tables } from "@/integrations/supabase/types";
 import { useState } from "react";
+import { useSchool } from "@/hooks/useSchool";
 
-type Teacher = Tables<'teachers'> & {
-  profile: Tables<'profiles'>;
+type Teacher = Tables<"teachers"> & {
+  profile: Tables<"profiles">;
 };
 
 const classSchema = z.object({
@@ -25,14 +32,12 @@ const classSchema = z.object({
 type ClassFormValues = z.infer<typeof classSchema>;
 
 interface ClassFormProps {
-  classItem?: Tables<'classes'>;
+  classItem?: Tables<"classes">;
   onSuccess: () => void;
 }
 
 const fetchTeachers = async () => {
-  const { data, error } = await supabase
-    .from("teachers")
-    .select(`
+  const { data, error } = await supabase.from("teachers").select(`
       *,
       profile:profiles(*)
     `);
@@ -42,8 +47,11 @@ const fetchTeachers = async () => {
 
 export function ClassForm({ classItem, onSuccess }: ClassFormProps) {
   const queryClient = useQueryClient();
-  const [selectedTeacherId, setSelectedTeacherId] = useState<string>(classItem?.id || "");
-  
+  const { schoolId } = useSchool();
+  const [selectedTeacherId, setSelectedTeacherId] = useState<string>(
+    classItem?.id || "",
+  );
+
   const { data: teachers } = useQuery({
     queryKey: ["teachers"],
     queryFn: fetchTeachers,
@@ -70,7 +78,7 @@ export function ClassForm({ classItem, onSuccess }: ClassFormProps) {
         section: data.section || null,
         grade_level: data.grade_level || null,
         capacity: data.capacity || null,
-        school_id: "dummy-school-id", // In real app, get from user context
+        school_id: schoolId || null,
       };
 
       if (classItem) {
@@ -80,12 +88,10 @@ export function ClassForm({ classItem, onSuccess }: ClassFormProps) {
           .eq("id", classItem.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase
-          .from("classes")
-          .insert(classData);
+        const { error } = await supabase.from("classes").insert(classData);
         if (error) throw error;
       }
-      
+
       queryClient.invalidateQueries({ queryKey: ["classes"] });
       onSuccess();
     } catch (error: any) {
@@ -104,42 +110,51 @@ export function ClassForm({ classItem, onSuccess }: ClassFormProps) {
             <div className="grid gap-2">
               <Label htmlFor="name">Class Name *</Label>
               <Input id="name" {...register("name")} />
-              {errors.name && <p className="text-red-500 text-sm">{errors.name.message}</p>}
+              {errors.name && (
+                <p className="text-red-500 text-sm">{errors.name.message}</p>
+              )}
             </div>
-            
+
             <div className="grid gap-2">
               <Label htmlFor="section">Section</Label>
-              <Input id="section" {...register("section")} placeholder="e.g., A, B, C" />
+              <Input
+                id="section"
+                {...register("section")}
+                placeholder="e.g., A, B, C"
+              />
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="grid gap-2">
                 <Label htmlFor="grade_level">Grade Level</Label>
-                <Input 
-                  id="grade_level" 
-                  type="number" 
-                  min="1" 
-                  max="12" 
-                  {...register("grade_level")} 
+                <Input
+                  id="grade_level"
+                  type="number"
+                  min="1"
+                  max="12"
+                  {...register("grade_level")}
                   placeholder="1-12"
                 />
               </div>
-              
+
               <div className="grid gap-2">
                 <Label htmlFor="capacity">Capacity</Label>
-                <Input 
-                  id="capacity" 
-                  type="number" 
-                  min="1" 
-                  {...register("capacity")} 
+                <Input
+                  id="capacity"
+                  type="number"
+                  min="1"
+                  {...register("capacity")}
                   placeholder="Max students"
                 />
               </div>
             </div>
-            
+
             <div className="grid gap-2">
               <Label htmlFor="teacher">Class Teacher (Optional)</Label>
-              <Select value={selectedTeacherId} onValueChange={setSelectedTeacherId}>
+              <Select
+                value={selectedTeacherId}
+                onValueChange={setSelectedTeacherId}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select a teacher" />
                 </SelectTrigger>
@@ -153,7 +168,7 @@ export function ClassForm({ classItem, onSuccess }: ClassFormProps) {
                 </SelectContent>
               </Select>
             </div>
-            
+
             <Button type="submit" className="w-full">
               {classItem ? "Update Class" : "Add Class"}
             </Button>
