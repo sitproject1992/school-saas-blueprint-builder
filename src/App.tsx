@@ -178,7 +178,7 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <AppLayout>
-                      <div>Exams Module - Coming Soon</div>
+                    <TestsPage />
                     </AppLayout>
                   </ProtectedRoute>
                 }

@@ -40,6 +40,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { StudentForm } from "@/components/students/StudentForm";
+import StudentResults from "@/components/students/StudentResults";
 import { useStudents, useDeleteStudent } from "@/hooks/useStudents";
 import {
   GraduationCap,
@@ -748,9 +749,10 @@ export default function StudentsPage() {
               </div>
 
               <Tabs defaultValue="overview" className="w-full">
-                <TabsList className="grid w-full grid-cols-4">
+                <TabsList className="grid w-full grid-cols-5">
                   <TabsTrigger value="overview">Overview</TabsTrigger>
                   <TabsTrigger value="academic">Academic</TabsTrigger>
+                  <TabsTrigger value="results">Results</TabsTrigger>
                   <TabsTrigger value="contact">Contact</TabsTrigger>
                   <TabsTrigger value="fees">Fees</TabsTrigger>
                 </TabsList>
@@ -872,6 +874,10 @@ export default function StudentsPage() {
                       </CardContent>
                     </Card>
                   )}
+                </TabsContent>
+
+                <TabsContent value="results" className="space-y-4">
+                  <StudentResults studentId={selectedStudentProfile.id} />
                 </TabsContent>
 
                 <TabsContent value="contact" className="space-y-4">
