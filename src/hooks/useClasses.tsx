@@ -1,13 +1,30 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { MockApiService, Class } from '@/lib/mockData';
 
-export { type Class } from '@/lib/mockData';
+export interface Class {
+  id: string;
+  name: string;
+  section: string | null;
+  grade_level: number | null;
+  capacity: number | null;
+  school_id: string;
+  created_at: string;
+  updated_at: string;
+}
 
 export function useClasses() {
   return useQuery({
     queryKey: ['classes'],
-    queryFn: MockApiService.getClasses
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('classes')
+        .select('*')
+        .order('grade_level', { ascending: true });
+
+      if (error) throw error;
+      return data as Class[];
+    }
   });
 }
 
@@ -16,13 +33,24 @@ export function useCreateClass() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: (data: {
+    mutationFn: async (data: {
       name: string;
       section?: string;
-      grade?: string;
-      capacity: number;
-      teacher_id?: string;
-    }) => MockApiService.createClass(data),
+      grade_level?: number;
+      capacity?: number;
+    }) => {
+      const { data: newClass, error } = await supabase
+        .from('classes')
+        .insert({
+          ...data,
+          school_id: '1' // Default school ID
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return newClass;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['classes'] });
       toast({
@@ -45,8 +73,17 @@ export function useUpdateClass() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: ({ id, updates }: { id: string; updates: Partial<Class> }) => 
-      MockApiService.updateClass(id, updates),
+    mutationFn: async ({ id, updates }: { id: string; updates: Partial<Class> }) => {
+      const { data, error } = await supabase
+        .from('classes')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['classes'] });
       toast({
@@ -69,7 +106,14 @@ export function useDeleteClass() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: MockApiService.deleteClass,
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('classes')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['classes'] });
       toast({
