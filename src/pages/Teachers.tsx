@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Edit, Trash2, Search, GraduationCap, Mail, Phone, Calendar } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, GraduationCap, Mail, Phone, Calendar, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useTeachers } from '@/hooks/useTeachers';
 import { TeacherForm } from '@/components/teachers/TeacherForm';
+import TeacherEvaluation from '@/components/teachers/TeacherEvaluation';
 import { Tables } from '@/integrations/supabase/types';
 
 type Teacher = Tables<'teachers'> & {
@@ -23,6 +24,7 @@ export default function Teachers() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [teacherToDelete, setTeacherToDelete] = useState<Teacher | null>(null);
+  const [isEvaluationOpen, setIsEvaluationOpen] = useState(false);
 
   const filteredTeachers = teachers.filter(teacher =>
     teacher.profile.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -44,6 +46,11 @@ export default function Teachers() {
   const handleDeleteTeacher = (teacher: Teacher) => {
     setTeacherToDelete(teacher);
     setIsDeleteDialogOpen(true);
+  };
+
+  const handleEvaluateTeacher = (teacher: Teacher) => {
+    setSelectedTeacher(teacher);
+    setIsEvaluationOpen(true);
   };
 
   const handleFormSubmit = (data: any) => {
@@ -137,6 +144,13 @@ export default function Teachers() {
                   <Button
                     variant="ghost"
                     size="sm"
+                    onClick={() => handleEvaluateTeacher(teacher)}
+                  >
+                    <Star className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={() => handleEditTeacher(teacher)}
                   >
                     <Edit className="h-4 w-4" />
@@ -223,6 +237,17 @@ export default function Teachers() {
             onCancel={handleFormCancel}
             isLoading={isCreating || isUpdating}
           />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isEvaluationOpen} onOpenChange={setIsEvaluationOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              Evaluate {selectedTeacher?.profile.first_name} {selectedTeacher?.profile.last_name}
+            </DialogTitle>
+          </DialogHeader>
+          <TeacherEvaluation teacherId={selectedTeacher?.id} />
         </DialogContent>
       </Dialog>
 
