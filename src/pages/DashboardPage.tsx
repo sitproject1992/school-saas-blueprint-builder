@@ -17,6 +17,8 @@ export default function DashboardPage() {
     const role = user.roles[0];
 
     switch (role) {
+      case 'super_admin':
+        return <AdminDashboard />;
       case 'school_admin':
         return <AdminDashboard />;
       case 'teacher':

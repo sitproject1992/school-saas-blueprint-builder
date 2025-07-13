@@ -91,6 +91,17 @@ export function AuthPage() {
               <div className="space-y-2">
                 <Button
                   variant="outline"
+                  className="w-full justify-start bg-red-50 border-red-200 hover:bg-red-100"
+                  onClick={() => quickLogin('superadmin@skooler.com', 'SuperAdmin123!')}
+                >
+                  <div className="text-left">
+                    <div className="font-medium text-red-700">Super Admin</div>
+                    <div className="text-sm text-red-600">superadmin@skooler.com / SuperAdmin123!</div>
+                  </div>
+                </Button>
+                
+                <Button
+                  variant="outline"
                   className="w-full justify-start"
                   onClick={() => quickLogin('admin@skooler.com', 'admin123')}
                 >
