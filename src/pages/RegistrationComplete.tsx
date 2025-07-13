@@ -38,8 +38,21 @@ interface RegistrationData {
 
 export default function RegistrationComplete() {
   const [showCredentials, setShowCredentials] = useState(false);
-  const [teachers, setTeachers] = useState<any[]>([]);
-  const [students, setStudents] = useState<any[]>([]);
+  const [teachers, setTeachers] = useState<
+    Array<{
+      email: string;
+      password: string;
+      name: string;
+    }>
+  >([]);
+  const [students, setStudents] = useState<
+    Array<{
+      email: string;
+      password: string;
+      name: string;
+      admissionNumber: string;
+    }>
+  >([]);
   const [registrationData, setRegistrationData] =
     useState<RegistrationData | null>(null);
 
