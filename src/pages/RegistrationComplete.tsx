@@ -51,6 +51,12 @@ export default function RegistrationComplete() {
       password: string;
       name: string;
       admissionNumber: string;
+      parents?: Array<{
+        name: string;
+        email: string;
+        password: string;
+        relationship: string;
+      }>;
     }>
   >([]);
   const [registrationData, setRegistrationData] =
@@ -293,7 +299,7 @@ export default function RegistrationComplete() {
                       {students.map((student, index) => (
                         <div key={index} className="p-3 bg-gray-50 rounded-lg">
                           <div className="flex justify-between items-start">
-                            <div>
+                            <div className="flex-1">
                               <p className="font-medium">{student.name}</p>
                               <p className="text-sm text-muted-foreground">
                                 Email: {student.email}
@@ -304,6 +310,20 @@ export default function RegistrationComplete() {
                               <p className="text-sm text-muted-foreground">
                                 Admission: {student.admissionNumber}
                               </p>
+                              
+                              {/* Parent Credentials */}
+                              {student.parents && student.parents.length > 0 && (
+                                <div className="mt-2 pt-2 border-t border-gray-200">
+                                  <p className="text-xs font-medium text-gray-600 mb-1">
+                                    Parent Accounts:
+                                  </p>
+                                  {student.parents.map((parent, parentIndex) => (
+                                    <div key={parentIndex} className="text-xs text-gray-500 mb-1">
+                                      <span className="font-medium">{parent.relationship}:</span> {parent.email} / {parent.password}
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
                             </div>
                             <Button
                               variant="ghost"

@@ -270,24 +270,45 @@ export default function StudentRegistration() {
     }
 
     setIsLoading(true);
-    try {
-      const registrationPromises = students.map(
-        async (
-          student,
-        ): Promise<{
-          email: string;
-          password: string;
-          name: string;
-          admissionNumber: string;
-        }> => {
-          // 1. Create auth user
-          const { data: authData, error: authError } =
-            await supabase.auth.signUp({
-              email: student.email,
-              password: student.password,
-            });
+    const results = {
+      success: 0,
+      failed: 0,
+      errors: [] as string[],
+      registeredStudents: [] as Array<{
+        email: string;
+        password: string;
+        name: string;
+        admissionNumber: string;
+      }>,
+    };
 
-          if (authError) throw authError;
+    try {
+      // Process each student sequentially to avoid conflicts
+      for (const student of students) {
+        try {
+          // Check if user already exists
+          const { data: existingUser } = await supabase.auth.signInWithPassword({
+            email: student.email,
+            password: student.password,
+          });
+
+          if (existingUser.user) {
+            results.errors.push(`${student.email}: Account already exists`);
+            results.failed++;
+            continue;
+          }
+
+          // 1. Create auth user
+          const { data: authData, error: authError } = await supabase.auth.signUp({
+            email: student.email,
+            password: student.password,
+          });
+
+          if (authError) {
+            results.errors.push(`${student.email}: ${authError.message}`);
+            results.failed++;
+            continue;
+          }
 
           if (authData.user) {
             // 2. Create profile
@@ -309,10 +330,14 @@ export default function StudentRegistration() {
               .select()
               .single();
 
-            if (profileError) throw profileError;
+            if (profileError) {
+              results.errors.push(`${student.email}: Profile creation failed`);
+              results.failed++;
+              continue;
+            }
 
             // 3. Create student record
-            const { error: studentError } = await supabase
+            const { data: studentData, error: studentError } = await supabase
               .from("students")
               .insert([
                 {
@@ -322,52 +347,164 @@ export default function StudentRegistration() {
                   admission_number: student.admissionNumber,
                   blood_group: student.bloodGroup || null,
                   emergency_contact_name: student.emergencyContactName || null,
-                  emergency_contact_phone:
-                    student.emergencyContactPhone || null,
+                  emergency_contact_phone: student.emergencyContactPhone || null,
                   medical_conditions: student.medicalConditions || null,
                   admission_date: new Date().toISOString().split("T")[0],
                 },
-              ]);
+              ])
+              .select()
+              .single();
 
-            if (studentError) throw studentError;
+            if (studentError) {
+              results.errors.push(`${student.email}: Student record creation failed`);
+              results.failed++;
+              continue;
+            }
 
-            return {
+            // 4. Create parent profiles and relationships
+            if (student.fatherName || student.motherName) {
+              try {
+                // Create father profile if provided
+                if (student.fatherName) {
+                  const fatherEmail = `father.${student.admissionNumber}@school.com`;
+                  const fatherPassword = `father${student.admissionNumber}`;
+
+                  // Create father auth user
+                  const { data: fatherAuthData } = await supabase.auth.signUp({
+                    email: fatherEmail,
+                    password: fatherPassword,
+                  });
+
+                  if (fatherAuthData.user) {
+                    // Create father profile
+                    const { data: fatherProfileData } = await supabase
+                      .from("profiles")
+                      .insert([
+                        {
+                          user_id: fatherAuthData.user.id,
+                          email: fatherEmail,
+                          first_name: student.fatherName,
+                          last_name: student.lastName,
+                          phone: student.fatherPhone || null,
+                          role: "parent",
+                          school_id: schoolId,
+                        },
+                      ])
+                      .select()
+                      .single();
+
+                    if (fatherProfileData) {
+                      // Create parent-student relationship
+                      await supabase.from("parent_students").insert([
+                        {
+                          parent_id: fatherProfileData.id,
+                          student_id: studentData.id,
+                          relationship: "father",
+                          is_primary: true,
+                        },
+                      ]);
+                    }
+                  }
+                }
+
+                // Create mother profile if provided
+                if (student.motherName) {
+                  const motherEmail = `mother.${student.admissionNumber}@school.com`;
+                  const motherPassword = `mother${student.admissionNumber}`;
+
+                  // Create mother auth user
+                  const { data: motherAuthData } = await supabase.auth.signUp({
+                    email: motherEmail,
+                    password: motherPassword,
+                  });
+
+                  if (motherAuthData.user) {
+                    // Create mother profile
+                    const { data: motherProfileData } = await supabase
+                      .from("profiles")
+                      .insert([
+                        {
+                          user_id: motherAuthData.user.id,
+                          email: motherEmail,
+                          first_name: student.motherName,
+                          last_name: student.lastName,
+                          phone: student.motherPhone || null,
+                          role: "parent",
+                          school_id: schoolId,
+                        },
+                      ])
+                      .select()
+                      .single();
+
+                    if (motherProfileData) {
+                      // Create parent-student relationship
+                      await supabase.from("parent_students").insert([
+                        {
+                          parent_id: motherProfileData.id,
+                          student_id: studentData.id,
+                          relationship: "mother",
+                          is_primary: false,
+                        },
+                      ]);
+                    }
+                  }
+                }
+              } catch (parentError) {
+                console.warn(`Parent creation failed for ${student.email}:`, parentError);
+                // Don't fail the entire student registration for parent creation issues
+              }
+            }
+
+            results.success++;
+            results.registeredStudents.push({
               email: student.email,
               password: student.password,
               name: `${student.firstName} ${student.lastName}`,
               admissionNumber: student.admissionNumber,
-            };
+            });
           }
-        },
-      );
+        } catch (studentError: any) {
+          results.errors.push(`${student.email}: ${studentError.message}`);
+          results.failed++;
+        }
+      }
 
-      const registeredStudents = await Promise.all(registrationPromises);
+      // Show results
+      if (results.success > 0) {
+        toast({
+          title: "Students Registered Successfully!",
+          description: `${results.success} students registered successfully.${results.failed > 0 ? ` ${results.failed} failed.` : ''}`,
+        });
 
-      toast({
-        title: "Students Registered Successfully!",
-        description: `${students.length} student(s) have been registered.`,
-      });
+        // Store student credentials for reference
+        localStorage.setItem(
+          "registeredStudents",
+          JSON.stringify(results.registeredStudents),
+        );
+      }
 
-      // Store student credentials for reference
-      localStorage.setItem(
-        "registeredStudents",
-        JSON.stringify(registeredStudents),
-      );
+      if (results.failed > 0) {
+        console.error("Student registration errors:", results.errors);
+        toast({
+          title: "Some Students Failed to Register",
+          description: `Check console for details. ${results.success} succeeded, ${results.failed} failed.`,
+          variant: "destructive",
+        });
+      }
 
       // Navigate to completion page
       navigate("/registration-complete", {
         state: {
           schoolId,
           studentsRegistered: true,
-          studentCount: students.length,
+          studentCount: results.success,
         },
       });
     } catch (error: any) {
       console.error("Student registration error:", error);
       toast({
         title: "Registration Failed",
-        description:
-          error.message || "Failed to register students. Please try again.",
+        description: error.message || "Failed to register students. Please try again.",
         variant: "destructive",
       });
     } finally {

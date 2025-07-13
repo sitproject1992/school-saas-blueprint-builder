@@ -199,23 +199,44 @@ export default function TeacherRegistration() {
     }
 
     setIsLoading(true);
-    try {
-      const registrationPromises = teachers.map(
-        async (
-          teacher,
-        ): Promise<{
-          email: string;
-          password: string;
-          name: string;
-        }> => {
-          // 1. Create auth user
-          const { data: authData, error: authError } =
-            await supabase.auth.signUp({
-              email: teacher.email,
-              password: teacher.password,
-            });
+    const results = {
+      success: 0,
+      failed: 0,
+      errors: [] as string[],
+      registeredTeachers: [] as Array<{
+        email: string;
+        password: string;
+        name: string;
+      }>,
+    };
 
-          if (authError) throw authError;
+    try {
+      // Process each teacher sequentially to avoid conflicts
+      for (const teacher of teachers) {
+        try {
+          // Check if user already exists
+          const { data: existingUser } = await supabase.auth.signInWithPassword({
+            email: teacher.email,
+            password: teacher.password,
+          });
+
+          if (existingUser.user) {
+            results.errors.push(`${teacher.email}: Account already exists`);
+            results.failed++;
+            continue;
+          }
+
+          // 1. Create auth user
+          const { data: authData, error: authError } = await supabase.auth.signUp({
+            email: teacher.email,
+            password: teacher.password,
+          });
+
+          if (authError) {
+            results.errors.push(`${teacher.email}: ${authError.message}`);
+            results.failed++;
+            continue;
+          }
 
           if (authData.user) {
             // 2. Create profile
@@ -237,10 +258,14 @@ export default function TeacherRegistration() {
               .select()
               .single();
 
-            if (profileError) throw profileError;
+            if (profileError) {
+              results.errors.push(`${teacher.email}: Profile creation failed`);
+              results.failed++;
+              continue;
+            }
 
             // 3. Create teacher record
-            const { error: teacherError } = await supabase
+            const { data: teacherData, error: teacherError } = await supabase
               .from("teachers")
               .insert([
                 {
@@ -253,46 +278,112 @@ export default function TeacherRegistration() {
                   joining_date: teacher.joiningDate,
                   salary: teacher.salary ? parseFloat(teacher.salary) : null,
                 },
-              ]);
+              ])
+              .select()
+              .single();
 
-            if (teacherError) throw teacherError;
+            if (teacherError) {
+              results.errors.push(`${teacher.email}: Teacher record creation failed`);
+              results.failed++;
+              continue;
+            }
 
-            return {
+            // 4. Create subject assignments
+            for (const subjectName of teacher.subjects) {
+              try {
+                // Get or create subject
+                let { data: subjectData } = await supabase
+                  .from("subjects")
+                  .select("id")
+                  .eq("name", subjectName)
+                  .eq("school_id", schoolId)
+                  .single();
+
+                if (!subjectData) {
+                  const { data: newSubject, error: subjectError } = await supabase
+                    .from("subjects")
+                    .insert([
+                      {
+                        name: subjectName,
+                        code: subjectName.substring(0, 3).toUpperCase(),
+                        description: `${subjectName} subject`,
+                        school_id: schoolId,
+                      },
+                    ])
+                    .select()
+                    .single();
+
+                  if (subjectError) {
+                    console.warn(`Subject creation failed for ${subjectName}:`, subjectError);
+                    continue;
+                  }
+                  subjectData = newSubject;
+                }
+
+                if (subjectData) {
+                  // Create teacher-subject assignment
+                  await supabase.from("teacher_subjects").insert([
+                    {
+                      teacher_id: teacherData.id,
+                      subject_id: subjectData.id,
+                      class_id: null, // Will be assigned later
+                    },
+                  ]);
+                }
+              } catch (subjectError) {
+                console.warn(`Subject assignment failed for ${teacher.email} - ${subjectName}:`, subjectError);
+              }
+            }
+
+            results.success++;
+            results.registeredTeachers.push({
               email: teacher.email,
               password: teacher.password,
               name: `${teacher.firstName} ${teacher.lastName}`,
-            };
+            });
           }
-        },
-      );
+        } catch (teacherError: any) {
+          results.errors.push(`${teacher.email}: ${teacherError.message}`);
+          results.failed++;
+        }
+      }
 
-      const registeredTeachers = await Promise.all(registrationPromises);
+      // Show results
+      if (results.success > 0) {
+        toast({
+          title: "Teachers Registered Successfully!",
+          description: `${results.success} teachers registered successfully.${results.failed > 0 ? ` ${results.failed} failed.` : ''}`,
+        });
 
-      toast({
-        title: "Teachers Registered Successfully!",
-        description: `${teachers.length} teacher(s) have been registered.`,
-      });
+        // Store teacher credentials for reference
+        localStorage.setItem(
+          "registeredTeachers",
+          JSON.stringify(results.registeredTeachers),
+        );
+      }
 
-      // Store teacher credentials for reference
-      localStorage.setItem(
-        "registeredTeachers",
-        JSON.stringify(registeredTeachers),
-      );
+      if (results.failed > 0) {
+        console.error("Teacher registration errors:", results.errors);
+        toast({
+          title: "Some Teachers Failed to Register",
+          description: `Check console for details. ${results.success} succeeded, ${results.failed} failed.`,
+          variant: "destructive",
+        });
+      }
 
       // Navigate to student registration
       navigate("/student-registration", {
         state: {
           schoolId,
           teachersRegistered: true,
-          teacherCount: teachers.length,
+          teacherCount: results.success,
         },
       });
     } catch (error: any) {
       console.error("Teacher registration error:", error);
       toast({
         title: "Registration Failed",
-        description:
-          error.message || "Failed to register teachers. Please try again.",
+        description: error.message || "Failed to register teachers. Please try again.",
         variant: "destructive",
       });
     } finally {

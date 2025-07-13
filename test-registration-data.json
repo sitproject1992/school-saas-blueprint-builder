@@ -1,0 +1,98 @@
+{
+  "school": {
+    "name": "Test School",
+    "subdomain": "test-school",
+    "email": "admin@testschool.com",
+    "phone": "+91-9876543210",
+    "address": "123 Test Street, Test City, Test State - 123456",
+    "adminFirstName": "Test",
+    "adminLastName": "Admin",
+    "adminEmail": "admin@testschool.com",
+    "adminPhone": "+91-9876543210",
+    "adminPosition": "Principal",
+    "totalStudents": "500",
+    "totalTeachers": "25",
+    "gradeRange": "1-12",
+    "curriculum": "CBSE",
+    "subscriptionPlan": "professional"
+  },
+  "teachers": [
+    {
+      "firstName": "John",
+      "lastName": "Doe",
+      "email": "john.doe@testschool.com",
+      "phone": "+91-9876543211",
+      "qualification": "M.Ed",
+      "experience": "5",
+      "subjects": [
+        "Mathematics",
+        "Physics"
+      ],
+      "joiningDate": "2024-01-15",
+      "salary": "45000",
+      "password": "teacher123"
+    },
+    {
+      "firstName": "Jane",
+      "lastName": "Smith",
+      "email": "jane.smith@testschool.com",
+      "phone": "+91-9876543212",
+      "qualification": "B.Ed",
+      "experience": "3",
+      "subjects": [
+        "English",
+        "Literature"
+      ],
+      "joiningDate": "2024-01-20",
+      "salary": "40000",
+      "password": "teacher456"
+    }
+  ],
+  "students": [
+    {
+      "firstName": "Alice",
+      "lastName": "Johnson",
+      "email": "alice.johnson@testschool.com",
+      "phone": "+91-9876543213",
+      "dateOfBirth": "2010-05-15",
+      "gender": "Female",
+      "address": "456 Student Street, Test City",
+      "admissionNumber": "2024001",
+      "classId": "1",
+      "bloodGroup": "A+",
+      "emergencyContactName": "Mr. Johnson",
+      "emergencyContactPhone": "+91-9876543214",
+      "fatherName": "Mr. Johnson",
+      "fatherPhone": "+91-9876543214",
+      "fatherOccupation": "Engineer",
+      "motherName": "Mrs. Johnson",
+      "motherPhone": "+91-9876543215",
+      "motherOccupation": "Teacher",
+      "medicalConditions": "None",
+      "password": "student123"
+    },
+    {
+      "firstName": "Bob",
+      "lastName": "Williams",
+      "email": "bob.williams@testschool.com",
+      "phone": "+91-9876543216",
+      "dateOfBirth": "2009-08-22",
+      "gender": "Male",
+      "address": "789 Student Avenue, Test City",
+      "admissionNumber": "2024002",
+      "classId": "2",
+      "bloodGroup": "O+",
+      "emergencyContactName": "Mr. Williams",
+      "emergencyContactPhone": "+91-9876543217",
+      "fatherName": "Mr. Williams",
+      "fatherPhone": "+91-9876543217",
+      "fatherOccupation": "Doctor",
+      "motherName": "Mrs. Williams",
+      "motherPhone": "+91-9876543218",
+      "motherOccupation": "Nurse",
+      "medicalConditions": "None",
+      "password": "student456"
+    }
+  ],
+  "generatedAt": "2025-07-13T11:38:13.619Z"
+}
