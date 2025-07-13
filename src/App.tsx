@@ -27,6 +27,7 @@ import AdminSetup from "./pages/AdminSetup";
 import TeacherRegistration from "./pages/TeacherRegistration";
 import StudentRegistration from "./pages/StudentRegistration";
 import RegistrationComplete from "./pages/RegistrationComplete";
+import SettingsPage from "./pages/Settings";
 
 const queryClient = new QueryClient();
 
@@ -274,7 +275,7 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <AppLayout>
-                    <div>Settings Module - Coming Soon</div>
+                    <SettingsPage />
                   </AppLayout>
                 </ProtectedRoute>
               }
