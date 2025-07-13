@@ -222,13 +222,13 @@ export default function SchoolRegistration() {
     setIsLoading(true);
     try {
       // Validate subdomain uniqueness
-      const { data: existingSchool, error: checkError } = await supabase
+      const { data: existingSchoolData, error: checkError } = await supabase
         .from("schools")
         .select("id")
         .eq("subdomain", schoolData.subdomain)
-        .single();
+        .maybeSingle();
 
-      if (existingSchool) {
+      if (existingSchoolData) {
         toast({
           title: "Subdomain Already Exists",
           description: "This subdomain is already taken. Please choose a different one.",
