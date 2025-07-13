@@ -79,6 +79,7 @@ const deleteFeeStructure = async (id: string) => {
 
 export default function FeeStructures() {
   const queryClient = useQueryClient();
+  const { schoolId } = useSchool();
   const [open, setOpen] = useState(false);
   const [selectedFeeStructure, setSelectedFeeStructure] = useState<any>(null);
 
