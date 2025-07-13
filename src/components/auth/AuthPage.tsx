@@ -50,8 +50,8 @@ export function AuthPage() {
         alert("Account created successfully!");
       }
       navigate("/dashboard");
-    } catch (error: any) {
-      alert(error.message);
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "An error occurred");
     } finally {
       setIsLoading(false);
     }
