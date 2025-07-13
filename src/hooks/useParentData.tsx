@@ -28,8 +28,7 @@ const getParentData = async (userId: string) => {
     .from("students")
     .select(
       `
-      id,
-      admission_number,
+      *,
       profiles (*),
       classes (
         name,

@@ -45,7 +45,7 @@ const getSyllabuses = async () => {
   return data;
 };
 
-const createSyllabus = async (newSyllabus: z.infer<typeof syllabusSchema>) => {
+const createSyllabus = async (newSyllabus: z.infer<typeof syllabusSchema> & { school_id: string }) => {
   const { data, error } = await supabase.from("syllabus").insert(newSyllabus).select();
   if (error) throw new Error(error.message);
   return data;
@@ -132,7 +132,7 @@ export default function Syllabus() {
     if (selectedSyllabus) {
       updateMutation.mutate({ id: selectedSyllabus.id, ...values });
     } else {
-      createMutation.mutate(values);
+      createMutation.mutate({ ...values, school_id: "your_school_id" });
     }
   };
 

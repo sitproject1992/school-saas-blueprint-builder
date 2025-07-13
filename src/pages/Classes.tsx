@@ -22,9 +22,13 @@ const fetchClasses = async () => {
   const { data, error } = await supabase.from("classes").select(`
     id,
     name,
+    teacher_id,
     teachers (
-      first_name,
-      last_name
+      profile_id,
+      profiles (
+        first_name,
+        last_name
+      )
     )
   `);
   if (error) throw new Error(error.message);
@@ -41,7 +45,7 @@ export default function ClassesPage() {
     queryFn: fetchClasses,
   });
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm("Are you sure you want to delete this class?")) {
       try {
         const { error } = await supabase.from("classes").delete().eq("id", id);
@@ -86,7 +90,7 @@ export default function ClassesPage() {
               <TableCell>{classItem.name}</TableCell>
               <TableCell>
                 {classItem.teachers
-                  ? `${classItem.teachers.first_name} ${classItem.teachers.last_name}`
+                  ? `${classItem.teachers.profiles.first_name} ${classItem.teachers.profiles.last_name}`
                   : "Unassigned"}
               </TableCell>
               <TableCell>
