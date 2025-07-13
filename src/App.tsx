@@ -240,6 +240,16 @@ const App = () => (
               }
             />
             <Route
+              path="/statistics"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <div>Statistics Module - Coming Soon</div>
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/schools"
               element={
                 <ProtectedRoute>
