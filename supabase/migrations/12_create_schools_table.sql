@@ -62,7 +62,48 @@ CREATE INDEX IF NOT EXISTS idx_attendance_school_id ON attendance(school_id);
 CREATE INDEX IF NOT EXISTS idx_subjects_school_id ON subjects(school_id);
 
 -- Enable RLS
--- RLS is not enabled for this table
+ALTER TABLE schools ENABLE ROW LEVEL SECURITY;
+ALTER TABLE school_admins ENABLE ROW LEVEL SECURITY;
+
+-- Create RLS policies for schools
+CREATE POLICY "Users can view their own school" ON schools
+    FOR SELECT USING (
+        EXISTS (
+            SELECT 1 FROM school_admins sa
+            WHERE sa.school_id = schools.id
+            AND sa.user_id = auth.uid()
+        )
+    );
+
+CREATE POLICY "School admins can update their school" ON schools
+    FOR UPDATE USING (
+        EXISTS (
+            SELECT 1 FROM school_admins sa
+            WHERE sa.school_id = schools.id
+            AND sa.user_id = auth.uid()
+            AND sa.is_active = true
+        )
+    );
+
+-- Create RLS policies for school_admins
+CREATE POLICY "Users can view school admins for their school" ON school_admins
+    FOR SELECT USING (
+        EXISTS (
+            SELECT 1 FROM school_admins sa
+            WHERE sa.school_id = school_admins.school_id
+            AND sa.user_id = auth.uid()
+        )
+    );
+
+CREATE POLICY "School admins can manage school admins" ON school_admins
+    FOR ALL USING (
+        EXISTS (
+            SELECT 1 FROM school_admins sa
+            WHERE sa.school_id = school_admins.school_id
+            AND sa.user_id = auth.uid()
+            AND sa.role IN ('super_admin', 'admin')
+        )
+    );
 
 -- Create updated_at triggers
 CREATE TRIGGER update_schools_updated_at BEFORE UPDATE ON schools
