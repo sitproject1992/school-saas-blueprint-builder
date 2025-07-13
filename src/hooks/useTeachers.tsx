@@ -1,21 +1,43 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Tables, TablesInsert } from '@/integrations/supabase/types';
 import { useToast } from '@/hooks/use-toast';
 
-type Teacher = Tables<'teachers'> & {
-  profile: Tables<'profiles'>;
-  class?: Tables<'classes'>;
-};
+export interface Teacher {
+  id: string;
+  profile_id: string;
+  school_id: string;
+  class_id: string | null;
+  experience_years: number | null;
+  is_class_teacher: boolean | null;
+  joining_date: string | null;
+  qualification: string | null;
+  salary: number | null;
+  created_at: string;
+  updated_at: string;
+  profiles: {
+    first_name: string;
+    last_name: string;
+    email: string;
+    phone: string | null;
+    date_of_birth: string | null;
+    address: string | null;
+  };
+}
 
-type TeacherInsert = TablesInsert<'teachers'> & {
+type TeacherInsert = {
+  class_id?: string;
+  experience_years?: number;
+  is_class_teacher?: boolean;
+  joining_date?: string;
+  qualification?: string;
+  salary?: number;
   profile: {
     first_name: string;
     last_name: string;
     email: string;
-    phone?: string;
-    address?: string;
-    date_of_birth?: string;
+    phone?: string | null;
+    address?: string | null;
+    date_of_birth?: string | null;
   };
 };
 
@@ -34,8 +56,14 @@ export const useTeachers = () => {
         .from('teachers')
         .select(`
           *,
-          profile:profiles(*),
-          class:classes(*)
+          profiles:profile_id (
+            first_name,
+            last_name,
+            email,
+            phone,
+            date_of_birth,
+            address
+          )
         `)
         .order('created_at', { ascending: false });
 
@@ -46,103 +74,71 @@ export const useTeachers = () => {
 
   const createTeacher = useMutation({
     mutationFn: async (teacherData: TeacherInsert) => {
-      // First create the profile
+      // Create a user account first
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: teacherData.profile.email,
+        password: Math.random().toString(36).slice(-8), // Temporary password
+      });
+
+      if (authError) throw authError;
+
+      if (!authData.user) throw new Error('Failed to create user');
+
+      // Create the profile
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .insert({
-          first_name: teacherData.profile.first_name,
-          last_name: teacherData.profile.last_name,
-          email: teacherData.profile.email,
-          phone: teacherData.profile.phone,
-          address: teacherData.profile.address,
-          date_of_birth: teacherData.profile.date_of_birth,
-          role: 'teacher',
-          user_id: crypto.randomUUID(), // Temporary - in real app this would come from auth
+          user_id: authData.user.id,
+          ...teacherData.profile,
+          role: 'teacher'
         })
         .select()
         .single();
 
       if (profileError) throw profileError;
 
-      // Then create the teacher record
-      const { data, error } = await supabase
+      // Create the teacher record
+      const { data: teacher, error: teacherError } = await supabase
         .from('teachers')
         .insert({
           profile_id: profile.id,
-          qualification: teacherData.qualification,
-          experience_years: teacherData.experience_years,
-          joining_date: teacherData.joining_date,
-          salary: teacherData.salary,
+          school_id: profile.school_id || '1', // Default school
           class_id: teacherData.class_id,
+          experience_years: teacherData.experience_years,
           is_class_teacher: teacherData.is_class_teacher,
-          school_id: profile.school_id,
+          joining_date: teacherData.joining_date,
+          qualification: teacherData.qualification,
+          salary: teacherData.salary,
         })
-        .select(`
-          *,
-          profile:profiles(*),
-          class:classes(*)
-        `)
+        .select()
         .single();
 
-      if (error) throw error;
-      return data;
+      if (teacherError) throw teacherError;
+      return teacher;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['teachers'] });
       toast({
-        title: "Success",
-        description: "Teacher created successfully.",
+        title: 'Success',
+        description: 'Teacher created successfully',
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({
-        title: "Error",
-        description: "Failed to create teacher. Please try again.",
-        variant: "destructive",
+        title: 'Error',
+        description: error.message || 'Failed to create teacher',
+        variant: 'destructive',
       });
-      console.error('Create teacher error:', error);
     },
   });
 
   const updateTeacher = useMutation({
-    mutationFn: async ({ id, ...teacherData }: Partial<TeacherInsert> & { id: string }) => {
-      // Update profile if profile data is provided
-      if (teacherData.profile) {
-        const teacher = teachers.find(t => t.id === id);
-        if (teacher?.profile_id) {
-          const { error: profileError } = await supabase
-            .from('profiles')
-            .update({
-              first_name: teacherData.profile.first_name,
-              last_name: teacherData.profile.last_name,
-              email: teacherData.profile.email,
-              phone: teacherData.profile.phone,
-              address: teacherData.profile.address,
-              date_of_birth: teacherData.profile.date_of_birth,
-            })
-            .eq('id', teacher.profile_id);
-
-          if (profileError) throw profileError;
-        }
-      }
-
-      // Update teacher record
+    mutationFn: async ({ id, updates }: { id: string; updates: Partial<Teacher> }) => {
       const { data, error } = await supabase
         .from('teachers')
-        .update({
-          qualification: teacherData.qualification,
-          experience_years: teacherData.experience_years,
-          joining_date: teacherData.joining_date,
-          salary: teacherData.salary,
-          class_id: teacherData.class_id,
-          is_class_teacher: teacherData.is_class_teacher,
-        })
+        .update(updates)
         .eq('id', id)
-        .select(`
-          *,
-          profile:profiles(*),
-          class:classes(*)
-        `)
+        .select()
         .single();
 
       if (error) throw error;
@@ -151,17 +147,16 @@ export const useTeachers = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['teachers'] });
       toast({
-        title: "Success",
-        description: "Teacher updated successfully.",
+        title: 'Success',
+        description: 'Teacher updated successfully',
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({
-        title: "Error",
-        description: "Failed to update teacher. Please try again.",
-        variant: "destructive",
+        title: 'Error',
+        description: error.message || 'Failed to update teacher',
+        variant: 'destructive',
       });
-      console.error('Update teacher error:', error);
     },
   });
 
@@ -177,17 +172,16 @@ export const useTeachers = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['teachers'] });
       toast({
-        title: "Success",
-        description: "Teacher deleted successfully.",
+        title: 'Success',
+        description: 'Teacher deleted successfully',
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({
-        title: "Error",
-        description: "Failed to delete teacher. Please try again.",
-        variant: "destructive",
+        title: 'Error',
+        description: error.message || 'Failed to delete teacher',
+        variant: 'destructive',
       });
-      console.error('Delete teacher error:', error);
     },
   });
 
@@ -195,11 +189,8 @@ export const useTeachers = () => {
     teachers,
     isLoading,
     error,
-    createTeacher: createTeacher.mutate,
-    updateTeacher: updateTeacher.mutate,
-    deleteTeacher: deleteTeacher.mutate,
-    isCreating: createTeacher.isPending,
-    isUpdating: updateTeacher.isPending,
-    isDeleting: deleteTeacher.isPending,
+    createTeacher,
+    updateTeacher,
+    deleteTeacher,
   };
 };

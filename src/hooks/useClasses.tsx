@@ -4,11 +4,11 @@ import { useToast } from '@/hooks/use-toast';
 
 export interface Class {
   id: string;
-  school_id: string;
   name: string;
   section: string | null;
   grade_level: number | null;
-  capacity: number;
+  capacity: number | null;
+  school_id: string;
   created_at: string;
   updated_at: string;
 }
@@ -37,13 +37,13 @@ export function useCreateClass() {
       name: string;
       section?: string;
       grade_level?: number;
-      capacity: number;
+      capacity?: number;
     }) => {
       const { data: newClass, error } = await supabase
         .from('classes')
         .insert({
           ...data,
-          school_id: 'temp' // This should come from auth context
+          school_id: '1' // Default school ID
         })
         .select()
         .single();
@@ -54,17 +54,17 @@ export function useCreateClass() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['classes'] });
       toast({
-        title: "Success",
-        description: "Class created successfully"
+        title: 'Success',
+        description: 'Class created successfully',
       });
     },
     onError: (error: any) => {
       toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.message
+        title: 'Error',
+        description: error.message || 'Failed to create class',
+        variant: 'destructive',
       });
-    }
+    },
   });
 }
 
@@ -73,31 +73,31 @@ export function useUpdateClass() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async (data: { id: string; updates: Partial<Class> }) => {
-      const { data: updatedClass, error } = await supabase
+    mutationFn: async ({ id, updates }: { id: string; updates: Partial<Class> }) => {
+      const { data, error } = await supabase
         .from('classes')
-        .update(data.updates)
-        .eq('id', data.id)
+        .update(updates)
+        .eq('id', id)
         .select()
         .single();
 
       if (error) throw error;
-      return updatedClass;
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['classes'] });
       toast({
-        title: "Success",
-        description: "Class updated successfully"
+        title: 'Success',
+        description: 'Class updated successfully',
       });
     },
     onError: (error: any) => {
       toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.message
+        title: 'Error',
+        description: error.message || 'Failed to update class',
+        variant: 'destructive',
       });
-    }
+    },
   });
 }
 
@@ -117,16 +117,16 @@ export function useDeleteClass() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['classes'] });
       toast({
-        title: "Success",
-        description: "Class deleted successfully"
+        title: 'Success',
+        description: 'Class deleted successfully',
       });
     },
     onError: (error: any) => {
       toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.message
+        title: 'Error',
+        description: error.message || 'Failed to delete class',
+        variant: 'destructive',
       });
-    }
+    },
   });
 }
