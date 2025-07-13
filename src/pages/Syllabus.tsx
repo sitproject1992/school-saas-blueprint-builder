@@ -81,6 +81,7 @@ const deleteSyllabus = async (id: string) => {
 export default function Syllabus() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const { schoolId } = useSchool();
   const [open, setOpen] = useState(false);
   const [selectedSyllabus, setSelectedSyllabus] = useState<any>(null);
 
