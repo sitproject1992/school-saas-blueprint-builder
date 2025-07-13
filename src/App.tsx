@@ -63,227 +63,231 @@ function AppLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
+import { SchoolProvider } from "@/hooks/useSchool";
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/auth" element={<AuthPage />} />
-            <Route
-              path="/school-registration"
-              element={<SchoolRegistration />}
-            />
-            <Route path="/setup-admin" element={<AdminSetup />} />
-            <Route
-              path="/teacher-registration"
-              element={<TeacherRegistration />}
-            />
-            <Route
-              path="/student-registration"
-              element={<StudentRegistration />}
-            />
-            <Route
-              path="/registration-complete"
-              element={<RegistrationComplete />}
-            />
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <DashboardPage />
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/students"
-              element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <StudentsPage />
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/teachers"
-              element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <TeachersPage />
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/classes"
-              element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <ClassesPage />
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/subjects"
-              element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <SubjectsPage />
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/attendance"
-              element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <AttendancePage />
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/syllabus"
-              element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <Syllabus />
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/lesson-plans"
-              element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <LessonPlans />
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/exams"
-              element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <div>Exams Module - Coming Soon</div>
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/fees"
-              element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <FeeStructures />
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/invoices"
-              element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <Invoices />
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payments"
-              element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <div>Payments Module - Coming Soon</div>
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/inventory"
-              element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <Inventory />
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/announcements"
-              element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <div>Announcements Module - Coming Soon</div>
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/reports"
-              element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <div>Reports Module - Coming Soon</div>
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/schools"
-              element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <div>Schools Management Module - Coming Soon</div>
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/users"
-              element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <div>Users Management Module - Coming Soon</div>
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/parent-portal"
-              element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <ParentPortal />
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/settings"
-              element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <SettingsPage />
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
+      <SchoolProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/auth" element={<AuthPage />} />
+              <Route
+                path="/school-registration"
+                element={<SchoolRegistration />}
+              />
+              <Route path="/setup-admin" element={<AdminSetup />} />
+              <Route
+                path="/teacher-registration"
+                element={<TeacherRegistration />}
+              />
+              <Route
+                path="/student-registration"
+                element={<StudentRegistration />}
+              />
+              <Route
+                path="/registration-complete"
+                element={<RegistrationComplete />}
+              />
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <DashboardPage />
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/students"
+                element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <StudentsPage />
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/teachers"
+                element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <TeachersPage />
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/classes"
+                element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <ClassesPage />
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/subjects"
+                element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <SubjectsPage />
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/attendance"
+                element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <AttendancePage />
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/syllabus"
+                element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <Syllabus />
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/lesson-plans"
+                element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <LessonPlans />
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/exams"
+                element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <div>Exams Module - Coming Soon</div>
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/fees"
+                element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <FeeStructures />
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/invoices"
+                element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <Invoices />
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/payments"
+                element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <div>Payments Module - Coming Soon</div>
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/inventory"
+                element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <Inventory />
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/announcements"
+                element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <div>Announcements Module - Coming Soon</div>
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/reports"
+                element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <div>Reports Module - Coming Soon</div>
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/schools"
+                element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <SchoolsPage />
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/users"
+                element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                    <UsersPage />
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/parent-portal"
+                element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <ParentPortal />
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/settings"
+                element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <SettingsPage />
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </SchoolProvider>
     </AuthProvider>
   </QueryClientProvider>
 );

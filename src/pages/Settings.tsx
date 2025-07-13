@@ -5,6 +5,7 @@ import UserManagement from '@/components/settings/UserManagement';
 import AcademicYear from '@/components/settings/AcademicYear';
 import GradingSystem from '@/components/settings/GradingSystem';
 import NotificationSettings from '@/components/settings/NotificationSettings';
+import SystemConfiguration from '@/components/settings/SystemConfiguration';
 
 const SettingsPage: React.FC = () => {
   return (
@@ -17,6 +18,7 @@ const SettingsPage: React.FC = () => {
           <TabsTrigger value="academic-year">Academic Year</TabsTrigger>
           <TabsTrigger value="grading-system">Grading System</TabsTrigger>
           <TabsTrigger value="notification-settings">Notification Settings</TabsTrigger>
+          <TabsTrigger value="system-configuration">System Configuration</TabsTrigger>
         </TabsList>
         <TabsContent value="school-profile">
           <SchoolProfileForm />
@@ -32,6 +34,9 @@ const SettingsPage: React.FC = () => {
         </TabsContent>
         <TabsContent value="notification-settings">
           <NotificationSettings />
+        </TabsContent>
+        <TabsContent value="system-configuration">
+          <SystemConfiguration />
         </TabsContent>
       </Tabs>
     </div>
