@@ -20,6 +20,7 @@ import FeeStructures from "./pages/FeeStructures";
 import Invoices from "./pages/Invoices";
 import Syllabus from "./pages/Syllabus";
 import LessonPlans from "./pages/LessonPlans";
+import SubjectsPage from "./pages/Subjects";
 
 const queryClient = new QueryClient();
 
@@ -94,7 +95,7 @@ const App = () => (
             <Route path="/subjects" element={
               <ProtectedRoute>
                 <AppLayout>
-                  <div>Subjects Module - Coming Soon</div>
+                  <SubjectsPage />
                 </AppLayout>
               </ProtectedRoute>
             } />
