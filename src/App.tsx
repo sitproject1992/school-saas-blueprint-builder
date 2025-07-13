@@ -27,6 +27,12 @@ import AdminSetup from "./pages/AdminSetup";
 import TeacherRegistration from "./pages/TeacherRegistration";
 import StudentRegistration from "./pages/StudentRegistration";
 import RegistrationComplete from "./pages/RegistrationComplete";
+import Exams from "./pages/Exams";
+import Announcements from "./pages/Announcements";
+import Statistics from "./pages/Statistics";
+import Schools from "./pages/Schools";
+import Users from "./pages/Users";
+import Settings from "./pages/Settings";
 
 const queryClient = new QueryClient();
 
