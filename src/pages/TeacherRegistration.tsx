@@ -200,64 +200,71 @@ export default function TeacherRegistration() {
 
     setIsLoading(true);
     try {
-      const registrationPromises = teachers.map(async (teacher) => {
-        // 1. Create auth user
-        const { data: authData, error: authError } = await supabase.auth.signUp(
-          {
-            email: teacher.email,
-            password: teacher.password,
-          },
-        );
+      const registrationPromises = teachers.map(
+        async (
+          teacher,
+        ): Promise<{
+          email: string;
+          password: string;
+          name: string;
+        }> => {
+          // 1. Create auth user
+          const { data: authData, error: authError } =
+            await supabase.auth.signUp({
+              email: teacher.email,
+              password: teacher.password,
+            });
 
-        if (authError) throw authError;
+          if (authError) throw authError;
 
-        if (authData.user) {
-          // 2. Create profile
-          const { data: profileData, error: profileError } = await supabase
-            .from("profiles")
-            .insert([
-              {
-                user_id: authData.user.id,
-                email: teacher.email,
-                first_name: teacher.firstName,
-                last_name: teacher.lastName,
-                phone: teacher.phone,
-                address: teacher.address,
-                date_of_birth: teacher.dateOfBirth || null,
-                role: "teacher",
-                school_id: schoolId,
-              },
-            ])
-            .select()
-            .single();
+          if (authData.user) {
+            // 2. Create profile
+            const { data: profileData, error: profileError } = await supabase
+              .from("profiles")
+              .insert([
+                {
+                  user_id: authData.user.id,
+                  email: teacher.email,
+                  first_name: teacher.firstName,
+                  last_name: teacher.lastName,
+                  phone: teacher.phone,
+                  address: teacher.address,
+                  date_of_birth: teacher.dateOfBirth || null,
+                  role: "teacher",
+                  school_id: schoolId,
+                },
+              ])
+              .select()
+              .single();
 
-          if (profileError) throw profileError;
+            if (profileError) throw profileError;
 
-          // 3. Create teacher record
-          const { error: teacherError } = await supabase
-            .from("teachers")
-            .insert([
-              {
-                profile_id: profileData.id,
-                school_id: schoolId,
-                qualification: teacher.qualification,
-                experience_years: teacher.experience
-                  ? parseInt(teacher.experience)
-                  : null,
-                joining_date: teacher.joiningDate,
-                salary: teacher.salary ? parseFloat(teacher.salary) : null,
-              },
-            ]);
+            // 3. Create teacher record
+            const { error: teacherError } = await supabase
+              .from("teachers")
+              .insert([
+                {
+                  profile_id: profileData.id,
+                  school_id: schoolId,
+                  qualification: teacher.qualification,
+                  experience_years: teacher.experience
+                    ? parseInt(teacher.experience)
+                    : null,
+                  joining_date: teacher.joiningDate,
+                  salary: teacher.salary ? parseFloat(teacher.salary) : null,
+                },
+              ]);
 
-          if (teacherError) throw teacherError;
+            if (teacherError) throw teacherError;
 
-          return {
-            email: teacher.email,
-            password: teacher.password,
-            name: `${teacher.firstName} ${teacher.lastName}`,
-          };
-        }
-      });
+            return {
+              email: teacher.email,
+              password: teacher.password,
+              name: `${teacher.firstName} ${teacher.lastName}`,
+            };
+          }
+        },
+      );
 
       const registeredTeachers = await Promise.all(registrationPromises);
 
