@@ -56,6 +56,11 @@ const menuItems = [
         icon: BookOpen,
       },
       {
+        title: "Subjects",
+        url: "/subjects",
+        icon: BookOpen,
+      },
+      {
         title: "Attendance",
         url: "/attendance",
         icon: ClipboardList,
