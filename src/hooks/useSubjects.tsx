@@ -14,57 +14,27 @@ export interface Subject {
   updated_at: string;
 }
 
-export function useSubjects() {
-  const { schoolId } = useSchool();
-  return useQuery({
-    queryKey: ['subjects', schoolId],
-    queryFn: async () => {
-      if (!schoolId) return [];
-      const { data, error } = await supabase
-        .from('subjects')
-        .select('*')
-        .eq('school_id', schoolId)
-        .order('name', { ascending: true });
+async function getSubjects(): Promise<Subject[]> {
+  const { data, error } = await supabase
+    .from("subjects")
+    .select("*")
+    .order("name", { ascending: true });
 
-      if (error) throw new Error(error.message);
-      return data as Subject[];
-    },
-    enabled: !!schoolId,
-  });
+  if (error) throw new Error(error.message);
+  return data || [];
 }
 
-export function useCreateSubject() {
-  const queryClient = useQueryClient();
-  const { toast } = useToast();
-  const { schoolId } = useSchool();
+async function createSubject(
+  subject: Omit<Subject, "id" | "created_at" | "updated_at">,
+): Promise<Subject> {
+  const { data, error } = await supabase
+    .from("subjects")
+    .insert(subject)
+    .select()
+    .single();
 
-  return useMutation({
-    mutationFn: async (subjectData: Omit<Subject, 'id' | 'created_at' | 'updated_at' | 'school_id'>) => {
-      if (!schoolId) throw new Error('No active school selected');
-      const { data, error } = await supabase
-        .from('subjects')
-        .insert({ ...subjectData, school_id: schoolId })
-        .select()
-        .single();
-
-      if (error) throw new Error(error.message);
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['subjects'] });
-      toast({
-        title: 'Success',
-        description: 'Subject created successfully',
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: 'Error',
-        description: error.message || 'Failed to create subject',
-        variant: 'destructive',
-      });
-    },
-  });
+  if (error) throw new Error(error.message);
+  return data;
 }
 
 async function updateSubject({
