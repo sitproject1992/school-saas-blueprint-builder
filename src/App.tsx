@@ -180,7 +180,7 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <AppLayout>
-                    <div>Exams Module - Coming Soon</div>
+                    <Exams />
                   </AppLayout>
                 </ProtectedRoute>
               }
