@@ -151,7 +151,7 @@ export default function Syllabus() {
     if (selectedSyllabus) {
       updateMutation.mutate({ id: selectedSyllabus.id, ...values });
     } else {
-      createMutation.mutate({ ...values, school_id: "your_school_id" });
+      createMutation.mutate({ ...values, school_id: schoolId || null });
     }
   };
 
