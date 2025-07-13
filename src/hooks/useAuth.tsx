@@ -18,6 +18,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Demo credentials that will work with simple authentication
 const demoCredentials = [
+  { email: 'superadmin@skooler.com', password: 'super123', role: 'super_admin' },
   { email: 'admin@skooler.com', password: 'admin123', role: 'school_admin' },
   { email: 'teacher@skooler.com', password: 'teacher123', role: 'teacher' },
   { email: 'student@skooler.com', password: 'student123', role: 'student' },

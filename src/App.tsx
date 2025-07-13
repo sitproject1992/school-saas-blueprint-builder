@@ -27,6 +27,9 @@ import AdminSetup from "./pages/AdminSetup";
 import TeacherRegistration from "./pages/TeacherRegistration";
 import StudentRegistration from "./pages/StudentRegistration";
 import RegistrationComplete from "./pages/RegistrationComplete";
+import SuperAdmin from "./pages/SuperAdmin";
+import Payments from "./pages/Payments";
+import Messages from "./pages/Messages";
 
 const queryClient = new QueryClient();
 
@@ -204,7 +207,7 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <AppLayout>
-                    <div>Payments Module - Coming Soon</div>
+                    <Payments />
                   </AppLayout>
                 </ProtectedRoute>
               }
@@ -230,6 +233,16 @@ const App = () => (
               }
             />
             <Route
+              path="/messages"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <Messages />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/reports"
               element={
                 <ProtectedRoute>
@@ -244,7 +257,7 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <AppLayout>
-                    <div>Schools Management Module - Coming Soon</div>
+                    <SuperAdmin />
                   </AppLayout>
                 </ProtectedRoute>
               }

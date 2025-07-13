@@ -41,6 +41,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { useLocation, Link } from "react-router-dom";
+import { useTenant } from "@/hooks/useTenant";
 
 const menuItems = [
   {
@@ -203,6 +204,51 @@ const menuItems = [
 
 export function AppSidebar() {
   const location = useLocation();
+  const { isSuperAdmin, isSchoolAdmin, isTeacher, isStudent, isParent } = useTenant();
+
+  // Filter menu items based on user role
+  const getFilteredMenuItems = () => {
+    if (isSuperAdmin) {
+      return menuItems; // Super admin sees everything
+    }
+
+    if (isSchoolAdmin) {
+      return menuItems.filter(section => 
+        section.title !== "Administration" || 
+        section.items?.some(item => item.title === "Settings")
+      );
+    }
+
+    if (isTeacher) {
+      return menuItems.filter(section => 
+        section.title === "Dashboard" ||
+        section.title === "Academic Management" ||
+        section.title === "Operations" ||
+        (section.title === "Communication" && section.items?.some(item => item.title === "Messages"))
+      );
+    }
+
+    if (isStudent) {
+      return menuItems.filter(section => 
+        section.title === "Dashboard" ||
+        (section.title === "Academic Management" && section.items?.some(item => 
+          item.title === "Classes" || item.title === "Subjects" || item.title === "Syllabus"
+        )) ||
+        (section.title === "Operations" && section.items?.some(item => item.title === "Exams"))
+      );
+    }
+
+    if (isParent) {
+      return menuItems.filter(section => 
+        section.title === "Dashboard" ||
+        section.title === "Communication"
+      );
+    }
+
+    return menuItems; // Default fallback
+  };
+
+  const filteredMenuItems = getFilteredMenuItems();
 
   return (
     <Sidebar className="border-r">
@@ -219,7 +265,7 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent className="px-2 py-4">
-        {menuItems.map((section) => (
+        {filteredMenuItems.map((section) => (
           <SidebarGroup key={section.title} className="mb-2">
             {section.items ? (
               <>
