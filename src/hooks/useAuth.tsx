@@ -16,7 +16,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Demo credentials that will create/login real Supabase users
+// Demo credentials that will work with simple authentication
 const demoCredentials = [
   { email: 'admin@skooler.com', password: 'admin123', role: 'school_admin' },
   { email: 'teacher@skooler.com', password: 'teacher123', role: 'teacher' },
@@ -37,13 +37,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (error) {
         console.error('Error fetching user roles:', error);
-        return [];
+        // For demo purposes, assign role based on email
+        const demoUser = demoCredentials.find(cred => cred.email === user.email);
+        return demoUser ? [demoUser.role] : ['student'];
       }
 
       return data ? data.map((item: any) => item.roles.name) : [];
     } catch (error) {
       console.error('Error in fetchUserRoles:', error);
-      return [];
+      // For demo purposes, assign role based on email
+      const demoUser = demoCredentials.find(cred => cred.email === user.email);
+      return demoUser ? [demoUser.role] : ['student'];
     }
   };
 
@@ -82,77 +86,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const createDemoUserProfile = async (userId: string, email: string, role: string) => {
-    try {
-      // Create profile
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .upsert({
-          user_id: userId,
-          first_name: role.charAt(0).toUpperCase() + role.slice(1),
-          last_name: 'Demo',
-          email: email,
-          role: role as any
-        });
-
-      if (profileError) {
-        console.error('Profile creation error:', profileError);
-      }
-
-      // Get or create role
-      const { data: roleData } = await supabase
-        .from('roles')
-        .select('id')
-        .eq('name', role)
-        .single();
-
-      if (roleData) {
-        const { error: roleError } = await supabase
-          .from('user_roles')
-          .upsert({
-            user_id: userId,
-            role_id: roleData.id
-          });
-
-        if (roleError) {
-          console.error('Role assignment error:', roleError);
-        }
-      }
-    } catch (error) {
-      console.error('Error creating demo user profile:', error);
-    }
-  };
-
   const signIn = async (email: string, password: string) => {
     try {
       // Check if this is a demo credential
       const demoUser = demoCredentials.find(cred => cred.email === email && cred.password === password);
       
-      // Try to sign in with Supabase first
-      const { data, error } = await supabase.auth.signInWithPassword({
+      if (demoUser) {
+        // For demo purposes, create a mock session
+        const mockUser: AppUser = {
+          id: `demo-${demoUser.role}`,
+          email: demoUser.email,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          email_confirmed_at: new Date().toISOString(),
+          confirmed_at: new Date().toISOString(),
+          last_sign_in_at: new Date().toISOString(),
+          app_metadata: {},
+          user_metadata: {},
+          identities: [],
+          aud: 'authenticated',
+          role: 'authenticated',
+          roles: [demoUser.role]
+        };
+        
+        setUser(mockUser);
+        // Store in localStorage for persistence
+        localStorage.setItem('demo_user', JSON.stringify(mockUser));
+        return;
+      }
+
+      // Try regular Supabase authentication
+      const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      // If user doesn't exist and it's a demo credential, create them
-      if (error && error.message.includes('Invalid login credentials') && demoUser) {
-        console.log(`Creating demo user: ${email}`);
-        
-        // Create the user
-        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: undefined // Skip email confirmation for demo users
-          }
-        });
-
-        if (signUpError) throw signUpError;
-
-        if (signUpData.user) {
-          await createDemoUserProfile(signUpData.user.id, email, demoUser.role);
-        }
-      } else if (error) {
+      if (error) {
         throw error;
       }
     } catch (error: any) {
@@ -176,6 +145,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     try {
+      // Clear demo user from localStorage
+      localStorage.removeItem('demo_user');
+      setUser(null);
+      
+      // Also sign out from Supabase
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
     } catch (error: any) {
@@ -183,6 +157,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       throw error;
     }
   };
+
+  // Check for demo user in localStorage on initialization
+  useEffect(() => {
+    const demoUser = localStorage.getItem('demo_user');
+    if (demoUser && !user) {
+      try {
+        const parsedUser = JSON.parse(demoUser);
+        setUser(parsedUser);
+      } catch (error) {
+        console.error('Error parsing demo user:', error);
+        localStorage.removeItem('demo_user');
+      }
+    }
+  }, []);
 
   const value = {
     user,
