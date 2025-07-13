@@ -279,7 +279,7 @@ export function ParentDashboard() {
           <CardContent>
             <div className="space-y-4">
               {(data?.children || demoData.children).map(
-                (child: any, index: number) => (
+                (child, index: number) => (
                   <div
                     key={index}
                     className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg"
@@ -489,7 +489,7 @@ export function ParentDashboard() {
                   </div>
                   <div className="text-right">
                     <p className="font-semibold">
-                      ���{fee.amount.toLocaleString()}
+                      ₹{fee.amount.toLocaleString()}
                     </p>
                   </div>
                 </div>
