@@ -20,6 +20,8 @@ import FeeStructures from "./pages/FeeStructures";
 import Invoices from "./pages/Invoices";
 import Syllabus from "./pages/Syllabus";
 import LessonPlans from "./pages/LessonPlans";
+import Subjects from "./pages/Subjects";
+import Exams from "./pages/Exams";
 
 const queryClient = new QueryClient();
 
@@ -94,7 +96,7 @@ const App = () => (
             <Route path="/subjects" element={
               <ProtectedRoute>
                 <AppLayout>
-                  <div>Subjects Module - Coming Soon</div>
+                  <Subjects />
                 </AppLayout>
               </ProtectedRoute>
             } />
@@ -122,7 +124,7 @@ const App = () => (
             <Route path="/exams" element={
               <ProtectedRoute>
                 <AppLayout>
-                  <div>Exams Module - Coming Soon</div>
+                  <Exams />
                 </AppLayout>
               </ProtectedRoute>
             } />
