@@ -28,6 +28,8 @@ import TeacherRegistration from "./pages/TeacherRegistration";
 import StudentRegistration from "./pages/StudentRegistration";
 import RegistrationComplete from "./pages/RegistrationComplete";
 import SettingsPage from "./pages/Settings";
+import SchoolsPage from "./pages/Schools";
+import UsersPage from "./pages/Users";
 
 const queryClient = new QueryClient();
 
