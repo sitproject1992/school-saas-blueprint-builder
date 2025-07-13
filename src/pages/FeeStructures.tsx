@@ -131,7 +131,7 @@ export default function FeeStructures() {
     if (selectedFeeStructure) {
       updateMutation.mutate({ id: selectedFeeStructure.id, ...values });
     } else {
-      createMutation.mutate({ ...values, school_id: "your_school_id" });
+      createMutation.mutate({ ...values, school_id: schoolId || null });
     }
   };
 
