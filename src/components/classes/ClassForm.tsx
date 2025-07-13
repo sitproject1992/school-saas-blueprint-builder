@@ -78,7 +78,7 @@ export function ClassForm({ classItem, onSuccess }: ClassFormProps) {
         section: data.section || null,
         grade_level: data.grade_level || null,
         capacity: data.capacity || null,
-        school_id: "dummy-school-id", // In real app, get from user context
+        school_id: schoolId || null,
       };
 
       if (classItem) {
