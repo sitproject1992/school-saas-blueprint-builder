@@ -36,7 +36,15 @@ export default function AdminSetup() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [schoolData, setSchoolData] = useState<any>(null);
+  const [schoolData, setSchoolData] = useState<{
+    schoolName: string;
+    adminEmail: string;
+    adminFirstName: string;
+    adminLastName: string;
+    adminPhone: string;
+    adminPosition: string;
+    schoolId: string;
+  } | null>(null);
   const [adminData, setAdminData] = useState<AdminSetupData>({
     email: "",
     password: "",
