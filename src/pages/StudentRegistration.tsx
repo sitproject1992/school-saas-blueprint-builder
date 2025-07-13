@@ -271,66 +271,75 @@ export default function StudentRegistration() {
 
     setIsLoading(true);
     try {
-      const registrationPromises = students.map(async (student) => {
-        // 1. Create auth user
-        const { data: authData, error: authError } = await supabase.auth.signUp(
-          {
-            email: student.email,
-            password: student.password,
-          },
-        );
+      const registrationPromises = students.map(
+        async (
+          student,
+        ): Promise<{
+          email: string;
+          password: string;
+          name: string;
+          admissionNumber: string;
+        }> => {
+          // 1. Create auth user
+          const { data: authData, error: authError } =
+            await supabase.auth.signUp({
+              email: student.email,
+              password: student.password,
+            });
 
-        if (authError) throw authError;
+          if (authError) throw authError;
 
-        if (authData.user) {
-          // 2. Create profile
-          const { data: profileData, error: profileError } = await supabase
-            .from("profiles")
-            .insert([
-              {
-                user_id: authData.user.id,
-                email: student.email,
-                first_name: student.firstName,
-                last_name: student.lastName,
-                phone: student.phone,
-                address: student.address,
-                date_of_birth: student.dateOfBirth,
-                role: "student",
-                school_id: schoolId,
-              },
-            ])
-            .select()
-            .single();
+          if (authData.user) {
+            // 2. Create profile
+            const { data: profileData, error: profileError } = await supabase
+              .from("profiles")
+              .insert([
+                {
+                  user_id: authData.user.id,
+                  email: student.email,
+                  first_name: student.firstName,
+                  last_name: student.lastName,
+                  phone: student.phone,
+                  address: student.address,
+                  date_of_birth: student.dateOfBirth,
+                  role: "student",
+                  school_id: schoolId,
+                },
+              ])
+              .select()
+              .single();
 
-          if (profileError) throw profileError;
+            if (profileError) throw profileError;
 
-          // 3. Create student record
-          const { error: studentError } = await supabase
-            .from("students")
-            .insert([
-              {
-                profile_id: profileData.id,
-                school_id: schoolId,
-                class_id: student.classId,
-                admission_number: student.admissionNumber,
-                blood_group: student.bloodGroup || null,
-                emergency_contact_name: student.emergencyContactName || null,
-                emergency_contact_phone: student.emergencyContactPhone || null,
-                medical_conditions: student.medicalConditions || null,
-                admission_date: new Date().toISOString().split("T")[0],
-              },
-            ]);
+            // 3. Create student record
+            const { error: studentError } = await supabase
+              .from("students")
+              .insert([
+                {
+                  profile_id: profileData.id,
+                  school_id: schoolId,
+                  class_id: student.classId,
+                  admission_number: student.admissionNumber,
+                  blood_group: student.bloodGroup || null,
+                  emergency_contact_name: student.emergencyContactName || null,
+                  emergency_contact_phone:
+                    student.emergencyContactPhone || null,
+                  medical_conditions: student.medicalConditions || null,
+                  admission_date: new Date().toISOString().split("T")[0],
+                },
+              ]);
 
-          if (studentError) throw studentError;
+            if (studentError) throw studentError;
 
-          return {
-            email: student.email,
-            password: student.password,
-            name: `${student.firstName} ${student.lastName}`,
-            admissionNumber: student.admissionNumber,
-          };
-        }
-      });
+            return {
+              email: student.email,
+              password: student.password,
+              name: `${student.firstName} ${student.lastName}`,
+              admissionNumber: student.admissionNumber,
+            };
+          }
+        },
+      );
 
       const registeredStudents = await Promise.all(registrationPromises);
 
