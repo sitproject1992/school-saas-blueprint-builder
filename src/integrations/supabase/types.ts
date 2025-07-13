@@ -1007,33 +1007,67 @@ export type Database = {
       }
       teachers: {
         Row: {
-          id: number
-          first_name: string
-          last_name: string
-          email: string
-          phone: string | null
-          subject: string | null
+          class_id: string | null
           created_at: string
+          experience_years: number | null
+          id: string
+          is_class_teacher: boolean | null
+          joining_date: string | null
+          profile_id: string
+          qualification: string | null
+          salary: number | null
+          school_id: string
+          updated_at: string
         }
         Insert: {
-          id?: number
-          first_name: string
-          last_name: string
-          email: string
-          phone?: string | null
-          subject?: string | null
+          class_id?: string | null
           created_at?: string
+          experience_years?: number | null
+          id?: string
+          is_class_teacher?: boolean | null
+          joining_date?: string | null
+          profile_id: string
+          qualification?: string | null
+          salary?: number | null
+          school_id: string
+          updated_at?: string
         }
         Update: {
-          id?: number
-          first_name?: string
-          last_name?: string
-          email?: string
-          phone?: string | null
-          subject?: string | null
+          class_id?: string | null
           created_at?: string
+          experience_years?: number | null
+          id?: string
+          is_class_teacher?: boolean | null
+          joining_date?: string | null
+          profile_id?: string
+          qualification?: string | null
+          salary?: number | null
+          school_id?: string
+          updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "teachers_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teachers_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teachers_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -1174,8 +1208,6 @@ export type Enums<
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
     ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
     : never
-
-export type Teacher = Database["public"]["Tables"]["teachers"]["Row"];
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
