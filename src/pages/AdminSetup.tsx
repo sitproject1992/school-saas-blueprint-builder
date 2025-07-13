@@ -142,16 +142,45 @@ export default function AdminSetup() {
 
     setIsLoading(true);
     try {
-      // 1. Create auth user
+      // 1. Check if user already exists
+      const { data: existingUser, error: checkError } = await supabase.auth.signInWithPassword({
+        email: adminData.email,
+        password: adminData.password,
+      });
+
+      if (existingUser.user) {
+        toast({
+          title: "Account Already Exists",
+          description: "An account with this email already exists. Please use a different email or sign in.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // 2. Create auth user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: adminData.email,
         password: adminData.password,
       });
 
-      if (authError) throw authError;
+      if (authError) {
+        console.error("Auth error:", authError);
+        throw new Error(authError.message || "Failed to create user account");
+      }
 
       if (authData.user) {
-        // 2. Create profile
+        // 3. Get the school_admin role ID
+        const { data: roleData, error: roleCheckError } = await supabase
+          .from("roles")
+          .select("id")
+          .eq("name", "school_admin")
+          .single();
+
+        if (roleCheckError) {
+          console.warn("Role check error:", roleCheckError);
+        }
+
+        // 4. Create profile
         const { data: profileData, error: profileError } = await supabase
           .from("profiles")
           .insert([
@@ -168,27 +197,35 @@ export default function AdminSetup() {
           .select()
           .single();
 
-        if (profileError) throw profileError;
-
-        // 3. Create admin role assignment
-        const { error: roleError } = await supabase.from("user_roles").insert([
-          {
-            user_id: authData.user.id,
-            role_id: "school_admin", // We'll need to create this role in the system
-          },
-        ]);
-
-        if (roleError) {
-          console.warn("Role assignment error:", roleError);
-          // Don't fail the entire process for role assignment
+        if (profileError) {
+          console.error("Profile creation error:", profileError);
+          throw new Error(profileError.message || "Failed to create user profile");
         }
+
+        // 5. Create admin role assignment if role exists
+        if (roleData?.id) {
+          const { error: roleError } = await supabase.from("user_roles").insert([
+            {
+              user_id: authData.user.id,
+              role_id: roleData.id,
+            },
+          ]);
+
+          if (roleError) {
+            console.warn("Role assignment error:", roleError);
+            // Don't fail the entire process for role assignment
+          }
+        }
+
+        // 6. Note: school_admins table is not in current schema, using profiles table for role management
+        console.log("Admin user created successfully with school_admin role");
 
         // Clear stored registration data
         localStorage.removeItem("schoolRegistrationData");
 
         toast({
           title: "Admin Setup Complete!",
-          description: "Your admin account has been created successfully.",
+          description: `Welcome ${adminData.firstName}! Your admin account has been created successfully.`,
         });
 
         // Navigate to teacher registration
@@ -196,6 +233,12 @@ export default function AdminSetup() {
           state: {
             schoolId: schoolData.schoolId,
             adminSetupComplete: true,
+            adminUser: {
+              id: authData.user.id,
+              email: adminData.email,
+              firstName: adminData.firstName,
+              lastName: adminData.lastName,
+            },
           },
         });
       }

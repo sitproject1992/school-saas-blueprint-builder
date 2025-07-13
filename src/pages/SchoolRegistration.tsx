@@ -221,7 +221,23 @@ export default function SchoolRegistration() {
 
     setIsLoading(true);
     try {
-      // Create school record
+      // Validate subdomain uniqueness
+      const { data: existingSchool, error: checkError } = await supabase
+        .from("schools")
+        .select("id")
+        .eq("subdomain", schoolData.subdomain)
+        .single();
+
+      if (existingSchool) {
+        toast({
+          title: "Subdomain Already Exists",
+          description: "This subdomain is already taken. Please choose a different one.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Create school record with enhanced data
       const { data: schoolRecord, error: schoolError } = await supabase
         .from("schools")
         .insert([
@@ -230,41 +246,56 @@ export default function SchoolRegistration() {
             subdomain: schoolData.subdomain,
             email: schoolData.email,
             phone: schoolData.phone,
-            website: schoolData.website,
+            website: schoolData.website || null,
             address: `${schoolData.address}, ${schoolData.city}, ${schoolData.state} - ${schoolData.pincode}`,
             subscription_status: "active",
+            subscription_expires_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(), // 14 days trial
           },
         ])
         .select()
         .single();
 
-      if (schoolError) throw schoolError;
+      if (schoolError) {
+        console.error("School creation error:", schoolError);
+        throw new Error(schoolError.message || "Failed to create school");
+      }
 
       // Store registration data in localStorage for the next step
+      const registrationData = {
+        ...schoolData,
+        schoolId: schoolRecord.id,
+        registrationDate: new Date().toISOString(),
+      };
+      
       localStorage.setItem(
         "schoolRegistrationData",
-        JSON.stringify({
-          ...schoolData,
-          schoolId: schoolRecord.id,
-        }),
+        JSON.stringify(registrationData),
       );
 
       toast({
         title: "School Registered Successfully!",
-        description:
-          "Your school has been registered. You can now set up admin access.",
+        description: `Your school "${schoolData.schoolName}" has been registered. You can now set up admin access.`,
       });
 
       // Navigate to admin setup
       navigate("/setup-admin", {
-        state: { schoolData: { ...schoolData, schoolId: schoolRecord.id } },
+        state: { schoolData: registrationData },
       });
     } catch (error: any) {
       console.error("School registration error:", error);
+      
+      let errorMessage = "Failed to register school. Please try again.";
+      if (error.message?.includes("duplicate key")) {
+        errorMessage = "This subdomain is already taken. Please choose a different one.";
+      } else if (error.message?.includes("violates")) {
+        errorMessage = "Please check your input data and try again.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
       toast({
         title: "Registration Failed",
-        description:
-          error.message || "Failed to register school. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
