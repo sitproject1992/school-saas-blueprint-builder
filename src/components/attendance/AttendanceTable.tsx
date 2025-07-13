@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Tables } from "@/integrations/supabase/types";
 import {
   Table,
   TableBody,
@@ -12,23 +13,30 @@ import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+type Student = Tables<'students'> & {
+  profile: Tables<'profiles'>;
+};
 
 interface AttendanceTableProps {
-  classId: number;
+  classId: string;
   date: string;
 }
 
-const fetchStudentsForClass = async (classId: number) => {
+const fetchStudentsForClass = async (classId: string) => {
   const { data, error } = await supabase
     .from("students")
-    .select("id, first_name, last_name")
+    .select(`
+      *,
+      profile:profiles(*)
+    `)
     .eq("class_id", classId);
   if (error) throw new Error(error.message);
-  return data;
+  return data as Student[];
 };
 
-const fetchAttendance = async (classId: number, date: string) => {
+const fetchAttendance = async (classId: string, date: string) => {
   const { data, error } = await supabase
     .from("attendance")
     .select("*")
@@ -40,7 +48,7 @@ const fetchAttendance = async (classId: number, date: string) => {
 
 export function AttendanceTable({ classId, date }: AttendanceTableProps) {
   const queryClient = useQueryClient();
-  const [attendanceData, setAttendanceData] = useState<any>({});
+  const [attendanceData, setAttendanceData] = useState<Record<string, { status: string; notes: string }>>({});
 
   const { data: students, isLoading: isLoadingStudents } = useQuery({
     queryKey: ["students", classId],
@@ -52,23 +60,30 @@ export function AttendanceTable({ classId, date }: AttendanceTableProps) {
     queryKey: ["attendance", classId, date],
     queryFn: () => fetchAttendance(classId, date),
     enabled: !!classId && !!date,
-    onSuccess: (data) => {
-      const initialData = data.reduce((acc, record) => {
-        acc[record.student_id] = { status: record.status, remarks: record.remarks || "" };
-        return acc;
-      }, {});
-      setAttendanceData(initialData);
-    },
   });
 
+  // Update attendance data when initial data loads
+  useEffect(() => {
+    if (initialAttendance) {
+      const initialData = initialAttendance.reduce((acc, record) => {
+        acc[record.student_id] = { 
+          status: record.status, 
+          notes: record.notes || "" 
+        };
+        return acc;
+      }, {} as Record<string, { status: string; notes: string }>);
+      setAttendanceData(initialData);
+    }
+  }, [initialAttendance]);
+
   const mutation = useMutation({
-    mutationFn: async (newData: any) => {
+    mutationFn: async (newData: Record<string, { status: string; notes: string }>) => {
       const recordsToUpsert = Object.keys(newData).map((studentId) => ({
-        student_id: parseInt(studentId),
+        student_id: studentId,
         class_id: classId,
         date,
-        status: newData[studentId].status,
-        remarks: newData[studentId].remarks,
+        status: newData[studentId].status as "present" | "absent" | "late" | "excused",
+        notes: newData[studentId].notes,
       }));
 
       const { error } = await supabase.from("attendance").upsert(recordsToUpsert, {
@@ -81,17 +96,17 @@ export function AttendanceTable({ classId, date }: AttendanceTableProps) {
     },
   });
 
-  const handleStatusChange = (studentId: number, status: string) => {
-    setAttendanceData((prev: any) => ({
+  const handleStatusChange = (studentId: string, status: string) => {
+    setAttendanceData((prev) => ({
       ...prev,
       [studentId]: { ...prev[studentId], status },
     }));
   };
 
-  const handleRemarksChange = (studentId: number, remarks: string) => {
-    setAttendanceData((prev: any) => ({
+  const handleNotesChange = (studentId: string, notes: string) => {
+    setAttendanceData((prev) => ({
       ...prev,
-      [studentId]: { ...prev[studentId], remarks },
+      [studentId]: { ...prev[studentId], notes },
     }));
   };
 
@@ -108,16 +123,18 @@ export function AttendanceTable({ classId, date }: AttendanceTableProps) {
           <TableRow>
             <TableHead>Student</TableHead>
             <TableHead>Status</TableHead>
-            <TableHead>Remarks</TableHead>
+            <TableHead>Notes</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {students?.map((student) => (
             <TableRow key={student.id}>
-              <TableCell>{student.first_name} {student.last_name}</TableCell>
+              <TableCell>
+                {student.profile.first_name} {student.profile.last_name}
+              </TableCell>
               <TableCell>
                 <RadioGroup
-                  value={attendanceData[student.id]?.status}
+                  value={attendanceData[student.id]?.status || ""}
                   onValueChange={(value) => handleStatusChange(student.id, value)}
                   className="flex space-x-4"
                 >
@@ -133,20 +150,24 @@ export function AttendanceTable({ classId, date }: AttendanceTableProps) {
                     <RadioGroupItem value="late" id={`late-${student.id}`} />
                     <Label htmlFor={`late-${student.id}`}>Late</Label>
                   </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="excused" id={`excused-${student.id}`} />
+                    <Label htmlFor={`excused-${student.id}`}>Excused</Label>
+                  </div>
                 </RadioGroup>
               </TableCell>
               <TableCell>
                 <Textarea
-                  value={attendanceData[student.id]?.remarks || ""}
-                  onChange={(e) => handleRemarksChange(student.id, e.target.value)}
-                  placeholder="Add remarks..."
+                  value={attendanceData[student.id]?.notes || ""}
+                  onChange={(e) => handleNotesChange(student.id, e.target.value)}
+                  placeholder="Add notes..."
                 />
               </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
-      <Button onClick={handleSubmit} className="mt-4">
+      <Button onClick={handleSubmit} className="mt-4" disabled={mutation.isPending}>
         {mutation.isPending ? "Saving..." : "Save Attendance"}
       </Button>
     </div>

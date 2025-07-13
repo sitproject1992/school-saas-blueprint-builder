@@ -22,7 +22,8 @@ interface TeacherFormProps {
 }
 
 export function TeacherForm({ teacher, onSubmit, onCancel, isLoading }: TeacherFormProps) {
-  const { classes } = useClasses();
+  const classesResult = useClasses();
+  const safeClasses = classesResult.data || []; // Access data from query result
   
   const [formData, setFormData] = useState({
     // Profile data
@@ -61,7 +62,7 @@ export function TeacherForm({ teacher, onSubmit, onCancel, isLoading }: TeacherF
       qualification: formData.qualification,
       experience_years: formData.experience_years,
       joining_date: formData.joining_date,
-      salary: formData.salary ? parseFloat(formData.salary) : null,
+      salary: formData.salary ? parseFloat(String(formData.salary)) : null,
       class_id: formData.class_id || null,
       is_class_teacher: formData.is_class_teacher,
     };
@@ -213,7 +214,7 @@ export function TeacherForm({ teacher, onSubmit, onCancel, isLoading }: TeacherF
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="">No class assigned</SelectItem>
-                    {classes.map((cls) => (
+                    {safeClasses.map((cls) => (
                       <SelectItem key={cls.id} value={cls.id}>
                         {cls.name} {cls.section && `- ${cls.section}`}
                       </SelectItem>
