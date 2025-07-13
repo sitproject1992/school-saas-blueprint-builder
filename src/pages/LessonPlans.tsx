@@ -46,7 +46,7 @@ const getLessonPlans = async () => {
   return data;
 };
 
-const createLessonPlan = async (newLessonPlan: z.infer<typeof lessonPlanSchema>) => {
+const createLessonPlan = async (newLessonPlan: z.infer<typeof lessonPlanSchema> & { teacher_id: string }) => {
   const { data, error } = await supabase.from("lesson_plans").insert(newLessonPlan).select();
   if (error) throw new Error(error.message);
   return data;
@@ -134,7 +134,7 @@ export default function LessonPlans() {
     if (selectedLessonPlan) {
       updateMutation.mutate({ id: selectedLessonPlan.id, ...values });
     } else {
-      createMutation.mutate(values);
+      createMutation.mutate({ ...values, teacher_id: user.id });
     }
   };
 

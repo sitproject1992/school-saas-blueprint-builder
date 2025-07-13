@@ -27,7 +27,7 @@ const fetchClasses = async () => {
 };
 
 export default function AttendancePage() {
-  const [selectedClass, setSelectedClass] = useState<number | null>(null);
+  const [selectedClass, setSelectedClass] = useState<string | null>(null);
   const [date, setDate] = useState<Date | undefined>(new Date());
 
   const { data: classes, isLoading: isLoadingClasses } = useQuery({
@@ -42,7 +42,7 @@ export default function AttendancePage() {
       </div>
 
       <div className="flex items-center space-x-4">
-        <Select onValueChange={(value) => setSelectedClass(Number(value))}>
+        <Select onValueChange={(value) => setSelectedClass(value)}>
           <SelectTrigger className="w-[280px]">
             <SelectValue placeholder="Select a class" />
           </SelectTrigger>

@@ -43,7 +43,7 @@ const getFeeStructures = async () => {
   return data;
 };
 
-const createFeeStructure = async (newFeeStructure: z.infer<typeof feeStructureSchema>) => {
+const createFeeStructure = async (newFeeStructure: z.infer<typeof feeStructureSchema> & { school_id: string }) => {
   const { data, error } = await supabase.from("fee_structures").insert(newFeeStructure).select();
   if (error) throw new Error(error.message);
   return data;
@@ -111,7 +111,7 @@ export default function FeeStructures() {
     if (selectedFeeStructure) {
       updateMutation.mutate({ id: selectedFeeStructure.id, ...values });
     } else {
-      createMutation.mutate(values);
+      createMutation.mutate({ ...values, school_id: "your_school_id" });
     }
   };
 
