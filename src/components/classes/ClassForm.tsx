@@ -47,6 +47,7 @@ const fetchTeachers = async () => {
 
 export function ClassForm({ classItem, onSuccess }: ClassFormProps) {
   const queryClient = useQueryClient();
+  const { schoolId } = useSchool();
   const [selectedTeacherId, setSelectedTeacherId] = useState<string>(
     classItem?.id || "",
   );
