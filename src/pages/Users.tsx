@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '../integrations/supabase/client';
+import { useUsers, useDeleteUser } from '@/hooks/useUsers';
 import { Button } from '@/components/ui/button';
 import {
   Table,
@@ -17,43 +16,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { useToast } from '@/components/ui/use-toast';
-import UserForm from '../components/settings/UserForm';
-
-const getUsers = async () => {
-  const { data, error } = await supabase.from('profiles').select('*');
-  if (error) throw new Error(error.message);
-  return data;
-};
+import UserForm from '@/components/settings/UserForm';
 
 const UsersPage: React.FC = () => {
-  const queryClient = useQueryClient();
-  const { toast } = useToast();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any>(null);
-
-  const { data: users, isLoading, error } = useQuery({
-    queryKey: ['users'],
-    queryFn: getUsers,
-  });
-
-  const deleteUser = useMutation({
-    mutationFn: async (userId: string) => {
-      const { error } = await supabase.from('users').delete().eq('id', userId);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] });
-      toast({ title: 'User deleted successfully' });
-    },
-    onError: (error: any) => {
-      toast({
-        title: 'Error',
-        description: error.message,
-        variant: 'destructive',
-      });
-    },
-  });
+  const { data: users, isLoading, error } = useUsers();
+  const deleteUser = useDeleteUser();
 
   const handleEdit = (user: any) => {
     setSelectedUser(user);

@@ -8,27 +8,29 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-const SchoolSwitcher: React.FC = () => {
+export function SchoolSwitcher() {
   const { school, schools, switchSchool, isLoading } = useSchool();
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) {
+    return <div>Loading schools...</div>;
+  }
+
+  if (!school) {
+    return <div>No school selected</div>;
+  }
 
   return (
-    <div className="flex items-center space-x-2">
-      <Select value={school?.id} onValueChange={switchSchool}>
-        <SelectTrigger className="w-[180px]">
-          <SelectValue placeholder="Select a school" />
-        </SelectTrigger>
-        <SelectContent>
-          {schools.map((s) => (
-            <SelectItem key={s.id} value={s.id}>
-              {s.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
+    <Select value={school.id} onValueChange={switchSchool}>
+      <SelectTrigger className="w-[180px]">
+        <SelectValue placeholder="Select a school" />
+      </SelectTrigger>
+      <SelectContent>
+        {schools.map((s) => (
+          <SelectItem key={s.id} value={s.id}>
+            {s.name}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
-};
-
-export default SchoolSwitcher;
+}

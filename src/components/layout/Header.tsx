@@ -8,7 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import SchoolSwitcher from "./SchoolSwitcher";
+import { SchoolSwitcher } from "./SchoolSwitcher";
 
 export function Header() {
   const { user, signOut } = useAuth();
