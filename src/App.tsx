@@ -73,6 +73,23 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route
+              path="/school-registration"
+              element={<SchoolRegistration />}
+            />
+            <Route path="/setup-admin" element={<AdminSetup />} />
+            <Route
+              path="/teacher-registration"
+              element={<TeacherRegistration />}
+            />
+            <Route
+              path="/student-registration"
+              element={<StudentRegistration />}
+            />
+            <Route
+              path="/registration-complete"
+              element={<RegistrationComplete />}
+            />
+            <Route
               path="/dashboard"
               element={
                 <ProtectedRoute>
