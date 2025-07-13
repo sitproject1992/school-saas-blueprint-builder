@@ -8,7 +8,7 @@ export const useInvoices = () => {
 
   const getInvoices = async () => {
     const { data, error } = await supabase
-      .from("invoices")
+      .from("fee_payments")
       .select("*, students(*, profiles(*)), fee_structures(*)");
     if (error) throw new Error(error.message);
     return data;
@@ -18,9 +18,12 @@ export const useInvoices = () => {
     student_id: string;
     fee_structure_id: string;
     amount: number;
-    status: string;
+    status: "pending" | "paid" | "overdue" | "cancelled";
   }) => {
-    const { data, error } = await supabase.from("invoices").insert(newInvoice).select();
+    const { data, error } = await supabase.from("fee_payments").insert({
+      ...newInvoice,
+      due_date: new Date().toISOString().split('T')[0] // Add current date as due date
+    }).select();
     if (error) throw new Error(error.message);
     return data;
   };
@@ -38,7 +41,7 @@ export const useInvoices = () => {
           student_id: student.id,
           fee_structure_id: sfs.fee_structure_id,
           amount: sfs.fee_structures.amount,
-          status: "pending",
+          status: "pending" as const,
         })
       )
     );

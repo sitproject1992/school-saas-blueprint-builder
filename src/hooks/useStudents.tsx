@@ -109,6 +109,7 @@ export function useCreateStudent() {
         .from('students')
         .insert({
           profile_id: profile.id,
+          school_id: profile.school_id,
           ...data.student
         })
         .select()

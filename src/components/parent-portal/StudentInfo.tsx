@@ -23,7 +23,7 @@ type Student = Database["public"]["Tables"]["students"]["Row"] & {
   exam_results: (Database["public"]["Tables"]["exam_results"]["Row"] & {
     subjects: Database["public"]["Tables"]["subjects"]["Row"] | null;
   })[];
-  invoices: (Database["public"]["Tables"]["invoices"]["Row"] & {
+  fee_payments: (Database["public"]["Tables"]["fee_payments"]["Row"] & {
     fee_structures: Database["public"]["Tables"]["fee_structures"]["Row"];
   })[];
 };
@@ -107,7 +107,7 @@ export function StudentInfo({ student }: { student: Student }) {
           </Table>
         </div>
         <div className="mt-4">
-          <h3 className="text-lg font-semibold">Invoices</h3>
+          <h3 className="text-lg font-semibold">Fee Payments</h3>
           <Table>
             <TableHeader>
               <TableRow>
@@ -117,13 +117,19 @@ export function StudentInfo({ student }: { student: Student }) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {student.invoices.map((invoice) => (
-                <TableRow key={invoice.id}>
-                  <TableCell>{invoice.fee_structures.name}</TableCell>
-                  <TableCell>{invoice.amount}</TableCell>
-                  <TableCell>{invoice.status}</TableCell>
+              {student.fee_payments?.map((payment) => (
+                <TableRow key={payment.id}>
+                  <TableCell>{payment.fee_structures.name}</TableCell>
+                  <TableCell>${payment.amount}</TableCell>
+                  <TableCell>{payment.status}</TableCell>
                 </TableRow>
-              ))}
+              )) || (
+                <TableRow>
+                  <TableCell colSpan={3} className="text-center text-muted-foreground">
+                    No fee payments recorded
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </div>

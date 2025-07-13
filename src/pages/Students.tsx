@@ -1,5 +1,3 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -17,32 +15,18 @@ import {
 } from "@/components/ui/dialog";
 import { StudentForm } from "@/components/students/StudentForm";
 import { useState } from "react";
-
-const fetchStudents = async () => {
-  const { data, error } = await supabase.from("students").select("*");
-  if (error) throw new Error(error.message);
-  return data;
-};
+import { useStudents, useDeleteStudent } from "@/hooks/useStudents";
 
 export default function StudentsPage() {
-  const queryClient = useQueryClient();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
 
-  const { data: students, isLoading, error } = useQuery({
-    queryKey: ["students"],
-    queryFn: fetchStudents,
-  });
+  const { data: students, isLoading, error } = useStudents();
+  const deleteStudent = useDeleteStudent();
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm("Are you sure you want to delete this student?")) {
-      try {
-        const { error } = await supabase.from("students").delete().eq("id", id);
-        if (error) throw error;
-        queryClient.invalidateQueries({ queryKey: ["students"] });
-      } catch (error: any) {
-        alert(error.message);
-      }
+      await deleteStudent.mutateAsync(id);
     }
   };
 
@@ -71,15 +55,17 @@ export default function StudentsPage() {
             <TableHead>First Name</TableHead>
             <TableHead>Last Name</TableHead>
             <TableHead>Email</TableHead>
+            <TableHead>Class</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {students?.map((student) => (
             <TableRow key={student.id}>
-              <TableCell>{student.first_name}</TableCell>
-              <TableCell>{student.last_name}</TableCell>
-              <TableCell>{student.email}</TableCell>
+              <TableCell>{student.profiles?.first_name}</TableCell>
+              <TableCell>{student.profiles?.last_name}</TableCell>
+              <TableCell>{student.profiles?.email}</TableCell>
+              <TableCell>{student.classes?.name || "No class assigned"}</TableCell>
               <TableCell>
                 <Button variant="outline" size="sm" onClick={() => openForm(student)}>
                   Edit
@@ -89,6 +75,7 @@ export default function StudentsPage() {
                   size="sm"
                   onClick={() => handleDelete(student.id)}
                   className="ml-2"
+                  disabled={deleteStudent.isPending}
                 >
                   Delete
                 </Button>
@@ -99,7 +86,7 @@ export default function StudentsPage() {
       </Table>
 
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>{selectedStudent ? "Edit Student" : "Add Student"}</DialogTitle>
           </DialogHeader>

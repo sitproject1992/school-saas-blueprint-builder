@@ -41,7 +41,10 @@ export function useCreateClass() {
     }) => {
       const { data: newClass, error } = await supabase
         .from('classes')
-        .insert(data)
+        .insert({
+          ...data,
+          school_id: 'temp' // This should come from auth context
+        })
         .select()
         .single();
 

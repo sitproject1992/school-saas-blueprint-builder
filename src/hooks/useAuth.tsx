@@ -22,16 +22,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const fetchUserRoles = async (user: User) => {
     const { data, error } = await supabase
-      .from('user_roles')
-      .select('roles(name)')
-      .eq('user_id', user.id);
+      .from('profiles')
+      .select('role')
+      .eq('user_id', user.id)
+      .single();
 
     if (error) {
-      console.error('Error fetching user roles:', error);
+      console.error('Error fetching user role:', error);
       return [];
     }
 
-    return data.map((item: any) => item.roles.name);
+    return data ? [data.role] : [];
   };
 
   useEffect(() => {
