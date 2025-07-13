@@ -280,6 +280,16 @@ const App = () => (
               }
             />
             <Route
+              path="/messages"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <div>Messages Module - Coming Soon</div>
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/settings"
               element={
                 <ProtectedRoute>
