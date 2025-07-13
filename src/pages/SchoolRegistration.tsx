@@ -36,7 +36,7 @@ import {
   FileText,
   CreditCard,
 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, supabaseAdmin } from "@/lib/supabaseClient";
 
 interface SchoolData {
   // Basic Information
@@ -238,7 +238,7 @@ export default function SchoolRegistration() {
       }
 
       // Create school record with enhanced data
-      const { data: schoolRecord, error: schoolError } = await supabase
+      const { data: schoolRecord, error: schoolError } = await supabaseAdmin
         .from("schools")
         .insert([
           {

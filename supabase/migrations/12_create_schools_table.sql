@@ -69,8 +69,8 @@ ALTER TABLE school_admins ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can view their own school" ON schools
     FOR SELECT USING (
         EXISTS (
-            SELECT 1 FROM school_admins sa 
-            WHERE sa.school_id = schools.id 
+            SELECT 1 FROM school_admins sa
+            WHERE sa.school_id = schools.id
             AND sa.user_id = auth.uid()
         )
     );
@@ -78,8 +78,8 @@ CREATE POLICY "Users can view their own school" ON schools
 CREATE POLICY "School admins can update their school" ON schools
     FOR UPDATE USING (
         EXISTS (
-            SELECT 1 FROM school_admins sa 
-            WHERE sa.school_id = schools.id 
+            SELECT 1 FROM school_admins sa
+            WHERE sa.school_id = schools.id
             AND sa.user_id = auth.uid()
             AND sa.is_active = true
         )
@@ -89,8 +89,8 @@ CREATE POLICY "School admins can update their school" ON schools
 CREATE POLICY "Users can view school admins for their school" ON school_admins
     FOR SELECT USING (
         EXISTS (
-            SELECT 1 FROM school_admins sa 
-            WHERE sa.school_id = school_admins.school_id 
+            SELECT 1 FROM school_admins sa
+            WHERE sa.school_id = school_admins.school_id
             AND sa.user_id = auth.uid()
         )
     );
@@ -98,8 +98,8 @@ CREATE POLICY "Users can view school admins for their school" ON school_admins
 CREATE POLICY "School admins can manage school admins" ON school_admins
     FOR ALL USING (
         EXISTS (
-            SELECT 1 FROM school_admins sa 
-            WHERE sa.school_id = school_admins.school_id 
+            SELECT 1 FROM school_admins sa
+            WHERE sa.school_id = school_admins.school_id
             AND sa.user_id = auth.uid()
             AND sa.role IN ('super_admin', 'admin')
         )
