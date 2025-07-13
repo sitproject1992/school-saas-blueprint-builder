@@ -1,9 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import {
   Card,
   CardContent,
@@ -25,19 +22,10 @@ import {
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import {
   Select,
   SelectContent,
@@ -45,53 +33,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import {
   Package,
   Plus,
   Search,
   Download,
-  BookOpen,
-  Laptop,
-  TestTube,
-  Wrench,
-  Building,
   AlertTriangle,
   CheckCircle,
   Clock,
-  Eye,
   Edit,
   Trash2,
   TrendingUp,
   MapPin,
 } from "lucide-react";
-
-const inventorySchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  description: z.string().optional(),
-  category_id: z.string().min(1, "Category is required"),
-  brand: z.string().optional(),
-  model: z.string().optional(),
-  serial_number: z.string().optional(),
-  purchase_date: z.string().optional(),
-  purchase_price: z.coerce.number().optional(),
-  current_value: z.coerce.number().optional(),
-  supplier: z.string().optional(),
-  location: z.string().optional(),
-  condition: z
-    .enum(["excellent", "good", "fair", "poor", "damaged"])
-    .default("good"),
-  status: z
-    .enum(["available", "in_use", "maintenance", "disposed"])
-    .default("available"),
-  quantity: z.coerce.number().min(1, "Quantity must be at least 1").default(1),
-  min_quantity: z.coerce.number().default(0),
-  assigned_to: z.string().optional(),
-  notes: z.string().optional(),
-});
-
-type InventoryFormData = z.infer<typeof inventorySchema>;
+import InventoryForm from "../components/inventory/InventoryForm";
 
 interface InventoryItem {
   id: string;
@@ -126,30 +82,6 @@ const Inventory = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
 
-  const form = useForm<InventoryFormData>({
-    resolver: zodResolver(inventorySchema),
-    defaultValues: {
-      name: "",
-      description: "",
-      category_id: "",
-      brand: "",
-      model: "",
-      serial_number: "",
-      purchase_date: "",
-      purchase_price: 0,
-      current_value: 0,
-      supplier: "",
-      location: "",
-      condition: "good",
-      status: "available",
-      quantity: 1,
-      min_quantity: 0,
-      assigned_to: "",
-      notes: "",
-    },
-  });
-
-  // Fetch inventory items
   const { data: inventoryItems = [], isLoading } = useQuery({
     queryKey: ["inventory"],
     queryFn: async () => {
@@ -170,7 +102,6 @@ const Inventory = () => {
     },
   });
 
-  // Fetch categories
   const { data: categories = [] } = useQuery({
     queryKey: ["inventory-categories"],
     queryFn: async () => {
@@ -184,75 +115,6 @@ const Inventory = () => {
     },
   });
 
-  // Create inventory item
-  const createMutation = useMutation({
-    mutationFn: async (data: InventoryFormData) => {
-      const { data: result, error } = await supabase
-        .from("inventory")
-        .insert(data)
-        .select()
-        .single();
-
-      if (error) throw new Error(error.message);
-      return result;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["inventory"] });
-      setIsAddDialogOpen(false);
-      form.reset();
-      toast({
-        title: "Success",
-        description: "Inventory item added successfully",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to add inventory item",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Update inventory item
-  const updateMutation = useMutation({
-    mutationFn: async ({
-      id,
-      data,
-    }: {
-      id: string;
-      data: InventoryFormData;
-    }) => {
-      const { data: result, error } = await supabase
-        .from("inventory")
-        .update(data)
-        .eq("id", id)
-        .select()
-        .single();
-
-      if (error) throw new Error(error.message);
-      return result;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["inventory"] });
-      setIsAddDialogOpen(false);
-      setEditingItem(null);
-      form.reset();
-      toast({
-        title: "Success",
-        description: "Inventory item updated successfully",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to update inventory item",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Delete inventory item
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from("inventory").delete().eq("id", id);
@@ -275,42 +137,19 @@ const Inventory = () => {
     },
   });
 
-  const onSubmit = (data: InventoryFormData) => {
-    if (editingItem) {
-      updateMutation.mutate({ id: editingItem.id, data });
-    } else {
-      createMutation.mutate(data);
-    }
-  };
-
   const handleEdit = (item: InventoryItem) => {
     setEditingItem(item);
-    form.reset({
-      name: item.name,
-      description: item.description || "",
-      category_id: item.category_id,
-      brand: item.brand || "",
-      model: item.model || "",
-      serial_number: item.serial_number || "",
-      purchase_date: item.purchase_date || "",
-      purchase_price: item.purchase_price || 0,
-      current_value: item.current_value || 0,
-      supplier: item.supplier || "",
-      location: item.location || "",
-      condition: item.condition as any,
-      status: item.status as any,
-      quantity: item.quantity,
-      min_quantity: item.min_quantity,
-      assigned_to: item.assigned_to || "",
-      notes: item.notes || "",
-    });
     setIsAddDialogOpen(true);
   };
 
   const handleAddNew = () => {
     setEditingItem(null);
-    form.reset();
     setIsAddDialogOpen(true);
+  };
+
+  const handleSuccess = () => {
+    setIsAddDialogOpen(false);
+    queryClient.invalidateQueries({ queryKey: ["inventory"] });
   };
 
   const getStatusColor = (condition: string) => {
@@ -374,7 +213,6 @@ const Inventory = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
         <div>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
@@ -401,331 +239,13 @@ const Inventory = () => {
                 <DialogTitle>
                   {editingItem ? "Edit" : "Add New"} Inventory Item
                 </DialogTitle>
-                <DialogDescription>
-                  Enter the details for the inventory item
-                </DialogDescription>
               </DialogHeader>
-              <Form {...form}>
-                <form
-                  onSubmit={form.handleSubmit(onSubmit)}
-                  className="space-y-4"
-                >
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Item Name</FormLabel>
-                          <FormControl>
-                            <Input {...field} placeholder="Enter item name" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="category_id"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Category</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            value={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select category" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {categories.map((cat) => (
-                                <SelectItem key={cat.id} value={cat.id}>
-                                  {cat.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="brand"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Brand</FormLabel>
-                          <FormControl>
-                            <Input {...field} placeholder="Brand name" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="model"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Model</FormLabel>
-                          <FormControl>
-                            <Input {...field} placeholder="Model number" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="serial_number"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Serial Number</FormLabel>
-                          <FormControl>
-                            <Input {...field} placeholder="Serial number" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="quantity"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Quantity</FormLabel>
-                          <FormControl>
-                            <Input {...field} type="number" placeholder="0" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="min_quantity"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Min Quantity</FormLabel>
-                          <FormControl>
-                            <Input {...field} type="number" placeholder="0" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="location"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Location</FormLabel>
-                          <FormControl>
-                            <Input {...field} placeholder="Storage location" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="condition"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Condition</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            value={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select condition" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="excellent">
-                                Excellent
-                              </SelectItem>
-                              <SelectItem value="good">Good</SelectItem>
-                              <SelectItem value="fair">Fair</SelectItem>
-                              <SelectItem value="poor">Poor</SelectItem>
-                              <SelectItem value="damaged">Damaged</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="status"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Status</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            value={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select status" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="available">
-                                Available
-                              </SelectItem>
-                              <SelectItem value="in_use">In Use</SelectItem>
-                              <SelectItem value="maintenance">
-                                Maintenance
-                              </SelectItem>
-                              <SelectItem value="disposed">Disposed</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="purchase_price"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Purchase Price (₹)</FormLabel>
-                          <FormControl>
-                            <Input {...field} type="number" placeholder="0" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="current_value"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Current Value (₹)</FormLabel>
-                          <FormControl>
-                            <Input {...field} type="number" placeholder="0" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="purchase_date"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Purchase Date</FormLabel>
-                          <FormControl>
-                            <Input {...field} type="date" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="supplier"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Supplier</FormLabel>
-                          <FormControl>
-                            <Input {...field} placeholder="Supplier name" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="assigned_to"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Assigned To</FormLabel>
-                          <FormControl>
-                            <Input {...field} placeholder="Person/Department" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <FormField
-                    control={form.control}
-                    name="description"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Description</FormLabel>
-                        <FormControl>
-                          <Textarea
-                            {...field}
-                            placeholder="Item description and notes"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="notes"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Notes</FormLabel>
-                        <FormControl>
-                          <Textarea {...field} placeholder="Additional notes" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <div className="flex justify-end space-x-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setIsAddDialogOpen(false)}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      type="submit"
-                      disabled={
-                        createMutation.isPending || updateMutation.isPending
-                      }
-                    >
-                      {editingItem ? "Update" : "Add"} Item
-                    </Button>
-                  </div>
-                </form>
-              </Form>
+              <InventoryForm item={editingItem} onSuccess={handleSuccess} />
             </DialogContent>
           </Dialog>
         </div>
       </div>
 
-      {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card className="hover:shadow-lg transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -778,7 +298,6 @@ const Inventory = () => {
         </Card>
       </div>
 
-      {/* Filters and Search */}
       <Card>
         <CardHeader>
           <CardTitle>Inventory Items</CardTitle>
