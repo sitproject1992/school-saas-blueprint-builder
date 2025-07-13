@@ -105,13 +105,13 @@ const Index = () => {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
             <Button asChild size="lg" className="px-8 py-3 text-lg">
-              <Link to="/auth">
-                Get Started Free
+              <Link to="/school-registration">
+                Register Your School
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
             <Button variant="outline" size="lg" className="px-8 py-3 text-lg">
-              <Link to="/dashboard">View Demo</Link>
+              <Link to="/auth">View Demo</Link>
             </Button>
           </div>
 
@@ -274,13 +274,13 @@ const Index = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button asChild size="lg" className="px-8 py-3 text-lg">
-              <Link to="/auth">
+              <Link to="/school-registration">
                 Start Your Free Trial
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
             <Button variant="outline" size="lg" className="px-8 py-3 text-lg">
-              Schedule a Demo
+              <Link to="/auth">Try Demo</Link>
             </Button>
           </div>
         </div>
