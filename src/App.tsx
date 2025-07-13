@@ -206,11 +206,11 @@ const App = () => (
                 }
               />
               <Route
-                path="/payments"
+              path="/payments"
                 element={
                   <ProtectedRoute>
                     <AppLayout>
-                      <div>Payments Module - Coming Soon</div>
+                    <PaymentsPage />
                     </AppLayout>
                   </ProtectedRoute>
                 }
@@ -230,17 +230,27 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <AppLayout>
-                      <div>Announcements Module - Coming Soon</div>
+                    <AnnouncementsPage />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/chat"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <ChatPage />
                     </AppLayout>
                   </ProtectedRoute>
                 }
               />
               <Route
-                path="/reports"
+              path="/events"
                 element={
                   <ProtectedRoute>
                     <AppLayout>
-                      <div>Reports Module - Coming Soon</div>
+                    <EventsPage />
                     </AppLayout>
                   </ProtectedRoute>
                 }
