@@ -13,38 +13,38 @@ export interface Class {
   updated_at: string;
 }
 
+import { useSchool } from './useSchool';
+
 export function useClasses() {
+  const { schoolId } = useSchool();
   return useQuery({
-    queryKey: ['classes'],
+    queryKey: ['classes', schoolId],
     queryFn: async () => {
+      if (!schoolId) return [];
       const { data, error } = await supabase
         .from('classes')
         .select('*')
+        .eq('school_id', schoolId)
         .order('grade_level', { ascending: true });
 
       if (error) throw error;
       return data as Class[];
-    }
+    },
+    enabled: !!schoolId,
   });
 }
 
 export function useCreateClass() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { schoolId } = useSchool();
 
   return useMutation({
-    mutationFn: async (data: {
-      name: string;
-      section?: string;
-      grade_level?: number;
-      capacity?: number;
-    }) => {
+    mutationFn: async (classData: Omit<Class, 'id' | 'created_at' | 'updated_at' | 'school_id'>) => {
+      if (!schoolId) throw new Error('No active school selected');
       const { data: newClass, error } = await supabase
         .from('classes')
-        .insert({
-          ...data,
-          school_id: '1' // Default school ID
-        })
+        .insert({ ...classData, school_id: schoolId })
         .select()
         .single();
 

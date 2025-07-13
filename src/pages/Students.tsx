@@ -206,11 +206,11 @@ export default function StudentsPage() {
     },
   ];
 
-  const displayStudents =
-    students && students.length > 0 ? students : mockStudents;
+  const { data: students = [], isLoading, error } = useStudents();
+  const deleteStudent = useDeleteStudent();
 
   const handleDelete = async (id: string) => {
-    if (window.confirm("Are you sure you want to delete this student?")) {
+    if (window.confirm('Are you sure you want to delete this student?')) {
       await deleteStudent.mutateAsync(id);
     }
   };
@@ -231,53 +231,18 @@ export default function StudentsPage() {
   };
 
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case "active":
-        return "bg-green-100 text-green-800 border-green-200";
-      case "inactive":
-        return "bg-gray-100 text-gray-800 border-gray-200";
-      case "suspended":
-        return "bg-red-100 text-red-800 border-red-200";
-      default:
-        return "bg-blue-100 text-blue-800 border-blue-200";
-    }
+    // Simplified status color logic
+    return status === 'active' ? 'bg-green-100 text-green-800 border-green-200' : 'bg-gray-100 text-gray-800 border-gray-200';
   };
 
-  const getGradeColor = (grade: string) => {
-    if (grade.startsWith("A")) return "text-green-600";
-    if (grade.startsWith("B")) return "text-blue-600";
-    if (grade.startsWith("C")) return "text-yellow-600";
-    return "text-red-600";
-  };
-
-  const getFeeStatusColor = (status: string) => {
-    switch (status) {
-      case "paid":
-        return "text-green-600";
-      case "partial":
-        return "text-yellow-600";
-      case "overdue":
-        return "text-red-600";
-      default:
-        return "text-gray-600";
-    }
-  };
-
-  const filteredStudents = displayStudents.filter((student) => {
+  const filteredStudents = students.filter((student) => {
     const matchesSearch =
-      student.profiles?.first_name
-        ?.toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      student.profiles?.last_name
-        ?.toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      student.admission_number
-        ?.toLowerCase()
-        .includes(searchTerm.toLowerCase());
-    const matchesClass =
-      selectedClass === "all" || student.classes?.id === selectedClass;
-    const matchesStatus =
-      selectedStatus === "all" || student.status === selectedStatus;
+      student.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.email.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesClass = selectedClass === 'all' || student.class_id === selectedClass;
+    // Assuming student has a status property
+    const matchesStatus = selectedStatus === 'all' || (student as any).status === selectedStatus;
 
     return matchesSearch && matchesClass && matchesStatus;
   });

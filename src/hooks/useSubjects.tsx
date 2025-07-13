@@ -2,37 +2,69 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
+import { useSchool } from './useSchool';
+
 export interface Subject {
   id: string;
+  school_id: string;
   name: string;
-  teacher_id: string | null;
-  class_id: string | null;
-  school_id?: string | null;
-  created_at?: string;
-  updated_at?: string;
+  code: string | null;
+  description: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
-async function getSubjects(): Promise<Subject[]> {
-  const { data, error } = await supabase
-    .from("subjects")
-    .select("*")
-    .order("name", { ascending: true });
+export function useSubjects() {
+  const { schoolId } = useSchool();
+  return useQuery({
+    queryKey: ['subjects', schoolId],
+    queryFn: async () => {
+      if (!schoolId) return [];
+      const { data, error } = await supabase
+        .from('subjects')
+        .select('*')
+        .eq('school_id', schoolId)
+        .order('name', { ascending: true });
 
-  if (error) throw new Error(error.message);
-  return data || [];
+      if (error) throw new Error(error.message);
+      return data as Subject[];
+    },
+    enabled: !!schoolId,
+  });
 }
 
-async function createSubject(
-  subject: Omit<Subject, "id" | "created_at" | "updated_at">,
-): Promise<Subject> {
-  const { data, error } = await supabase
-    .from("subjects")
-    .insert(subject)
-    .select()
-    .single();
+export function useCreateSubject() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const { schoolId } = useSchool();
 
-  if (error) throw new Error(error.message);
-  return data;
+  return useMutation({
+    mutationFn: async (subjectData: Omit<Subject, 'id' | 'created_at' | 'updated_at' | 'school_id'>) => {
+      if (!schoolId) throw new Error('No active school selected');
+      const { data, error } = await supabase
+        .from('subjects')
+        .insert({ ...subjectData, school_id: schoolId })
+        .select()
+        .single();
+
+      if (error) throw new Error(error.message);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['subjects'] });
+      toast({
+        title: 'Success',
+        description: 'Subject created successfully',
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to create subject',
+        variant: 'destructive',
+      });
+    },
+  });
 }
 
 async function updateSubject({

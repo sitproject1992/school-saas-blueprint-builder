@@ -51,7 +51,10 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-function AppLayout({ children }: { children: React.ReactNode }) {
+import { SchoolProvider } from "@/hooks/useSchool";
+import { ProtectedRoutes } from "./ProtectedRoutes";
+
+export function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full">
@@ -65,8 +68,6 @@ function AppLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-import { SchoolProvider } from "@/hooks/useSchool";
-
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
@@ -78,220 +79,16 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<AuthPage />} />
-              <Route
-                path="/school-registration"
-                element={<SchoolRegistration />}
-              />
+              <Route path="/school-registration" element={<SchoolRegistration />} />
               <Route path="/setup-admin" element={<AdminSetup />} />
+              <Route path="/teacher-registration" element={<TeacherRegistration />} />
+              <Route path="/student-registration" element={<StudentRegistration />} />
+              <Route path="/registration-complete" element={<RegistrationComplete />} />
               <Route
-                path="/teacher-registration"
-                element={<TeacherRegistration />}
-              />
-              <Route
-                path="/student-registration"
-                element={<StudentRegistration />}
-              />
-              <Route
-                path="/registration-complete"
-                element={<RegistrationComplete />}
-              />
-              <Route
-                path="/dashboard"
+                path="/*"
                 element={
                   <ProtectedRoute>
-                    <AppLayout>
-                      <DashboardPage />
-                    </AppLayout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/students"
-                element={
-                  <ProtectedRoute>
-                    <AppLayout>
-                      <StudentsPage />
-                    </AppLayout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/teachers"
-                element={
-                  <ProtectedRoute>
-                    <AppLayout>
-                      <TeachersPage />
-                    </AppLayout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/classes"
-                element={
-                  <ProtectedRoute>
-                    <AppLayout>
-                      <ClassesPage />
-                    </AppLayout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/subjects"
-                element={
-                  <ProtectedRoute>
-                    <AppLayout>
-                      <SubjectsPage />
-                    </AppLayout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/attendance"
-                element={
-                  <ProtectedRoute>
-                    <AppLayout>
-                      <AttendancePage />
-                    </AppLayout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/syllabus"
-                element={
-                  <ProtectedRoute>
-                    <AppLayout>
-                      <Syllabus />
-                    </AppLayout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/lesson-plans"
-                element={
-                  <ProtectedRoute>
-                    <AppLayout>
-                      <LessonPlans />
-                    </AppLayout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/exams"
-                element={
-                  <ProtectedRoute>
-                    <AppLayout>
-                    <TestsPage />
-                    </AppLayout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/fees"
-                element={
-                  <ProtectedRoute>
-                    <AppLayout>
-                      <FeeStructures />
-                    </AppLayout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/invoices"
-                element={
-                  <ProtectedRoute>
-                    <AppLayout>
-                      <Invoices />
-                    </AppLayout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-              path="/payments"
-                element={
-                  <ProtectedRoute>
-                    <AppLayout>
-                    <PaymentsPage />
-                    </AppLayout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/inventory"
-                element={
-                  <ProtectedRoute>
-                    <AppLayout>
-                      <Inventory />
-                    </AppLayout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/announcements"
-                element={
-                  <ProtectedRoute>
-                    <AppLayout>
-                    <AnnouncementsPage />
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/chat"
-              element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <ChatPage />
-                    </AppLayout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-              path="/events"
-                element={
-                  <ProtectedRoute>
-                    <AppLayout>
-                    <EventsPage />
-                    </AppLayout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/schools"
-                element={
-                  <ProtectedRoute>
-                    <AppLayout>
-                      <SchoolsPage />
-                    </AppLayout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/users"
-                element={
-                  <ProtectedRoute>
-                    <AppLayout>
-                    <UsersPage />
-                    </AppLayout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/parent-portal"
-                element={
-                  <ProtectedRoute>
-                    <AppLayout>
-                      <ParentPortal />
-                    </AppLayout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/settings"
-                element={
-                  <ProtectedRoute>
-                    <AppLayout>
-                      <SettingsPage />
-                    </AppLayout>
+                    <ProtectedRoutes />
                   </ProtectedRoute>
                 }
               />

@@ -13,7 +13,8 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { useToast } from '@/components/ui/use-toast';
+import { useCreateUser, useUpdateUser, User } from '@/hooks/useUsers';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const formSchema = z.object({
   first_name: z.string().min(1, 'First name is required'),
@@ -23,12 +24,14 @@ const formSchema = z.object({
 });
 
 interface UserFormProps {
-  user?: any;
+  user?: User;
   onSuccess: () => void;
 }
 
 const UserForm: React.FC<UserFormProps> = ({ user, onSuccess }) => {
-  const { toast } = useToast();
+  const createUser = useCreateUser();
+  const updateUser = useUpdateUser();
+
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: user || {
@@ -42,24 +45,13 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSuccess }) => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       if (user) {
-        const { error } = await supabase
-          .from('profiles')
-          .update(values)
-          .eq('id', user.id);
-        if (error) throw error;
-        toast({ title: 'User updated successfully' });
+        await updateUser.mutateAsync({ ...user, ...values });
       } else {
-        const { error } = await supabase.from('profiles').insert(values);
-        if (error) throw error;
-        toast({ title: 'User created successfully' });
+        await createUser.mutateAsync(values);
       }
       onSuccess();
-    } catch (error: any) {
-      toast({
-        title: 'Error',
-        description: error.message,
-        variant: 'destructive',
-      });
+    } catch (error) {
+      console.error('Error saving user:', error);
     }
   };
 

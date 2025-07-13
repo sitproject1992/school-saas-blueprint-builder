@@ -22,10 +22,12 @@ export function SchoolProvider({ children }: { children: React.ReactNode }) {
     queryKey: ["user-schools", user?.id],
     queryFn: async () => {
       if (!user) return [];
-      // This is a simplified query. A real implementation would involve checking user roles and permissions.
-      const { data, error } = await supabase.from("schools").select("*");
+      const { data, error } = await supabase
+        .from("school_admins")
+        .select("schools(*)")
+        .eq("user_id", user.id);
       if (error) throw new Error(error.message);
-      return data;
+      return data.map((item: any) => item.schools);
     },
     enabled: !!user,
   });
