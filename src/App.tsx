@@ -22,6 +22,11 @@ import Syllabus from "./pages/Syllabus";
 import LessonPlans from "./pages/LessonPlans";
 import SubjectsPage from "./pages/Subjects";
 import Inventory from "./pages/Inventory";
+import SchoolRegistration from "./pages/SchoolRegistration";
+import AdminSetup from "./pages/AdminSetup";
+import TeacherRegistration from "./pages/TeacherRegistration";
+import StudentRegistration from "./pages/StudentRegistration";
+import RegistrationComplete from "./pages/RegistrationComplete";
 
 const queryClient = new QueryClient();
 
