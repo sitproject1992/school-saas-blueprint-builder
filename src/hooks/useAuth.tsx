@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import type { User } from '@supabase/supabase-js';
 
-interface AppUser extends User {
+interface AppUser {
+  id: string;
+  email: string;
   roles: string[];
 }
 
@@ -16,68 +16,90 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Mock users for demo purposes
+const mockUsers = [
+  {
+    id: '1',
+    email: 'admin@skooler.com',
+    password: 'admin123',
+    roles: ['school_admin']
+  },
+  {
+    id: '2',
+    email: 'teacher@skooler.com',
+    password: 'teacher123',
+    roles: ['teacher']
+  },
+  {
+    id: '3',
+    email: 'student@skooler.com',
+    password: 'student123',
+    roles: ['student']
+  },
+  {
+    id: '4',
+    email: 'parent@skooler.com',
+    password: 'parent123',
+    roles: ['parent']
+  }
+];
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchUserRoles = async (user: User) => {
-    const { data, error } = await supabase
-      .from('user_roles')
-      .select('roles(name)')
-      .eq('user_id', user.id);
-
-    if (error) {
-      console.error('Error fetching user roles:', error);
-      return [];
-    }
-
-    return data ? data.map((item: any) => item.roles.name) : [];
-  };
-
   useEffect(() => {
-    const bootstrapAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        const roles = await fetchUserRoles(session.user);
-        setUser({ ...session.user, roles });
+    // Check if user is already logged in
+    const savedUser = localStorage.getItem('skooler_user');
+    if (savedUser) {
+      try {
+        const parsedUser = JSON.parse(savedUser);
+        setUser(parsedUser);
+      } catch (error) {
+        console.error('Error parsing saved user:', error);
+        localStorage.removeItem('skooler_user');
       }
-      setLoading(false);
-    };
-
-    bootstrapAuth();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (session?.user) {
-        const roles = await fetchUserRoles(session.user);
-        setUser({ ...session.user, roles });
-      } else {
-        setUser(null);
-      }
-      setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
+    }
+    setLoading(false);
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    if (error) throw error;
+    // Simulate API call delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    const foundUser = mockUsers.find(u => u.email === email && u.password === password);
+    if (!foundUser) {
+      throw new Error('Invalid email or password');
+    }
+    
+    const authUser: AppUser = {
+      id: foundUser.id,
+      email: foundUser.email,
+      roles: foundUser.roles
+    };
+    
+    setUser(authUser);
+    localStorage.setItem('skooler_user', JSON.stringify(authUser));
   };
 
   const signUp = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signUp({
+    // Simulate API call delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // For demo purposes, create a new user with student role
+    const newUser: AppUser = {
+      id: Date.now().toString(),
       email,
-      password,
-    });
-    if (error) throw error;
+      roles: ['student']
+    };
+    
+    setUser(newUser);
+    localStorage.setItem('skooler_user', JSON.stringify(newUser));
   };
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
+    setUser(null);
+    localStorage.removeItem('skooler_user');
   };
 
   const value = {
