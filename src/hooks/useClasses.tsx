@@ -1,30 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { MockApiService, Class } from '@/lib/mockData';
 
-export interface Class {
-  id: string;
-  school_id: string;
-  name: string;
-  section: string | null;
-  grade_level: number | null;
-  capacity: number;
-  created_at: string;
-  updated_at: string;
-}
+export { type Class } from '@/lib/mockData';
 
 export function useClasses() {
   return useQuery({
     queryKey: ['classes'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('classes')
-        .select('*')
-        .order('grade_level', { ascending: true });
-
-      if (error) throw error;
-      return data as Class[];
-    }
+    queryFn: MockApiService.getClasses
   });
 }
 
@@ -33,38 +16,27 @@ export function useCreateClass() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async (data: {
+    mutationFn: (data: {
       name: string;
       section?: string;
-      grade_level?: number;
+      grade?: string;
       capacity: number;
-    }) => {
-      const { data: newClass, error } = await supabase
-        .from('classes')
-        .insert({
-          ...data,
-          school_id: 'temp' // This should come from auth context
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-      return newClass;
-    },
+      teacher_id?: string;
+    }) => MockApiService.createClass(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['classes'] });
       toast({
-        title: "Success",
-        description: "Class created successfully"
+        title: 'Success',
+        description: 'Class created successfully',
       });
     },
     onError: (error: any) => {
       toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.message
+        title: 'Error',
+        description: error.message || 'Failed to create class',
+        variant: 'destructive',
       });
-    }
+    },
   });
 }
 
@@ -73,31 +45,22 @@ export function useUpdateClass() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async (data: { id: string; updates: Partial<Class> }) => {
-      const { data: updatedClass, error } = await supabase
-        .from('classes')
-        .update(data.updates)
-        .eq('id', data.id)
-        .select()
-        .single();
-
-      if (error) throw error;
-      return updatedClass;
-    },
+    mutationFn: ({ id, updates }: { id: string; updates: Partial<Class> }) => 
+      MockApiService.updateClass(id, updates),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['classes'] });
       toast({
-        title: "Success",
-        description: "Class updated successfully"
+        title: 'Success',
+        description: 'Class updated successfully',
       });
     },
     onError: (error: any) => {
       toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.message
+        title: 'Error',
+        description: error.message || 'Failed to update class',
+        variant: 'destructive',
       });
-    }
+    },
   });
 }
 
@@ -106,27 +69,20 @@ export function useDeleteClass() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('classes')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-    },
+    mutationFn: MockApiService.deleteClass,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['classes'] });
       toast({
-        title: "Success",
-        description: "Class deleted successfully"
+        title: 'Success',
+        description: 'Class deleted successfully',
       });
     },
     onError: (error: any) => {
       toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.message
+        title: 'Error',
+        description: error.message || 'Failed to delete class',
+        variant: 'destructive',
       });
-    }
+    },
   });
 }

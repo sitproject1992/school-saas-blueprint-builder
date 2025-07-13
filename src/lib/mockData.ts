@@ -293,4 +293,89 @@ export class MockApiService {
     
     mockStudents.splice(index, 1);
   }
+
+  // Teacher operations
+  static async createTeacher(teacher: Partial<Teacher>): Promise<Teacher> {
+    await this.delay();
+    const newTeacher: Teacher = {
+      id: Date.now().toString(),
+      profile_id: Date.now().toString(),
+      school_id: '1',
+      employee_id: teacher.employee_id || `TCH${Date.now()}`,
+      department: teacher.department || null,
+      designation: teacher.designation || null,
+      salary: teacher.salary || null,
+      join_date: teacher.join_date || null,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      profiles: {
+        first_name: teacher.profiles?.first_name || '',
+        last_name: teacher.profiles?.last_name || '',
+        email: teacher.profiles?.email || '',
+        phone: teacher.profiles?.phone || null,
+        date_of_birth: teacher.profiles?.date_of_birth || null,
+        address: teacher.profiles?.address || null
+      }
+    };
+    mockTeachers.push(newTeacher);
+    return newTeacher;
+  }
+
+  static async updateTeacher(id: string, teacher: Partial<Teacher>): Promise<Teacher> {
+    await this.delay();
+    const index = mockTeachers.findIndex(t => t.id === id);
+    if (index === -1) throw new Error('Teacher not found');
+    
+    mockTeachers[index] = { ...mockTeachers[index], ...teacher };
+    return mockTeachers[index];
+  }
+
+  static async deleteTeacher(id: string): Promise<void> {
+    await this.delay();
+    const index = mockTeachers.findIndex(t => t.id === id);
+    if (index === -1) throw new Error('Teacher not found');
+    
+    mockTeachers.splice(index, 1);
+  }
+
+  // Class operations
+  static async createClass(classData: Partial<Class>): Promise<Class> {
+    await this.delay();
+    const newClass: Class = {
+      id: Date.now().toString(),
+      name: classData.name || '',
+      section: classData.section || null,
+      grade: classData.grade || null,
+      capacity: classData.capacity || 30,
+      school_id: '1',
+      teacher_id: classData.teacher_id || null,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      teachers: classData.teacher_id ? {
+        profiles: {
+          first_name: 'Teacher',
+          last_name: 'Name'
+        }
+      } : null
+    };
+    mockClasses.push(newClass);
+    return newClass;
+  }
+
+  static async updateClass(id: string, classData: Partial<Class>): Promise<Class> {
+    await this.delay();
+    const index = mockClasses.findIndex(c => c.id === id);
+    if (index === -1) throw new Error('Class not found');
+    
+    mockClasses[index] = { ...mockClasses[index], ...classData };
+    return mockClasses[index];
+  }
+
+  static async deleteClass(id: string): Promise<void> {
+    await this.delay();
+    const index = mockClasses.findIndex(c => c.id === id);
+    if (index === -1) throw new Error('Class not found');
+    
+    mockClasses.splice(index, 1);
+  }
 }

@@ -1,21 +1,22 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { Tables, TablesInsert } from '@/integrations/supabase/types';
 import { useToast } from '@/hooks/use-toast';
+import { MockApiService, Teacher } from '@/lib/mockData';
 
-type Teacher = Tables<'teachers'> & {
-  profile: Tables<'profiles'>;
-  class?: Tables<'classes'>;
-};
+export { type Teacher } from '@/lib/mockData';
 
-type TeacherInsert = TablesInsert<'teachers'> & {
+type TeacherInsert = {
+  employee_id: string;
+  department?: string;
+  designation?: string;
+  salary?: number;
+  join_date?: string;
   profile: {
     first_name: string;
     last_name: string;
     email: string;
-    phone?: string;
-    address?: string;
-    date_of_birth?: string;
+    phone?: string | null;
+    address?: string | null;
+    date_of_birth?: string | null;
   };
 };
 
@@ -29,165 +30,68 @@ export const useTeachers = () => {
     error,
   } = useQuery({
     queryKey: ['teachers'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('teachers')
-        .select(`
-          *,
-          profile:profiles(*),
-          class:classes(*)
-        `)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      return data as Teacher[];
-    },
+    queryFn: MockApiService.getTeachers,
   });
 
   const createTeacher = useMutation({
-    mutationFn: async (teacherData: TeacherInsert) => {
-      // First create the profile
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .insert({
-          first_name: teacherData.profile.first_name,
-          last_name: teacherData.profile.last_name,
-          email: teacherData.profile.email,
-          phone: teacherData.profile.phone,
-          address: teacherData.profile.address,
-          date_of_birth: teacherData.profile.date_of_birth,
-          role: 'teacher',
-          user_id: crypto.randomUUID(), // Temporary - in real app this would come from auth
-        })
-        .select()
-        .single();
-
-      if (profileError) throw profileError;
-
-      // Then create the teacher record
-      const { data, error } = await supabase
-        .from('teachers')
-        .insert({
-          profile_id: profile.id,
-          qualification: teacherData.qualification,
-          experience_years: teacherData.experience_years,
-          joining_date: teacherData.joining_date,
-          salary: teacherData.salary,
-          class_id: teacherData.class_id,
-          is_class_teacher: teacherData.is_class_teacher,
-          school_id: profile.school_id,
-        })
-        .select(`
-          *,
-          profile:profiles(*),
-          class:classes(*)
-        `)
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
+    mutationFn: (teacherData: TeacherInsert) => MockApiService.createTeacher({
+      employee_id: teacherData.employee_id,
+      department: teacherData.department,
+      designation: teacherData.designation,
+      salary: teacherData.salary,
+      join_date: teacherData.join_date,
+      profiles: teacherData.profile
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['teachers'] });
       toast({
-        title: "Success",
-        description: "Teacher created successfully.",
+        title: 'Success',
+        description: 'Teacher created successfully',
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({
-        title: "Error",
-        description: "Failed to create teacher. Please try again.",
-        variant: "destructive",
+        title: 'Error',
+        description: error.message || 'Failed to create teacher',
+        variant: 'destructive',
       });
-      console.error('Create teacher error:', error);
     },
   });
 
   const updateTeacher = useMutation({
-    mutationFn: async ({ id, ...teacherData }: Partial<TeacherInsert> & { id: string }) => {
-      // Update profile if profile data is provided
-      if (teacherData.profile) {
-        const teacher = teachers.find(t => t.id === id);
-        if (teacher?.profile_id) {
-          const { error: profileError } = await supabase
-            .from('profiles')
-            .update({
-              first_name: teacherData.profile.first_name,
-              last_name: teacherData.profile.last_name,
-              email: teacherData.profile.email,
-              phone: teacherData.profile.phone,
-              address: teacherData.profile.address,
-              date_of_birth: teacherData.profile.date_of_birth,
-            })
-            .eq('id', teacher.profile_id);
-
-          if (profileError) throw profileError;
-        }
-      }
-
-      // Update teacher record
-      const { data, error } = await supabase
-        .from('teachers')
-        .update({
-          qualification: teacherData.qualification,
-          experience_years: teacherData.experience_years,
-          joining_date: teacherData.joining_date,
-          salary: teacherData.salary,
-          class_id: teacherData.class_id,
-          is_class_teacher: teacherData.is_class_teacher,
-        })
-        .eq('id', id)
-        .select(`
-          *,
-          profile:profiles(*),
-          class:classes(*)
-        `)
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
+    mutationFn: ({ id, updates }: { id: string; updates: Partial<Teacher> }) => 
+      MockApiService.updateTeacher(id, updates),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['teachers'] });
       toast({
-        title: "Success",
-        description: "Teacher updated successfully.",
+        title: 'Success',
+        description: 'Teacher updated successfully',
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({
-        title: "Error",
-        description: "Failed to update teacher. Please try again.",
-        variant: "destructive",
+        title: 'Error',
+        description: error.message || 'Failed to update teacher',
+        variant: 'destructive',
       });
-      console.error('Update teacher error:', error);
     },
   });
 
   const deleteTeacher = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('teachers')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-    },
+    mutationFn: MockApiService.deleteTeacher,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['teachers'] });
       toast({
-        title: "Success",
-        description: "Teacher deleted successfully.",
+        title: 'Success',
+        description: 'Teacher deleted successfully',
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({
-        title: "Error",
-        description: "Failed to delete teacher. Please try again.",
-        variant: "destructive",
+        title: 'Error',
+        description: error.message || 'Failed to delete teacher',
+        variant: 'destructive',
       });
-      console.error('Delete teacher error:', error);
     },
   });
 
@@ -195,11 +99,8 @@ export const useTeachers = () => {
     teachers,
     isLoading,
     error,
-    createTeacher: createTeacher.mutate,
-    updateTeacher: updateTeacher.mutate,
-    deleteTeacher: deleteTeacher.mutate,
-    isCreating: createTeacher.isPending,
-    isUpdating: updateTeacher.isPending,
-    isDeleting: deleteTeacher.isPending,
+    createTeacher,
+    updateTeacher,
+    deleteTeacher,
   };
 };
