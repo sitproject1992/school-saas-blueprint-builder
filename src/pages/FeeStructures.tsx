@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSchool } from "@/hooks/useSchool";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -43,21 +44,35 @@ const getFeeStructures = async () => {
   return data;
 };
 
-const createFeeStructure = async (newFeeStructure: z.infer<typeof feeStructureSchema> & { school_id: string }) => {
-  const { data, error } = await supabase.from("fee_structures").insert(newFeeStructure).select();
+const createFeeStructure = async (
+  newFeeStructure: z.infer<typeof feeStructureSchema> & { school_id: string },
+) => {
+  const { data, error } = await supabase
+    .from("fee_structures")
+    .insert(newFeeStructure)
+    .select();
   if (error) throw new Error(error.message);
   return data;
 };
 
-const updateFeeStructure = async (updatedFeeStructure: { id: string } & z.infer<typeof feeStructureSchema>) => {
+const updateFeeStructure = async (
+  updatedFeeStructure: { id: string } & z.infer<typeof feeStructureSchema>,
+) => {
   const { id, ...rest } = updatedFeeStructure;
-  const { data, error } = await supabase.from("fee_structures").update(rest).eq("id", id).select();
+  const { data, error } = await supabase
+    .from("fee_structures")
+    .update(rest)
+    .eq("id", id)
+    .select();
   if (error) throw new Error(error.message);
   return data;
 };
 
 const deleteFeeStructure = async (id: string) => {
-  const { data, error } = await supabase.from("fee_structures").delete().eq("id", id);
+  const { data, error } = await supabase
+    .from("fee_structures")
+    .delete()
+    .eq("id", id);
   if (error) throw new Error(error.message);
   return data;
 };
@@ -67,7 +82,11 @@ export default function FeeStructures() {
   const [open, setOpen] = useState(false);
   const [selectedFeeStructure, setSelectedFeeStructure] = useState<any>(null);
 
-  const { data: feeStructures, isLoading, error } = useQuery({
+  const {
+    data: feeStructures,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["feeStructures"],
     queryFn: getFeeStructures,
   });
@@ -140,7 +159,10 @@ export default function FeeStructures() {
       <div className="flex justify-between mb-4">
         <h1 className="text-2xl font-bold">Fee Structures</h1>
         <div>
-          <Button onClick={() => generateInvoicesMutation.mutate()} className="mr-2">
+          <Button
+            onClick={() => generateInvoicesMutation.mutate()}
+            className="mr-2"
+          >
             Generate Invoices
           </Button>
           <Dialog open={open} onOpenChange={setOpen}>
@@ -149,10 +171,15 @@ export default function FeeStructures() {
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>{selectedFeeStructure ? "Edit" : "Add"} Fee Structure</DialogTitle>
+                <DialogTitle>
+                  {selectedFeeStructure ? "Edit" : "Add"} Fee Structure
+                </DialogTitle>
               </DialogHeader>
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-4"
+                >
                   <FormField
                     control={form.control}
                     name="name"
@@ -218,7 +245,11 @@ export default function FeeStructures() {
                 <TableCell>{fs.amount}</TableCell>
                 <TableCell>{fs.frequency}</TableCell>
                 <TableCell>
-                  <Button variant="outline" size="sm" onClick={() => handleEdit(fs)}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleEdit(fs)}
+                  >
                     Edit
                   </Button>
                   <Button
