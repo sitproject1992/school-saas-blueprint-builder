@@ -7,18 +7,11 @@ import {
   DollarSign,
   TrendingUp,
   AlertTriangle,
-} from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { Link } from "react-router-dom";
-import {
   BookOpen,
   Calendar,
   Clock,
   UserPlus,
   ArrowUpRight,
-  ArrowDownRight,
   UserCheck,
   Receipt,
   FileText,
@@ -34,7 +27,32 @@ import {
   XCircle,
   Clock3,
   TrendingDown,
+  TestTube,
+  Package,
+  Megaphone,
+  MessageSquare,
+  BarChart3,
+  PieChart,
+  Building2,
+  ShieldCheck,
+  Wallet,
+  ClipboardList,
+  BookCheck,
+  Users2,
+  CalendarDays,
+  Archive,
+  CreditCard,
+  PhoneCall,
+  Mail,
+  Activity,
+  Briefcase,
+  HelpCircle,
+  Star,
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Link } from "react-router-dom";
 
 export function AdminDashboard() {
   const { data, isLoading, error } = useAdminDashboardData();
@@ -118,86 +136,464 @@ export function AdminDashboard() {
     },
   ];
 
-  const quickActions = [
+  // Academic Management Module Data
+  const academicModules = [
     {
-      title: "Add Student",
-      icon: UserPlus,
-      color: "bg-blue-600 hover:bg-blue-700",
+      title: "Students",
+      count: 1342,
+      icon: GraduationCap,
       url: "/students",
+      color: "blue",
+      stats: { active: 1298, new: 44, pending: 12 },
+      recentActions: [
+        "John Smith enrolled today",
+        "Grade 10 batch created",
+        "15 transfer certificates issued",
+      ],
     },
     {
-      title: "Mark Attendance",
-      icon: UserCheck,
-      color: "bg-green-600 hover:bg-green-700",
-      url: "/attendance",
-    },
-    {
-      title: "Generate Invoice",
-      icon: Receipt,
-      color: "bg-purple-600 hover:bg-purple-700",
-      url: "/invoices",
-    },
-    {
-      title: "View Reports",
-      icon: TrendingUp,
-      color: "bg-orange-600 hover:bg-orange-700",
-      url: "/reports",
-    },
-    {
-      title: "Schedule Class",
-      icon: Calendar,
-      color: "bg-emerald-600 hover:bg-emerald-700",
-      url: "/classes",
-    },
-    {
-      title: "Manage Teachers",
+      title: "Teachers",
+      count: 89,
       icon: Users,
-      color: "bg-indigo-600 hover:bg-indigo-700",
       url: "/teachers",
+      color: "green",
+      stats: { active: 85, onLeave: 4, new: 3 },
+      recentActions: [
+        "Ms. Sarah hired as Math teacher",
+        "Training program completed",
+        "Performance reviews due",
+      ],
+    },
+    {
+      title: "Classes",
+      count: 45,
+      icon: BookOpen,
+      url: "/classes",
+      color: "purple",
+      stats: { active: 42, cancelled: 3, scheduled: 15 },
+      recentActions: [
+        "Physics lab scheduled",
+        "Grade 9 room changed",
+        "Extra classes added",
+      ],
+    },
+    {
+      title: "Subjects",
+      count: 28,
+      icon: BookCheck,
+      url: "/subjects",
+      color: "indigo",
+      stats: { core: 18, elective: 10, practical: 8 },
+      recentActions: [
+        "Computer Science updated",
+        "Art curriculum revised",
+        "New lab equipment added",
+      ],
+    },
+    {
+      title: "Attendance",
+      count: "92%",
+      icon: UserCheck,
+      url: "/attendance",
+      color: "emerald",
+      stats: { present: 1234, absent: 108, late: 24 },
+      recentActions: [
+        "Daily report generated",
+        "Absentee notices sent",
+        "Perfect attendance awards",
+      ],
+    },
+    {
+      title: "Syllabus",
+      count: 15,
+      icon: FileText,
+      url: "/syllabus",
+      color: "orange",
+      stats: { completed: 12, inProgress: 3, pending: 2 },
+      recentActions: [
+        "Grade 8 syllabus updated",
+        "Science curriculum approved",
+        "History topics added",
+      ],
+    },
+    {
+      title: "Lesson Plans",
+      count: 156,
+      icon: ClipboardList,
+      url: "/lesson-plans",
+      color: "rose",
+      stats: { approved: 142, pending: 14, draft: 8 },
+      recentActions: [
+        "Weekly plans submitted",
+        "Math lessons reviewed",
+        "Activity plans created",
+      ],
     },
   ];
 
-  const recentActivities = [
+  // Finance & Billing Module Data
+  const financeModules = [
     {
-      action: "New student enrolled - John Smith",
-      time: "2 hours ago",
-      type: "success",
+      title: "Fee Structures",
+      count: 12,
+      icon: DollarSign,
+      url: "/fees",
+      color: "green",
+      stats: { active: 8, draft: 4, archived: 2 },
+      recentActions: [
+        "Grade 10 fees updated",
+        "Scholarship rates revised",
+        "Payment plans created",
+      ],
     },
     {
-      action: "Payment received - Grade 10A",
-      time: "4 hours ago",
-      type: "success",
+      title: "Invoices",
+      count: 1234,
+      icon: Receipt,
+      url: "/invoices",
+      color: "blue",
+      stats: { paid: 1098, pending: 136, overdue: 24 },
+      recentActions: [
+        "Monthly invoices generated",
+        "Payment reminders sent",
+        "Late fee applied",
+      ],
     },
     {
-      action: "Class scheduled - Mathematics",
-      time: "6 hours ago",
-      type: "info",
+      title: "Payments",
+      count: "₹24.5L",
+      icon: Wallet,
+      url: "/payments",
+      color: "emerald",
+      stats: { received: 210500, pending: 35300, refunded: 2800 },
+      recentActions: [
+        "Online payment received",
+        "Cash collection recorded",
+        "Refund processed",
+      ],
     },
-    {
-      action: "Teacher on leave - Ms. Johnson",
-      time: "8 hours ago",
-      type: "warning",
-    },
-    { action: "Fee reminder sent", time: "1 day ago", type: "info" },
   ];
 
-  const classPerformance = [
-    { class: "Grade 8A", students: 28, attendance: 92, performance: 85 },
-    { class: "Grade 8B", students: 25, attendance: 88, performance: 78 },
-    { class: "Grade 9A", students: 30, attendance: 95, performance: 91 },
-    { class: "Grade 9B", students: 27, attendance: 89, performance: 82 },
+  // Operations Module Data
+  const operationsModules = [
+    {
+      title: "Inventory",
+      count: 542,
+      icon: Package,
+      url: "/inventory",
+      color: "orange",
+      stats: { inStock: 487, lowStock: 55, outOfStock: 12 },
+      recentActions: [
+        "New books received",
+        "Lab equipment ordered",
+        "Furniture delivered",
+      ],
+    },
+    {
+      title: "Exams",
+      count: 28,
+      icon: TestTube,
+      url: "/exams",
+      color: "purple",
+      stats: { scheduled: 15, ongoing: 8, completed: 5 },
+      recentActions: [
+        "Final exams scheduled",
+        "Answer sheets scanned",
+        "Results published",
+      ],
+    },
+    {
+      title: "Announcements",
+      count: 45,
+      icon: Megaphone,
+      url: "/announcements",
+      color: "red",
+      stats: { active: 12, scheduled: 8, draft: 25 },
+      recentActions: [
+        "Holiday notice posted",
+        "Parent meeting announced",
+        "Sports day scheduled",
+      ],
+    },
   ];
+
+  // Communication Module Data
+  const communicationModules = [
+    {
+      title: "Parent Portal",
+      count: 892,
+      icon: Users2,
+      url: "/parent-portal",
+      color: "pink",
+      stats: { active: 856, pending: 36, inactive: 24 },
+      recentActions: [
+        "Progress reports shared",
+        "Meeting requests sent",
+        "Feedback received",
+      ],
+    },
+    {
+      title: "Messages",
+      count: 156,
+      icon: MessageSquare,
+      url: "/messages",
+      color: "cyan",
+      stats: { unread: 23, sent: 133, drafts: 8 },
+      recentActions: [
+        "Staff circular sent",
+        "Parent notifications",
+        "Emergency alerts",
+      ],
+    },
+  ];
+
+  // Analytics & Reports Module Data
+  const analyticsModules = [
+    {
+      title: "Reports",
+      count: 34,
+      icon: BarChart3,
+      url: "/reports",
+      color: "violet",
+      stats: { generated: 28, scheduled: 6, pending: 4 },
+      recentActions: [
+        "Monthly report generated",
+        "Attendance analysis",
+        "Financial summary",
+      ],
+    },
+    {
+      title: "Statistics",
+      count: "98%",
+      icon: PieChart,
+      url: "/statistics",
+      color: "amber",
+      stats: { performance: 98, attendance: 92, satisfaction: 89 },
+      recentActions: [
+        "Performance metrics updated",
+        "Trend analysis completed",
+        "Dashboard refreshed",
+      ],
+    },
+  ];
+
+  // Administration Module Data
+  const administrationModules = [
+    {
+      title: "Schools",
+      count: 3,
+      icon: Building2,
+      url: "/schools",
+      color: "slate",
+      stats: { active: 3, branches: 5, campuses: 2 },
+      recentActions: [
+        "New branch registered",
+        "School profile updated",
+        "Campus details modified",
+      ],
+    },
+    {
+      title: "Users",
+      count: 1567,
+      icon: ShieldCheck,
+      url: "/users",
+      color: "stone",
+      stats: { admin: 12, teachers: 89, parents: 892, students: 1342 },
+      recentActions: [
+        "New admin added",
+        "Teacher permissions updated",
+        "Student accounts created",
+      ],
+    },
+    {
+      title: "Settings",
+      count: 15,
+      icon: Settings,
+      url: "/settings",
+      color: "gray",
+      stats: { configured: 12, pending: 3, default: 8 },
+      recentActions: [
+        "Academic year configured",
+        "Fee structure updated",
+        "Notification settings changed",
+      ],
+    },
+  ];
+
+  const getColorClasses = (color: string) => {
+    const colorMap: Record<
+      string,
+      { bg: string; text: string; border: string }
+    > = {
+      blue: {
+        bg: "bg-blue-50",
+        text: "text-blue-600",
+        border: "border-blue-200",
+      },
+      green: {
+        bg: "bg-green-50",
+        text: "text-green-600",
+        border: "border-green-200",
+      },
+      purple: {
+        bg: "bg-purple-50",
+        text: "text-purple-600",
+        border: "border-purple-200",
+      },
+      indigo: {
+        bg: "bg-indigo-50",
+        text: "text-indigo-600",
+        border: "border-indigo-200",
+      },
+      emerald: {
+        bg: "bg-emerald-50",
+        text: "text-emerald-600",
+        border: "border-emerald-200",
+      },
+      orange: {
+        bg: "bg-orange-50",
+        text: "text-orange-600",
+        border: "border-orange-200",
+      },
+      rose: {
+        bg: "bg-rose-50",
+        text: "text-rose-600",
+        border: "border-rose-200",
+      },
+      red: { bg: "bg-red-50", text: "text-red-600", border: "border-red-200" },
+      pink: {
+        bg: "bg-pink-50",
+        text: "text-pink-600",
+        border: "border-pink-200",
+      },
+      cyan: {
+        bg: "bg-cyan-50",
+        text: "text-cyan-600",
+        border: "border-cyan-200",
+      },
+      violet: {
+        bg: "bg-violet-50",
+        text: "text-violet-600",
+        border: "border-violet-200",
+      },
+      amber: {
+        bg: "bg-amber-50",
+        text: "text-amber-600",
+        border: "border-amber-200",
+      },
+      slate: {
+        bg: "bg-slate-50",
+        text: "text-slate-600",
+        border: "border-slate-200",
+      },
+      stone: {
+        bg: "bg-stone-50",
+        text: "text-stone-600",
+        border: "border-stone-200",
+      },
+      gray: {
+        bg: "bg-gray-50",
+        text: "text-gray-600",
+        border: "border-gray-200",
+      },
+    };
+    return colorMap[color] || colorMap.blue;
+  };
+
+  const ModuleCard = ({
+    module,
+    showDetails = false,
+  }: {
+    module: any;
+    showDetails?: boolean;
+  }) => {
+    const colors = getColorClasses(module.color);
+
+    return (
+      <Card className="hover:shadow-lg transition-all duration-300 group cursor-pointer">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <div className="flex items-center gap-3">
+            <div
+              className={`p-2 rounded-lg ${colors.bg} group-hover:scale-110 transition-transform`}
+            >
+              <module.icon className={`h-5 w-5 ${colors.text}`} />
+            </div>
+            <div>
+              <CardTitle className="text-sm font-medium">
+                {module.title}
+              </CardTitle>
+              <p className="text-xs text-muted-foreground">Manage and track</p>
+            </div>
+          </div>
+          <Button variant="ghost" size="sm" asChild>
+            <Link to={module.url}>
+              <ArrowUpRight className="h-4 w-4" />
+            </Link>
+          </Button>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-2xl font-bold">{module.count}</span>
+              <Badge
+                variant="secondary"
+                className={`${colors.bg} ${colors.text} border-none`}
+              >
+                Active
+              </Badge>
+            </div>
+
+            {showDetails && (
+              <>
+                <div className="grid grid-cols-3 gap-2 text-xs">
+                  {Object.entries(module.stats).map(([key, value]) => (
+                    <div key={key} className="text-center">
+                      <div className="font-semibold">{value as string}</div>
+                      <div className="text-muted-foreground capitalize">
+                        {key}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-muted-foreground">
+                    Recent Activity:
+                  </p>
+                  {module.recentActions
+                    .slice(0, 2)
+                    .map((action: string, index: number) => (
+                      <div
+                        key={index}
+                        className="flex items-center gap-2 text-xs"
+                      >
+                        <div
+                          className={`w-1.5 h-1.5 rounded-full ${colors.text.replace("text-", "bg-")}`}
+                        />
+                        <span className="text-muted-foreground truncate">
+                          {action}
+                        </span>
+                      </div>
+                    ))}
+                </div>
+              </>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
       <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
         <div>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            Admin Dashboard
+            School Management Dashboard
           </h1>
           <p className="text-muted-foreground mt-1">
-            Welcome back! Here's what's happening at your school today.
+            Complete overview of all school operations and management modules
           </p>
         </div>
         <div className="flex items-center space-x-3">
@@ -215,12 +611,12 @@ export function AdminDashboard() {
             className="text-green-600 border-green-600 px-3 py-1"
           >
             <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse" />
-            Live Updates
+            Demo Mode
           </Badge>
         </div>
       </div>
 
-      {/* Stats Cards */}
+      {/* Key Stats */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat, index) => (
           <Card
@@ -262,314 +658,197 @@ export function AdminDashboard() {
         ))}
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {/* Attendance Summary */}
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-lg font-semibold">
-              Today's Attendance
-            </CardTitle>
-            <Button variant="ghost" size="sm" asChild>
-              <Link to="/attendance">
-                <Eye className="w-4 h-4" />
-              </Link>
-            </Button>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Student Attendance</span>
-                <span className="text-2xl font-bold text-green-600">92%</span>
-              </div>
-              <Progress value={92} className="h-3" />
-              <div className="grid grid-cols-3 gap-2 text-center text-sm">
-                <div className="p-2 bg-green-50 rounded-lg">
-                  <div className="font-bold text-green-600">1,234</div>
-                  <div className="text-muted-foreground text-xs">Present</div>
-                </div>
-                <div className="p-2 bg-red-50 rounded-lg">
-                  <div className="font-bold text-red-600">108</div>
-                  <div className="text-muted-foreground text-xs">Absent</div>
-                </div>
-                <div className="p-2 bg-yellow-50 rounded-lg">
-                  <div className="font-bold text-yellow-600">24</div>
-                  <div className="text-muted-foreground text-xs">Late</div>
-                </div>
-              </div>
+      {/* 1. Academic Management */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-blue-100 rounded-lg">
+              <GraduationCap className="h-6 w-6 text-blue-600" />
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Quick Actions */}
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-lg font-semibold">
-              Quick Actions
-            </CardTitle>
-            <Button variant="ghost" size="sm">
-              <MoreHorizontal className="w-4 h-4" />
-            </Button>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-3">
-              {quickActions.slice(0, 4).map((action, index) => (
-                <Button
-                  key={index}
-                  variant="outline"
-                  className="justify-start h-12 hover:shadow-md transition-all duration-200 group"
-                  asChild
-                >
-                  <Link to={action.url}>
-                    <div
-                      className={`p-2 rounded-lg mr-3 ${action.color} transition-transform group-hover:scale-110`}
-                    >
-                      <action.icon className="h-4 w-4 text-white" />
-                    </div>
-                    {action.title}
-                    <ArrowUpRight className="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </Link>
-                </Button>
-              ))}
+            <div>
+              <h2 className="text-xl font-semibold">Academic Management</h2>
+              <p className="text-sm text-muted-foreground">
+                Students, Teachers, Classes, Subjects, Attendance, Syllabus,
+                Lesson Plans
+              </p>
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Recent Activities */}
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold">
-              Recent Activities
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {recentActivities.map((activity, index) => (
-                <div
-                  key={index}
-                  className="flex items-start space-x-3 p-2 rounded-lg hover:bg-muted/50 transition-colors"
-                >
-                  <div
-                    className={`w-2 h-2 rounded-full mt-2 ${
-                      activity.type === "success"
-                        ? "bg-green-500"
-                        : activity.type === "warning"
-                          ? "bg-yellow-500"
-                          : "bg-blue-500"
-                    }`}
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">
-                      {activity.action}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {activity.time}
-                    </p>
-                  </div>
-                </div>
-              ))}
-              <Button variant="ghost" size="sm" className="w-full mt-2">
-                View All Activities
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+          </div>
+          <Button variant="outline" size="sm">
+            <Eye className="w-4 h-4 mr-2" />
+            View All
+          </Button>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {academicModules.map((module, index) => (
+            <ModuleCard key={index} module={module} showDetails={true} />
+          ))}
+        </div>
       </div>
 
-      {/* Pending Tasks & Financial Overview */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold flex items-center gap-2">
-              <Clock3 className="w-5 h-5 text-orange-500" />
-              Pending Tasks
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 bg-orange-50 border border-orange-200 rounded-lg">
-                <div className="flex items-center gap-2">
-                  <XCircle className="w-4 h-4 text-red-500" />
-                  <span className="text-sm font-medium">Fee Reminders</span>
-                </div>
-                <Badge variant="destructive">15</Badge>
-              </div>
-              <div className="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-blue-500" />
-                  <span className="text-sm font-medium">
-                    Pending Admissions
-                  </span>
-                </div>
-                <Badge variant="secondary">8</Badge>
-              </div>
-              <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-500" />
-                  <span className="text-sm font-medium">Completed Today</span>
-                </div>
-                <Badge variant="default" className="bg-green-600">
-                  12
-                </Badge>
-              </div>
+      {/* 2. Finance and Billing */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-green-100 rounded-lg">
+              <DollarSign className="h-6 w-6 text-green-600" />
             </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold flex items-center gap-2">
-              <DollarSign className="w-5 h-5 text-green-500" />
-              Financial Summary
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">
-                  This Month
-                </span>
-                <span className="text-2xl font-bold text-green-600">
-                  ₹2,45,800
-                </span>
-              </div>
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span>Collected</span>
-                  <span className="font-medium">₹2,10,500</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span>Pending</span>
-                  <span className="font-medium text-red-600">₹35,300</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span>Overdue</span>
-                  <span className="font-medium text-orange-600">₹12,200</span>
-                </div>
-              </div>
-              <Button className="w-full" size="sm" asChild>
-                <Link to="/invoices">
-                  <Receipt className="w-4 h-4 mr-2" />
-                  View Details
-                </Link>
-              </Button>
+            <div>
+              <h2 className="text-xl font-semibold">Finance and Billing</h2>
+              <p className="text-sm text-muted-foreground">
+                Fee structures, Invoices, Payments
+              </p>
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Class Performance */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold">
-              Class Overview
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {classPerformance.map((cls, index) => (
-                <div
-                  key={index}
-                  className="space-y-2 p-3 bg-muted/30 rounded-lg"
-                >
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium">{cls.class}</span>
-                    <span className="text-xs text-muted-foreground">
-                      {cls.students} students
-                    </span>
-                  </div>
-                  <div className="space-y-1">
-                    <div className="flex justify-between text-xs">
-                      <span>Attendance</span>
-                      <span>{cls.attendance}%</span>
-                    </div>
-                    <Progress value={cls.attendance} className="h-2" />
-                    <div className="flex justify-between text-xs">
-                      <span>Performance</span>
-                      <span>{cls.performance}%</span>
-                    </div>
-                    <Progress value={cls.performance} className="h-2" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+          </div>
+          <Button variant="outline" size="sm">
+            <Eye className="w-4 h-4 mr-2" />
+            View All
+          </Button>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {financeModules.map((module, index) => (
+            <ModuleCard key={index} module={module} showDetails={true} />
+          ))}
+        </div>
       </div>
 
-      {/* Schedule & Announcements */}
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-blue-500" />
-              Today's Schedule
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
-                <div>
-                  <p className="font-medium text-green-900">Morning Assembly</p>
-                  <p className="text-sm text-green-700">8:00 AM - 8:30 AM</p>
-                </div>
-                <Badge className="bg-green-600">Ongoing</Badge>
-              </div>
-              <div className="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                <div>
-                  <p className="font-medium text-blue-900">Staff Meeting</p>
-                  <p className="text-sm text-blue-700">2:00 PM - 3:00 PM</p>
-                </div>
-                <Badge variant="secondary">Upcoming</Badge>
-              </div>
-              <div className="flex items-center justify-between p-3 bg-purple-50 border border-purple-200 rounded-lg">
-                <div>
-                  <p className="font-medium text-purple-900">Parent Meeting</p>
-                  <p className="text-sm text-purple-700">4:00 PM - 5:00 PM</p>
-                </div>
-                <Badge
-                  variant="outline"
-                  className="border-purple-600 text-purple-600"
-                >
-                  Scheduled
-                </Badge>
-              </div>
+      {/* 3. Operations */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-orange-100 rounded-lg">
+              <Package className="h-6 w-6 text-orange-600" />
             </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Bell className="w-5 h-5 text-orange-500" />
-              Important Announcements
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                <p className="font-medium text-blue-900">School Holiday</p>
-                <p className="text-sm text-blue-700">
-                  National Day holiday on Monday, December 25th
-                </p>
-                <p className="text-xs text-blue-600 mt-1">2 hours ago</p>
-              </div>
-              <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-                <p className="font-medium text-green-900">New Teacher Joined</p>
-                <p className="text-sm text-green-700">
-                  Ms. Sarah Johnson joined as Math teacher
-                </p>
-                <p className="text-xs text-green-600 mt-1">1 day ago</p>
-              </div>
-              <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg">
-                <p className="font-medium text-orange-900">Fee Reminder</p>
-                <p className="text-sm text-orange-700">
-                  Monthly fee collection starts tomorrow
-                </p>
-                <p className="text-xs text-orange-600 mt-1">3 days ago</p>
-              </div>
+            <div>
+              <h2 className="text-xl font-semibold">Operations</h2>
+              <p className="text-sm text-muted-foreground">
+                Inventory, Exams, Announcements
+              </p>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+          <Button variant="outline" size="sm">
+            <Eye className="w-4 h-4 mr-2" />
+            View All
+          </Button>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {operationsModules.map((module, index) => (
+            <ModuleCard key={index} module={module} showDetails={true} />
+          ))}
+        </div>
       </div>
+
+      {/* 4. Communication */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-pink-100 rounded-lg">
+              <MessageSquare className="h-6 w-6 text-pink-600" />
+            </div>
+            <div>
+              <h2 className="text-xl font-semibold">Communication</h2>
+              <p className="text-sm text-muted-foreground">
+                Parental Portal, Messages
+              </p>
+            </div>
+          </div>
+          <Button variant="outline" size="sm">
+            <Eye className="w-4 h-4 mr-2" />
+            View All
+          </Button>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2">
+          {communicationModules.map((module, index) => (
+            <ModuleCard key={index} module={module} showDetails={true} />
+          ))}
+        </div>
+      </div>
+
+      {/* 5. Analytics and Reports */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-purple-100 rounded-lg">
+              <BarChart3 className="h-6 w-6 text-purple-600" />
+            </div>
+            <div>
+              <h2 className="text-xl font-semibold">Analytics and Reports</h2>
+              <p className="text-sm text-muted-foreground">
+                Reports, Statistics
+              </p>
+            </div>
+          </div>
+          <Button variant="outline" size="sm">
+            <Eye className="w-4 h-4 mr-2" />
+            View All
+          </Button>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2">
+          {analyticsModules.map((module, index) => (
+            <ModuleCard key={index} module={module} showDetails={true} />
+          ))}
+        </div>
+      </div>
+
+      {/* 6. Administration */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-slate-100 rounded-lg">
+              <ShieldCheck className="h-6 w-6 text-slate-600" />
+            </div>
+            <div>
+              <h2 className="text-xl font-semibold">Administration</h2>
+              <p className="text-sm text-muted-foreground">
+                Schools, Users, Settings
+              </p>
+            </div>
+          </div>
+          <Button variant="outline" size="sm">
+            <Eye className="w-4 h-4 mr-2" />
+            View All
+          </Button>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {administrationModules.map((module, index) => (
+            <ModuleCard key={index} module={module} showDetails={true} />
+          ))}
+        </div>
+      </div>
+
+      {/* Quick Access Summary */}
+      <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-none">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Star className="h-5 w-5 text-yellow-500" />
+            Demo Account Features
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="text-center p-4 bg-white rounded-lg shadow-sm">
+              <div className="text-2xl font-bold text-blue-600">6</div>
+              <div className="text-sm text-muted-foreground">Main Modules</div>
+            </div>
+            <div className="text-center p-4 bg-white rounded-lg shadow-sm">
+              <div className="text-2xl font-bold text-green-600">23</div>
+              <div className="text-sm text-muted-foreground">
+                Sub Components
+              </div>
+            </div>
+            <div className="text-center p-4 bg-white rounded-lg shadow-sm">
+              <div className="text-2xl font-bold text-purple-600">100%</div>
+              <div className="text-sm text-muted-foreground">Demo Content</div>
+            </div>
+          </div>
+          <div className="mt-4 text-center">
+            <p className="text-sm text-muted-foreground">
+              This dashboard demonstrates the complete school management system
+              with sample data. All modules are functional and ready for
+              real-world deployment.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
