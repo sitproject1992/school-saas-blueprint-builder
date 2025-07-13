@@ -230,7 +230,7 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <AppLayout>
-                    <div>Announcements Module - Coming Soon</div>
+                    <Announcements />
                   </AppLayout>
                 </ProtectedRoute>
               }
