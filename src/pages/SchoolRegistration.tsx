@@ -286,7 +286,11 @@ export default function SchoolRegistration() {
       
       let errorMessage = "Failed to register school. Please try again.";
       if (error.message?.includes("duplicate key")) {
-        errorMessage = "This subdomain is already taken. Please choose a different one.";
+        if (error.message?.includes('unique constraint "subjects_school_id_code_key"')) {
+          errorMessage = "A problem occurred during initial setup. Please try again with a different school name or contact support. (Error: Duplicate subject code)";
+        } else {
+          errorMessage = "This subdomain is already taken. Please choose a different one.";
+        }
       } else if (error.message?.includes("violates")) {
         errorMessage = "Please check your input data and try again.";
       } else if (error.message) {
