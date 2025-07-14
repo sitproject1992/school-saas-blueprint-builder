@@ -457,7 +457,7 @@ BEGIN
     ('Stationery', 'Pens, pencils, notebooks, etc.', school_id),
     ('Electronics', 'Computers, projectors, etc.', school_id);
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Trigger to automatically create default data for new schools
 CREATE OR REPLACE FUNCTION trigger_create_default_school_data()
