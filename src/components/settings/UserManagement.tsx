@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '../../integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import {
   Table,
@@ -17,33 +17,37 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
+import { useSchool } from '@/hooks/useSchool';
 import UserForm from './UserForm';
-
-const getUsers = async () => {
-  const { data, error } = await supabase.from('profiles').select('*');
-  if (error) throw new Error(error.message);
-  return data;
-};
 
 const UserManagement: React.FC = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { schoolId } = useSchool();
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<any>(null);
 
   const { data: users, isLoading, error } = useQuery({
-    queryKey: ['users'],
-    queryFn: getUsers,
+    queryKey: ['users', schoolId],
+    queryFn: async () => {
+      if (!schoolId) return [];
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('school_id', schoolId);
+      if (error) throw new Error(error.message);
+      return data;
+    },
+    enabled: !!schoolId,
   });
 
   const deleteUser = useMutation({
     mutationFn: async (userId: string) => {
-      const { error } = await supabase.from('users').delete().eq('id', userId);
+      const { error } = await supabase.from('profiles').delete().eq('id', userId);
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: ['users', schoolId] });
       toast({ title: 'User deleted successfully' });
     },
     onError: (error: any) => {
@@ -55,19 +59,13 @@ const UserManagement: React.FC = () => {
     },
   });
 
-  const handleEdit = (user: any) => {
-    setSelectedUser(user);
-    setIsFormOpen(true);
-  };
-
   const handleAddNew = () => {
-    setSelectedUser(null);
     setIsFormOpen(true);
   };
 
   const handleSuccess = () => {
     setIsFormOpen(false);
-    queryClient.invalidateQueries({ queryKey: ['users'] });
+    queryClient.invalidateQueries({ queryKey: ['users', schoolId] });
   };
 
   if (isLoading) return <div>Loading...</div>;
@@ -83,9 +81,13 @@ const UserManagement: React.FC = () => {
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>{selectedUser ? 'Edit User' : 'Add New User'}</DialogTitle>
+              <DialogTitle>Add New User</DialogTitle>
             </DialogHeader>
-            <UserForm user={selectedUser} onSuccess={handleSuccess} />
+            <UserForm 
+              schoolId={schoolId || ''} 
+              onSuccess={handleSuccess} 
+              onCancel={() => setIsFormOpen(false)}
+            />
           </DialogContent>
         </Dialog>
       </div>
@@ -105,14 +107,10 @@ const UserManagement: React.FC = () => {
               <TableCell>{user.email}</TableCell>
               <TableCell>{user.role}</TableCell>
               <TableCell>
-                <Button variant="outline" size="sm" onClick={() => handleEdit(user)}>
-                  Edit
-                </Button>
                 <Button
                   variant="destructive"
                   size="sm"
                   onClick={() => deleteUser.mutate(user.id)}
-                  className="ml-2"
                 >
                   Delete
                 </Button>

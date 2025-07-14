@@ -4,6 +4,7 @@ import type { User } from '@supabase/supabase-js';
 
 interface AppUser extends User {
   profile: any; // Replace 'any' with a proper profile type
+  roles?: string[]; // Add roles for compatibility
 }
 
 interface AuthContextType {
@@ -44,10 +45,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const bootstrapAuth = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user) {
-          const profile = await fetchUserProfile(session.user);
-          setUser({ ...session.user, profile });
-        }
+      if (session?.user) {
+        const profile = await fetchUserProfile(session.user);
+        setUser({ 
+          ...session.user, 
+          profile,
+          roles: profile?.role ? [profile.role] : []
+        });
+      }
       } catch (error) {
         console.error('Error in bootstrapAuth:', error);
       } finally {
@@ -61,7 +66,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         if (session?.user) {
           const profile = await fetchUserProfile(session.user);
-          setUser({ ...session.user, profile });
+          setUser({ 
+            ...session.user, 
+            profile,
+            roles: profile?.role ? [profile.role] : []
+          });
         } else {
           setUser(null);
         }

@@ -66,26 +66,30 @@ export default function AdminSetup() {
 
     if (stateData) {
       setSchoolData(stateData);
-      setAdminData((prev) => ({
-        ...prev,
-        email: stateData.adminEmail || "",
-        firstName: stateData.adminFirstName || "",
-        lastName: stateData.adminLastName || "",
-        phone: stateData.adminPhone || "",
-        position: stateData.adminPosition || "",
-      }));
+    setAdminData((prev) => ({
+      ...prev,
+      email: stateData.adminEmail || "",
+      firstName: stateData.adminFirstName || "",
+      lastName: stateData.adminLastName || "",
+      phone: stateData.adminPhone || "",
+      position: stateData.adminPosition || "",
+      password: "password123",
+      confirmPassword: "password123",
+    }));
     } else if (storedData) {
       try {
         const parsed = JSON.parse(storedData);
         setSchoolData(parsed);
-        setAdminData((prev) => ({
-          ...prev,
-          email: parsed.adminEmail || "",
-          firstName: parsed.adminFirstName || "",
-          lastName: parsed.adminLastName || "",
-          phone: parsed.adminPhone || "",
-          position: parsed.adminPosition || "",
-        }));
+      setAdminData((prev) => ({
+        ...prev,
+        email: parsed.adminEmail || "",
+        firstName: parsed.adminFirstName || "",
+        lastName: parsed.adminLastName || "",
+        phone: parsed.adminPhone || "",
+        position: parsed.adminPosition || "",
+        password: "password123",
+        confirmPassword: "password123",
+      }));
       } catch (error) {
         console.error("Error parsing stored data:", error);
         navigate("/school-registration");

@@ -36,7 +36,7 @@ import {
   FileText,
   CreditCard,
 } from "lucide-react";
-import { supabase, supabaseAdmin } from "@/lib/supabaseClient";
+import { supabase } from "@/integrations/supabase/client";
 
 interface SchoolData {
   // Basic Information
@@ -120,26 +120,26 @@ export default function SchoolRegistration() {
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [schoolData, setSchoolData] = useState<SchoolData>({
-    schoolName: "",
-    subdomain: "",
-    schoolType: "",
-    establishedYear: "",
-    email: "",
-    phone: "",
+    schoolName: "Global Academy English School",
+    subdomain: "global-academy",
+    schoolType: "K-12 School",
+    establishedYear: "2010",
+    email: "sujan1nepal@gmail.com",
+    phone: "+977 1234567890",
     website: "",
-    address: "",
-    city: "",
-    state: "",
-    pincode: "",
-    adminFirstName: "",
-    adminLastName: "",
-    adminEmail: "",
-    adminPhone: "",
-    adminPosition: "",
-    totalStudents: "",
-    totalTeachers: "",
-    gradeRange: "",
-    curriculum: "",
+    address: "Suryavinayak 10",
+    city: "Bhaktapur",
+    state: "Bagmati",
+    pincode: "00977",
+    adminFirstName: "Krishna",
+    adminLastName: "Ngakhusi",
+    adminEmail: "sujan1nepal@gmail.com",
+    adminPhone: "+977 1234567890",
+    adminPosition: "Principal",
+    totalStudents: "500",
+    totalTeachers: "300",
+    gradeRange: "1-12",
+    curriculum: "National Curriculum",
     subscriptionPlan: "professional",
   });
 
@@ -238,7 +238,7 @@ export default function SchoolRegistration() {
       }
 
       // Create school record with enhanced data
-      const { data: schoolRecord, error: schoolError } = await supabaseAdmin
+      const { data: schoolRecord, error: schoolError } = await supabase
         .from("schools")
         .insert([
           {
