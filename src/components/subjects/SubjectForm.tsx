@@ -9,11 +9,12 @@ import * as z from "zod";
 import { useClasses } from "@/hooks/useClasses";
 import { useTeachers } from "@/hooks/useTeachers";
 import { useCreateSubject, useUpdateSubject } from "@/hooks/useSubjects";
+import { useSchool } from "@/hooks/useSchool";
 
 const subjectSchema = z.object({
   name: z.string().min(1, "Subject name is required"),
-  teacher_id: z.string().optional(),
-  class_id: z.string().optional(),
+  code: z.string().optional(),
+  description: z.string().optional(),
 });
 
 type SubjectFormValues = z.infer<typeof subjectSchema>;
@@ -25,7 +26,8 @@ interface SubjectFormProps {
 
 export function SubjectForm({ subject, onSuccess }: SubjectFormProps) {
   const { data: classes } = useClasses();
-  const { data: teachers } = useTeachers();
+  const { teachers } = useTeachers();
+  const { schoolId } = useSchool();
   const createSubject = useCreateSubject();
   const updateSubject = useUpdateSubject();
 
@@ -39,8 +41,8 @@ export function SubjectForm({ subject, onSuccess }: SubjectFormProps) {
     resolver: zodResolver(subjectSchema),
     defaultValues: subject ? {
       name: subject.name || "",
-      teacher_id: subject.teacher_id || "",
-      class_id: subject.class_id || "",
+      code: subject.code || "",
+      description: subject.description || "",
     } : {},
   });
 
@@ -51,15 +53,17 @@ export function SubjectForm({ subject, onSuccess }: SubjectFormProps) {
           id: subject.id,
           updates: {
             name: data.name,
-            teacher_id: data.teacher_id || null,
-            class_id: data.class_id || null,
+            code: data.code || null,
+            description: data.description || null,
           }
         });
       } else {
+        if (!schoolId) throw new Error('No school selected');
         await createSubject.mutateAsync({
           name: data.name,
-          teacher_id: data.teacher_id || null,
-          class_id: data.class_id || null,
+          code: data.code || null,
+          description: data.description || null,
+          school_id: schoolId,
         });
       }
       onSuccess();
@@ -81,37 +85,16 @@ export function SubjectForm({ subject, onSuccess }: SubjectFormProps) {
             {errors.name && <p className="text-red-500 text-sm">{errors.name.message}</p>}
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="teacher_id">Teacher</Label>
-              <Select value={watch("teacher_id")} onValueChange={(value) => setValue("teacher_id", value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a teacher" />
-                </SelectTrigger>
-                <SelectContent>
-                  {teachers?.map((teacher) => (
-                    <SelectItem key={teacher.id} value={teacher.id}>
-                      {teacher.first_name} {teacher.last_name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="class_id">Class</Label>
-              <Select value={watch("class_id")} onValueChange={(value) => setValue("class_id", value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a class" />
-                </SelectTrigger>
-                <SelectContent>
-                  {classes?.map((cls) => (
-                    <SelectItem key={cls.id} value={cls.id}>
-                      {cls.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          <div className="grid gap-2">
+            <Label htmlFor="code">Subject Code</Label>
+            <Input id="code" {...register("code")} />
+            {errors.code && <p className="text-red-500 text-sm">{errors.code.message}</p>}
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="description">Description</Label>
+            <Input id="description" {...register("description")} />
+            {errors.description && <p className="text-red-500 text-sm">{errors.description.message}</p>}
           </div>
 
           <Button type="submit" className="w-full" disabled={createSubject.isPending || updateSubject.isPending}>

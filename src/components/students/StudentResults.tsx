@@ -23,7 +23,7 @@ import StudentResultForm from './StudentResultForm';
 const getStudentResults = async (studentId: string) => {
   const { data, error } = await supabase
     .from('exam_results')
-    .select('*, tests(*)')
+    .select('*, exams(*)')
     .eq('student_id', studentId);
   if (error) throw new Error(error.message);
   return data;
@@ -117,9 +117,9 @@ const StudentResults: React.FC<StudentResultsProps> = ({ studentId }) => {
         <TableBody>
           {results?.map((result) => (
             <TableRow key={result.id}>
-              <TableCell>{result.tests.title}</TableCell>
+              <TableCell>{result.exams?.name || 'N/A'}</TableCell>
               <TableCell>{result.marks_obtained}</TableCell>
-              <TableCell>{result.comments}</TableCell>
+              <TableCell>{result.remarks}</TableCell>
               <TableCell>
                 <Button
                   variant="outline"

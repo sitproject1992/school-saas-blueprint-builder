@@ -13,7 +13,8 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
+import { useSchool } from '@/hooks/useSchool';
 
 const formSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -29,6 +30,7 @@ interface SyllabusFormProps {
 
 const SyllabusForm: React.FC<SyllabusFormProps> = ({ syllabus, onSuccess }) => {
   const { toast } = useToast();
+  const { schoolId } = useSchool();
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: syllabus || {
@@ -49,7 +51,14 @@ const SyllabusForm: React.FC<SyllabusFormProps> = ({ syllabus, onSuccess }) => {
         if (error) throw error;
         toast({ title: 'Syllabus updated successfully' });
       } else {
-        const { error } = await supabase.from('syllabus').insert(values);
+        if (!schoolId) throw new Error('No school selected');
+        const { error } = await supabase.from('syllabus').insert({
+          title: values.title,
+          description: values.description,
+          class_id: values.class_id,
+          subject_id: values.subject_id,
+          school_id: schoolId,
+        });
         if (error) throw error;
         toast({ title: 'Syllabus created successfully' });
       }

@@ -12,6 +12,7 @@ export interface Student {
   last_name: string;
   email: string;
   date_of_birth: string | null;
+  admission_number: string;
   digital_id_card_url: string | null;
   health_records: any;
   created_at: string;
@@ -32,6 +33,12 @@ export function useStudents() {
         .from('students')
         .select(`
           *,
+          profiles!students_profile_id_fkey (
+            first_name,
+            last_name,
+            email,
+            date_of_birth
+          ),
           classes (
             name,
             section
@@ -41,7 +48,21 @@ export function useStudents() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data as Student[];
+      return data?.map(student => ({
+        id: student.id,
+        school_id: student.school_id,
+        class_id: student.class_id,
+        admission_number: student.admission_number,
+        first_name: student.profiles?.first_name || '',
+        last_name: student.profiles?.last_name || '',
+        email: student.profiles?.email || '',
+        date_of_birth: student.profiles?.date_of_birth || null,
+        digital_id_card_url: null,
+        health_records: student.medical_conditions,
+        created_at: student.created_at,
+        updated_at: student.updated_at,
+        classes: student.classes,
+      })) as Student[] || [];
     },
     enabled: !!schoolId,
   });
@@ -56,9 +77,33 @@ export function useCreateStudent() {
     mutationFn: async (studentData: Omit<Student, 'id' | 'created_at' | 'updated_at' | 'classes' | 'school_id'>) => {
       if (!schoolId) throw new Error('No active school selected');
 
+      // First create a profile
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .insert({
+          first_name: studentData.first_name,
+          last_name: studentData.last_name,
+          email: studentData.email,
+          date_of_birth: studentData.date_of_birth,
+          role: 'student',
+          school_id: schoolId,
+          user_id: crypto.randomUUID(), // This should be a real user ID in production
+        })
+        .select()
+        .single();
+
+      if (profileError) throw profileError;
+
+      // Then create the student record
       const { data, error } = await supabase
         .from('students')
-        .insert({ ...studentData, school_id: schoolId })
+        .insert({ 
+          admission_number: studentData.admission_number,
+          class_id: studentData.class_id,
+          medical_conditions: studentData.health_records,
+          school_id: schoolId,
+          profile_id: profile.id,
+        })
         .select()
         .single();
 

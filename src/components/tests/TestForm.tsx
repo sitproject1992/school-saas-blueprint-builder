@@ -13,20 +13,18 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { useToast } from '@/components/ui/use-toast';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { useSchool } from '@/hooks/useSchool';
 import { useClasses } from '@/hooks/useClasses';
 import { useSubjects } from '@/hooks/useSubjects';
 
 const formSchema = z.object({
-  title: z.string().min(1, 'Title is required'),
-  test_type: z.string().min(1, 'Test type is required'),
-  test_date: z.string().min(1, 'Test date is required'),
-  max_marks: z.coerce.number().min(1, 'Max marks must be a positive number'),
-  duration: z.coerce.number().optional(),
-  class_id: z.string().min(1, 'Class is required'),
-  subject_id: z.string().min(1, 'Subject is required'),
+  name: z.string().min(1, 'Name is required'),
+  type: z.enum(['pre_test', 'post_test', 'weekly', 'monthly', 'major', 'final']),
+  start_date: z.string().min(1, 'Start date is required'),
+  end_date: z.string().min(1, 'End date is required'),
 });
 
 interface TestFormProps {
@@ -36,20 +34,17 @@ interface TestFormProps {
 
 const TestForm: React.FC<TestFormProps> = ({ test, onSuccess }) => {
   const { user } = useAuth();
-  const { school } = useSchool();
+  const { schoolId } = useSchool();
   const { data: classes } = useClasses();
   const { data: subjects } = useSubjects();
   const { toast } = useToast();
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: test || {
-      title: '',
-      test_type: '',
-      test_date: '',
-      max_marks: 100,
-      duration: 60,
-      class_id: '',
-      subject_id: '',
+      name: '',
+      type: 'monthly',
+      start_date: '',
+      end_date: '',
     },
   });
 
@@ -57,27 +52,22 @@ const TestForm: React.FC<TestFormProps> = ({ test, onSuccess }) => {
     try {
       if (test) {
         const { error } = await supabase
-          .from('tests')
+          .from('exams')
           .update(values)
           .eq('id', test.id);
         if (error) throw error;
-        toast({ title: 'Test updated successfully' });
+        toast({ title: 'Exam updated successfully' });
       } else {
-        const { data: teacher } = await supabase
-          .from('teachers')
-          .select('id')
-          .eq('user_id', user?.id)
-          .single();
-
-        if (teacher) {
-          const { error } = await supabase.from('tests').insert({
-            ...values,
-            school_id: school?.id,
-            teacher_id: teacher.id,
-          });
-          if (error) throw error;
-          toast({ title: 'Test created successfully' });
-        }
+        if (!schoolId) throw new Error('No school selected');
+        const { error } = await supabase.from('exams').insert({
+          name: values.name,
+          type: values.type,
+          start_date: values.start_date,
+          end_date: values.end_date,
+          school_id: schoolId,
+        });
+        if (error) throw error;
+        toast({ title: 'Exam created successfully' });
       }
       onSuccess();
     } catch (error: any) {
@@ -94,10 +84,10 @@ const TestForm: React.FC<TestFormProps> = ({ test, onSuccess }) => {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
-          name="title"
+          name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Title</FormLabel>
+              <FormLabel>Exam Name</FormLabel>
               <FormControl>
                 <Input {...field} />
               </FormControl>
@@ -107,23 +97,35 @@ const TestForm: React.FC<TestFormProps> = ({ test, onSuccess }) => {
         />
         <FormField
           control={form.control}
-          name="test_type"
+          name="type"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Test Type</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
+              <FormLabel>Exam Type</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select exam type" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="pre_test">Pre Test</SelectItem>
+                  <SelectItem value="post_test">Post Test</SelectItem>
+                  <SelectItem value="weekly">Weekly</SelectItem>
+                  <SelectItem value="monthly">Monthly</SelectItem>
+                  <SelectItem value="major">Major</SelectItem>
+                  <SelectItem value="final">Final</SelectItem>
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}
         />
         <FormField
           control={form.control}
-          name="test_date"
+          name="start_date"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Test Date</FormLabel>
+              <FormLabel>Start Date</FormLabel>
               <FormControl>
                 <Input type="date" {...field} />
               </FormControl>
@@ -133,65 +135,12 @@ const TestForm: React.FC<TestFormProps> = ({ test, onSuccess }) => {
         />
         <FormField
           control={form.control}
-          name="max_marks"
+          name="end_date"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Max Marks</FormLabel>
+              <FormLabel>End Date</FormLabel>
               <FormControl>
-                <Input type="number" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="duration"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Duration (minutes)</FormLabel>
-              <FormControl>
-                <Input type="number" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="class_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Class</FormLabel>
-              <FormControl>
-                <select {...field}>
-                  <option value="">Select a class</option>
-                  {classes?.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="subject_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Subject</FormLabel>
-              <FormControl>
-                <select {...field}>
-                  <option value="">Select a subject</option>
-                  {subjects?.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.name}
-                    </option>
-                  ))}
-                </select>
+                <Input type="date" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
