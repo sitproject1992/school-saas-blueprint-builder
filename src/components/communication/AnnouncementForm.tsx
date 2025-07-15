@@ -53,7 +53,9 @@ const AnnouncementForm: React.FC<AnnouncementFormProps> = ({ announcement, onSuc
         toast({ title: 'Announcement updated successfully' });
       } else {
         const { error } = await supabase.from('announcements').insert({
-          ...values,
+          title: values.title,
+          content: values.content,
+          published_at: values.published_at,
           school_id: school?.id,
           created_by: user?.id,
         });

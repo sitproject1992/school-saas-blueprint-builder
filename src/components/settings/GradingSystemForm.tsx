@@ -15,6 +15,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/components/ui/use-toast';
+import { useSchool } from '@/hooks/useSchool';
 
 const formSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -34,6 +35,7 @@ interface GradingSystemFormProps {
 
 const GradingSystemForm: React.FC<GradingSystemFormProps> = ({ gradingSystem, onSuccess }) => {
   const { toast } = useToast();
+  const { school } = useSchool();
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: gradingSystem || {
@@ -58,7 +60,12 @@ const GradingSystemForm: React.FC<GradingSystemFormProps> = ({ gradingSystem, on
         if (error) throw error;
         toast({ title: 'Grading system updated successfully' });
       } else {
-        const { error } = await supabase.from('grading_systems').insert(values);
+        const { error } = await supabase.from('grading_systems').insert({
+          name: values.name,
+          scale: values.scale,
+          is_default: values.is_default,
+          school_id: school?.id,
+        });
         if (error) throw error;
         toast({ title: 'Grading system created successfully' });
       }

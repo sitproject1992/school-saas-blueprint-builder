@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
+import { useSchool } from '@/hooks/useSchool';
 
 const formSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -28,6 +29,7 @@ interface InventoryFormProps {
 
 const InventoryForm: React.FC<InventoryFormProps> = ({ item, onSuccess }) => {
   const { toast } = useToast();
+  const { school } = useSchool();
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: item || {
@@ -41,13 +43,18 @@ const InventoryForm: React.FC<InventoryFormProps> = ({ item, onSuccess }) => {
     try {
       if (item) {
         const { error } = await supabase
-          .from('inventory')
+          .from('inventory_items')
           .update(values)
           .eq('id', item.id);
         if (error) throw error;
         toast({ title: 'Item updated successfully' });
       } else {
-        const { error } = await supabase.from('inventory').insert(values);
+        const { error } = await supabase.from('inventory_items').insert({
+          name: values.name,
+          quantity: values.quantity,
+          category_id: values.category_id,
+          school_id: school?.id,
+        });
         if (error) throw error;
         toast({ title: 'Item created successfully' });
       }

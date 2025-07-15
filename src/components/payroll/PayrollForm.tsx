@@ -24,7 +24,7 @@ const formSchema = z.object({
   salary: z.coerce.number().min(0),
   deductions: z.coerce.number().min(0).optional(),
   net_salary: z.coerce.number().min(0),
-  status: z.string().optional(),
+  status: z.enum(['pending', 'paid', 'overdue', 'cancelled']).optional(),
 });
 
 const getTeachers = async (schoolId: string) => {
@@ -66,14 +66,17 @@ const PayrollForm: React.FC<PayrollFormProps> = ({ payroll, onSuccess }) => {
     try {
       if (payroll) {
         const { error } = await supabase
-          .from('payroll')
+          .from('fee_payments')
           .update(values)
           .eq('id', payroll.id);
         if (error) throw error;
         toast({ title: 'Payroll updated successfully' });
       } else {
-        const { error } = await supabase.from('payroll').insert({
-          ...values,
+        const { error } = await supabase.from('fee_payments').insert({
+          amount: values.salary || 0,
+          student_id: values.teacher_id || '',
+          fee_structure_id: values.teacher_id || '',
+          due_date: new Date().toISOString().split('T')[0],
           school_id: school?.id,
         });
         if (error) throw error;

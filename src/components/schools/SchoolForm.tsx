@@ -51,7 +51,13 @@ const SchoolForm: React.FC<SchoolFormProps> = ({ school, onSuccess }) => {
         if (error) throw error;
         toast({ title: 'School updated successfully' });
       } else {
-        const { error } = await supabase.from('schools').insert(values);
+        const { error } = await supabase.from('schools').insert({
+          name: values.name || '',
+          subdomain: values.subdomain || '',
+          address: values.address,
+          email: values.email,
+          phone: values.phone,
+        });
         if (error) throw error;
         toast({ title: 'School created successfully' });
       }

@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
+import { useSchool } from '@/hooks/useSchool';
 
 const formSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -29,6 +30,7 @@ interface FeeStructureFormProps {
 
 const FeeStructureForm: React.FC<FeeStructureFormProps> = ({ feeStructure, onSuccess }) => {
   const { toast } = useToast();
+  const { school } = useSchool();
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: feeStructure || {
@@ -49,7 +51,13 @@ const FeeStructureForm: React.FC<FeeStructureFormProps> = ({ feeStructure, onSuc
         if (error) throw error;
         toast({ title: 'Fee structure updated successfully' });
       } else {
-        const { error } = await supabase.from('fee_structures').insert(values);
+        const { error } = await supabase.from('fee_structures').insert({
+          name: values.name,
+          amount: values.amount,
+          frequency: values.frequency,
+          class_id: values.class_id,
+          school_id: school?.id,
+        });
         if (error) throw error;
         toast({ title: 'Fee structure created successfully' });
       }

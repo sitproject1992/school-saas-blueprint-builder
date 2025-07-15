@@ -48,14 +48,18 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSuccess }) => {
     try {
       if (event) {
         const { error } = await supabase
-          .from('events')
-          .update(values)
+          .from('announcements')
+          .update({
+            title: values.title,
+            content: values.description || '',
+          })
           .eq('id', event.id);
         if (error) throw error;
         toast({ title: 'Event updated successfully' });
       } else {
-        const { error } = await supabase.from('events').insert({
-          ...values,
+        const { error } = await supabase.from('announcements').insert({
+          title: values.title,
+          content: values.description || '',
           school_id: school?.id,
           created_by: user?.id,
         });

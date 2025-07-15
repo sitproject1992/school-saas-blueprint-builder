@@ -15,6 +15,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/components/ui/use-toast';
+import { useSchool } from '@/hooks/useSchool';
 
 const formSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -30,6 +31,7 @@ interface AcademicYearFormProps {
 
 const AcademicYearForm: React.FC<AcademicYearFormProps> = ({ academicYear, onSuccess }) => {
   const { toast } = useToast();
+  const { school } = useSchool();
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: academicYear || {
@@ -50,7 +52,13 @@ const AcademicYearForm: React.FC<AcademicYearFormProps> = ({ academicYear, onSuc
         if (error) throw error;
         toast({ title: 'Academic year updated successfully' });
       } else {
-        const { error } = await supabase.from('academic_years').insert(values);
+        const { error } = await supabase.from('academic_years').insert({
+          name: values.name,
+          start_date: values.start_date,
+          end_date: values.end_date,
+          is_active: values.is_active,
+          school_id: school?.id,
+        });
         if (error) throw error;
         toast({ title: 'Academic year created successfully' });
       }
