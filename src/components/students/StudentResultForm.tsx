@@ -24,7 +24,7 @@ const formSchema = z.object({
 });
 
 const getTests = async () => {
-  const { data, error } = await supabase.from('tests').select('*');
+  const { data, error } = await supabase.from('exams').select('*');
   if (error) throw new Error(error.message);
   return data;
 };
@@ -55,15 +55,17 @@ const StudentResultForm: React.FC<StudentResultFormProps> = ({
     try {
       if (result) {
         const { error } = await supabase
-          .from('student_test_results')
+          .from('exam_results')
           .update(values)
           .eq('id', result.id);
         if (error) throw error;
         toast({ title: 'Result updated successfully' });
       } else {
-        const { error } = await supabase.from('student_test_results').insert({
-          ...values,
+        const { error } = await supabase.from('exam_results').insert({
           student_id: studentId,
+          marks_obtained: values.marks_obtained,
+          exam_id: values.test_id || '',
+          subject_id: values.test_id || '', // You might need to adjust this based on your form
         });
         if (error) throw error;
         toast({ title: 'Result created successfully' });
@@ -92,7 +94,7 @@ const StudentResultForm: React.FC<StudentResultFormProps> = ({
                   <option value="">Select a test</option>
                   {tests?.map((t) => (
                     <option key={t.id} value={t.id}>
-                      {t.title}
+                      {t.name}
                     </option>
                   ))}
                 </select>

@@ -24,7 +24,7 @@ const formSchema = z.object({
 });
 
 const SchoolProfileForm: React.FC = () => {
-  const { school, isLoading, error } = useSchool();
+  const { school, isLoading } = useSchool();
   const { toast } = useToast();
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -62,7 +62,7 @@ const SchoolProfileForm: React.FC = () => {
   };
 
   if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error.message}</div>;
+  if (!school) return <div>No school found</div>;
 
   return (
     <Form {...form}>

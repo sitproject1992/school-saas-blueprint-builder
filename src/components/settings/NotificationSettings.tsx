@@ -55,7 +55,10 @@ const NotificationSettings: React.FC = () => {
           .eq('school_id', school.id)
           .single();
         if (data) {
-          form.reset(data);
+          form.reset({
+            email_notifications: data.email_notifications as { new_announcement?: boolean; fee_reminder?: boolean; },
+            in_app_notifications: data.in_app_notifications as { new_announcement?: boolean; fee_reminder?: boolean; },
+          });
         }
       }
     };

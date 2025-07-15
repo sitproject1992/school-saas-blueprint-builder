@@ -15,6 +15,9 @@ const studentSchema = z.object({
   email: z.string().email("Invalid email address"),
   date_of_birth: z.string().optional(),
   class_id: z.string().optional(),
+  admission_number: z.string().optional(),
+  digital_id_card_url: z.string().optional(),
+  health_records: z.string().optional(),
 });
 
 type StudentFormValues = z.infer<typeof studentSchema>;
@@ -48,7 +51,16 @@ export function StudentForm({ student, onSuccess }: StudentFormProps) {
           student: data,
         });
       } else {
-        await createStudent.mutateAsync(data);
+        await createStudent.mutateAsync({
+          first_name: data.first_name || '',
+          last_name: data.last_name || '',
+          email: data.email || '',
+          date_of_birth: data.date_of_birth,
+          class_id: data.class_id,
+          admission_number: data.admission_number,
+          digital_id_card_url: data.digital_id_card_url || '',
+          health_records: data.health_records || '',
+        });
       }
       onSuccess();
     } catch (error) {

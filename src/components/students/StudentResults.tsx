@@ -22,7 +22,7 @@ import StudentResultForm from './StudentResultForm';
 
 const getStudentResults = async (studentId: string) => {
   const { data, error } = await supabase
-    .from('student_test_results')
+    .from('exam_results')
     .select('*, tests(*)')
     .eq('student_id', studentId);
   if (error) throw new Error(error.message);
@@ -47,7 +47,7 @@ const StudentResults: React.FC<StudentResultsProps> = ({ studentId }) => {
   const deleteResult = useMutation({
     mutationFn: async (resultId: string) => {
       const { error } = await supabase
-        .from('student_test_results')
+        .from('exam_results')
         .delete()
         .eq('id', resultId);
       if (error) throw error;
