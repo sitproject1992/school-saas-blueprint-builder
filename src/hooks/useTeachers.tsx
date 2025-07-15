@@ -167,8 +167,11 @@ export const useTeachers = () => {
     teachers,
     isLoading,
     error,
-    createTeacher,
-    updateTeacher,
-    deleteTeacher,
+    createTeacher: createTeacher.mutate,
+    updateTeacher: updateTeacher.mutate,
+    deleteTeacher: deleteTeacher.mutate,
+    isCreating: createTeacher.isPending,
+    isUpdating: updateTeacher.isPending,
+    isDeleting: deleteTeacher.isPending,
   };
 };

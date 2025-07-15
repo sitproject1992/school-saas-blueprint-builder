@@ -76,12 +76,18 @@ export function StudentInfo({ student }: { student: Student }) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {student.classes.syllabus.map((s) => (
+              {student.classes?.syllabus?.map((s) => (
                 <TableRow key={s.id}>
                   <TableCell>{s.title}</TableCell>
                   <TableCell>{s.subjects.name}</TableCell>
                 </TableRow>
-              ))}
+              )) || (
+                <TableRow>
+                  <TableCell colSpan={2} className="text-center text-muted-foreground">
+                    No syllabus available
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </div>
@@ -96,13 +102,19 @@ export function StudentInfo({ student }: { student: Student }) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {student.classes.lesson_plans.map((lp) => (
+              {student.classes?.lesson_plans?.map((lp) => (
                 <TableRow key={lp.id}>
                   <TableCell>{lp.title}</TableCell>
                   <TableCell>{lp.subjects.name}</TableCell>
                   <TableCell>{new Date(lp.planned_date).toLocaleDateString()}</TableCell>
                 </TableRow>
-              ))}
+              )) || (
+                <TableRow>
+                  <TableCell colSpan={3} className="text-center text-muted-foreground">
+                    No lesson plans available
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </div>

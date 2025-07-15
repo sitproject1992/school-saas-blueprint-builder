@@ -31,7 +31,7 @@ const getParentData = async (userId: string) => {
       *,
       profiles (*),
       classes (
-        name,
+        *,
         syllabus (
           *,
           subjects (name)

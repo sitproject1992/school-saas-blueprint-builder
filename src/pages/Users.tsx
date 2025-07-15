@@ -36,7 +36,7 @@ const UsersPage: React.FC = () => {
 
   const handleSuccess = () => {
     setIsFormOpen(false);
-    queryClient.invalidateQueries({ queryKey: ['users'] });
+    // queryClient.invalidateQueries({ queryKey: ['users'] });
   };
 
   if (isLoading) return <div>Loading...</div>;
@@ -54,7 +54,7 @@ const UsersPage: React.FC = () => {
             <DialogHeader>
               <DialogTitle>{selectedUser ? 'Edit User' : 'Add New User'}</DialogTitle>
             </DialogHeader>
-            <UserForm user={selectedUser} onSuccess={handleSuccess} />
+            <UserForm schoolId="demo-school" onSuccess={handleSuccess} onCancel={() => setIsFormOpen(false)} />
           </DialogContent>
         </Dialog>
       </div>

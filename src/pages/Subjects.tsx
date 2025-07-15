@@ -92,8 +92,8 @@ const SubjectsPage: React.FC = () => {
               {subjects?.map((subject) => (
                 <TableRow key={subject.id}>
                   <TableCell>{subject.name}</TableCell>
-                  <TableCell>{subject.teacher_id}</TableCell>
-                  <TableCell>{subject.class_id}</TableCell>
+                <TableCell>Not assigned</TableCell>
+                <TableCell>Not assigned</TableCell>
                   <TableCell>
                     <Button variant="ghost" size="icon" onClick={() => handleEditClick(subject)}>
                       <Edit className="h-4 w-4" />

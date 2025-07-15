@@ -9,10 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useClasses } from '@/hooks/useClasses';
 import { Tables } from '@/integrations/supabase/types';
 
-type Teacher = Tables<'teachers'> & {
-  profile: Tables<'profiles'>;
-  class?: Tables<'classes'>;
-};
+import { Teacher } from '@/hooks/useTeachers';
 
 interface TeacherFormProps {
   teacher?: Teacher;
@@ -27,12 +24,12 @@ export function TeacherForm({ teacher, onSubmit, onCancel, isLoading }: TeacherF
   
   const [formData, setFormData] = useState({
     // Profile data
-    first_name: teacher?.profile?.first_name || '',
-    last_name: teacher?.profile?.last_name || '',
-    email: teacher?.profile?.email || '',
-    phone: teacher?.profile?.phone || '',
-    address: teacher?.profile?.address || '',
-    date_of_birth: teacher?.profile?.date_of_birth || '',
+    first_name: teacher?.profiles?.first_name || '',
+    last_name: teacher?.profiles?.last_name || '',
+    email: teacher?.profiles?.email || '',
+    phone: teacher?.profiles?.phone || '',
+    address: '',
+    date_of_birth: '',
     
     // Teacher data
     qualification: teacher?.qualification || '',
