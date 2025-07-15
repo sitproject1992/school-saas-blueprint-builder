@@ -27,7 +27,7 @@ const formSchema = z.object({
   lastName: z.string().min(1, 'Last name is required'),
   email: z.string().email('Invalid email address'),
   phone: z.string().optional(),
-  role: z.enum(['teacher', 'student', 'parent']),
+  role: z.enum(['school_admin', 'teacher', 'student', 'parent']),
   password: z.string().min(6, 'Password must be at least 6 characters'),
 });
 
@@ -82,18 +82,36 @@ const UserForm: React.FC<UserFormProps> = ({ schoolId, onSuccess, onCancel }) =>
 
         if (profileError) throw profileError;
 
+        // Get the created profile ID
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('user_id', authData.user.id)
+          .single();
+
+        if (!profileData) throw new Error('Failed to get profile ID');
+
         // Create role-specific record if needed
-        if (values.role === 'teacher') {
+        if (values.role === 'school_admin') {
+          await supabase.from('school_admins').insert([
+            {
+              user_id: authData.user.id,
+              school_id: schoolId,
+              role: 'admin',
+              is_active: true,
+            },
+          ]);
+        } else if (values.role === 'teacher') {
           await supabase.from('teachers').insert([
             {
-              profile_id: authData.user.id,
+              profile_id: profileData.id,
               school_id: schoolId,
             },
           ]);
         } else if (values.role === 'student') {
           await supabase.from('students').insert([
             {
-              profile_id: authData.user.id,
+              profile_id: profileData.id,
               school_id: schoolId,
               admission_number: `STU${Date.now()}`,
             },
@@ -187,6 +205,7 @@ const UserForm: React.FC<UserFormProps> = ({ schoolId, onSuccess, onCancel }) =>
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
+                  <SelectItem value="school_admin">School Admin</SelectItem>
                   <SelectItem value="teacher">Teacher</SelectItem>
                   <SelectItem value="student">Student</SelectItem>
                   <SelectItem value="parent">Parent</SelectItem>

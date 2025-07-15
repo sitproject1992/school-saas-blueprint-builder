@@ -86,6 +86,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
+      // Check if it's a demo account
+      const demoAccounts = [
+        { email: 'admin@skooler.com', password: 'admin123', role: 'school_admin' },
+        { email: 'teacher@skooler.com', password: 'teacher123', role: 'teacher' },
+        { email: 'student@skooler.com', password: 'student123', role: 'student' },
+        { email: 'parent@skooler.com', password: 'parent123', role: 'parent' }
+      ];
+      
+      const demoAccount = demoAccounts.find(acc => acc.email === email && acc.password === password);
+      
+      if (demoAccount) {
+        // Handle demo login - check if profile exists
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('email', email)
+          .single();
+        
+        if (profile) {
+          // Create a mock user session for demo
+          const mockUser = {
+            id: profile.user_id,
+            email: email,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            profile,
+            roles: [demoAccount.role]
+          } as AppUser;
+          
+          setUser(mockUser);
+          return;
+        }
+      }
+
+      // Regular Supabase auth for non-demo accounts
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,

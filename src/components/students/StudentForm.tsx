@@ -57,7 +57,7 @@ export function StudentForm({ student, onSuccess }: StudentFormProps) {
           email: data.email || '',
           date_of_birth: data.date_of_birth,
           class_id: data.class_id,
-          admission_number: data.admission_number,
+          admission_number: data.admission_number || `STU${Date.now()}`,
           digital_id_card_url: data.digital_id_card_url || '',
           health_records: data.health_records || '',
         });
@@ -119,6 +119,16 @@ export function StudentForm({ student, onSuccess }: StudentFormProps) {
           <div className="grid gap-2">
             <Label htmlFor="admission_number">Admission Number</Label>
             <Input id="admission_number" {...register("admission_number")} />
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="digital_id_card_url">Digital ID Card URL</Label>
+            <Input id="digital_id_card_url" {...register("digital_id_card_url")} />
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="health_records">Health Records</Label>
+            <Input id="health_records" {...register("health_records")} />
           </div>
           
           <Button type="submit" className="w-full" disabled={createStudent.isPending || updateStudent.isPending}>
