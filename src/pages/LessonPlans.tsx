@@ -158,6 +158,11 @@ export default function LessonPlans() {
   });
 
   const onSubmit = (values: z.infer<typeof lessonPlanSchema>) => {
+    // Validate required fields
+    if (!values.title || !values.planned_date || !values.class_id || !values.subject_id) {
+      return;
+    }
+    
     if (selectedLessonPlan) {
       updateMutation.mutate({ id: selectedLessonPlan.id, ...values });
     } else {

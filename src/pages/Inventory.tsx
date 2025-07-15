@@ -54,20 +54,18 @@ interface InventoryItem {
   name: string;
   description?: string;
   category_id: string;
-  brand?: string;
-  model?: string;
-  serial_number?: string;
-  purchase_date?: string;
-  purchase_price?: number;
-  current_value?: number;
-  supplier?: string;
-  location?: string;
-  condition: string;
-  status: string;
+  sku?: string;
   quantity: number;
-  min_quantity: number;
-  assigned_to?: string;
-  notes?: string;
+  minimum_stock: number;
+  unit_price?: number;
+  location?: string;
+  school_id: string;
+  created_at: string;
+  updated_at: string;
+  // Custom properties for display
+  condition?: string;
+  status?: string;
+  min_quantity?: number;
   inventory_categories?: {
     name: string;
   };
@@ -86,7 +84,7 @@ const Inventory = () => {
     queryKey: ["inventory"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("inventory")
+        .from("inventory_items")
         .select(
           `
           *,
@@ -117,7 +115,7 @@ const Inventory = () => {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("inventory").delete().eq("id", id);
+      const { error } = await supabase.from("inventory_items").delete().eq("id", id);
 
       if (error) throw new Error(error.message);
     },
@@ -186,17 +184,17 @@ const Inventory = () => {
   const filteredItems = inventoryItems.filter((item) => {
     const matchesSearch =
       item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.serial_number?.toLowerCase().includes(searchTerm.toLowerCase());
+      item.sku?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory =
       selectedCategory === "all" || item.category_id === selectedCategory;
     const matchesStatus =
-      selectedStatus === "all" || item.condition === selectedStatus;
+      selectedStatus === "all" || (item.condition && item.condition === selectedStatus);
 
     return matchesSearch && matchesCategory && matchesStatus;
   });
 
   const totalValue = inventoryItems.reduce(
-    (sum, item) => sum + (item.current_value || item.purchase_price || 0),
+    (sum, item) => sum + (item.unit_price || 0) * item.quantity,
     0,
   );
   const totalItems = inventoryItems.reduce(
@@ -204,7 +202,7 @@ const Inventory = () => {
     0,
   );
   const lowStockItems = inventoryItems.filter(
-    (item) => item.quantity <= item.min_quantity,
+    (item) => item.quantity <= (item.min_quantity || item.minimum_stock),
   ).length;
 
   if (isLoading) {
@@ -368,14 +366,14 @@ const Inventory = () => {
                     <TableCell>
                       <div>
                         <div className="font-medium">{item.name}</div>
-                        {item.serial_number && (
+                        {item.sku && (
                           <div className="text-sm text-muted-foreground">
-                            S/N: {item.serial_number}
+                            SKU: {item.sku}
                           </div>
                         )}
-                        {item.assigned_to && (
+                        {item.description && (
                           <div className="text-xs text-muted-foreground mt-1">
-                            Assigned to: {item.assigned_to}
+                            {item.description}
                           </div>
                         )}
                       </div>
@@ -388,7 +386,7 @@ const Inventory = () => {
                     <TableCell>
                       <div>
                         <div className="font-medium">{item.quantity}</div>
-                        {item.quantity <= item.min_quantity && (
+                        {item.quantity <= (item.min_quantity || item.minimum_stock) && (
                           <div className="text-xs text-red-600">Low stock</div>
                         )}
                       </div>
@@ -402,28 +400,21 @@ const Inventory = () => {
                     <TableCell>
                       <Badge
                         variant="outline"
-                        className={getStatusColor(item.condition)}
+                        className={getStatusColor(item.condition || "good")}
                       >
-                        {getStatusIcon(item.condition)}
+                        {getStatusIcon(item.condition || "good")}
                         <span className="ml-1 capitalize">
-                          {item.condition}
+                          {item.condition || "Good"}
                         </span>
                       </Badge>
                     </TableCell>
                     <TableCell>
                       <div className="font-medium">
-                        ₹
-                        {(
-                          item.current_value ||
-                          item.purchase_price ||
-                          0
-                        ).toLocaleString()}
+                        ₹{(item.unit_price || 0).toLocaleString()}
                       </div>
-                      {item.purchase_date && (
-                        <div className="text-xs text-muted-foreground">
-                          {new Date(item.purchase_date).toLocaleDateString()}
-                        </div>
-                      )}
+                      <div className="text-xs text-muted-foreground">
+                        Total: ₹{((item.unit_price || 0) * item.quantity).toLocaleString()}
+                      </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">

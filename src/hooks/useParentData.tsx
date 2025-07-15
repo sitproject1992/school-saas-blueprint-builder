@@ -51,6 +51,10 @@ const getParentData = async (userId: string) => {
       invoices (
         *,
         fee_structures (*)
+      ),
+      fee_payments (
+        *,
+        fee_structures (*)
       )
     `
     )
