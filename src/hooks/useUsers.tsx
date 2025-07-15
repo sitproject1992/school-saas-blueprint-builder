@@ -8,7 +8,7 @@ export interface User {
   email: string;
   first_name: string;
   last_name: string;
-  role: string;
+  role: 'super_admin' | 'school_admin' | 'teacher' | 'student' | 'parent' | 'accountant' | 'inventory_manager';
 }
 
 export function useUsers() {
@@ -53,7 +53,10 @@ export function useCreateUser() {
         .insert({
           user_id: authData.user.id,
           school_id: schoolId,
-          ...userData,
+          email: userData.email,
+          first_name: userData.first_name,
+          last_name: userData.last_name,
+          role: userData.role,
         })
         .select()
         .single();
@@ -83,10 +86,10 @@ export function useUpdateUser() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({ id, ...userData }: User) => {
+    mutationFn: async ({ id, email, first_name, last_name, role }: User) => {
       const { data, error } = await supabase
         .from('profiles')
-        .update(userData)
+        .update({ email, first_name, last_name, role })
         .eq('id', id)
         .select()
         .single();

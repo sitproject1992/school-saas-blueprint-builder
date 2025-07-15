@@ -6,17 +6,22 @@ import { useSchool } from './useSchool';
 
 export interface Teacher {
   id: string;
-  user_id: string;
   school_id: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  date_of_birth: string | null;
-  hire_date: string | null;
-  contract_details: string | null;
-  leave_balance: any;
+  profile_id: string;
+  class_id: string | null;
+  qualification: string | null;
+  experience_years: number | null;
+  salary: number | null;
+  is_class_teacher: boolean | null;
+  joining_date: string | null;
   created_at: string;
   updated_at: string;
+  profiles?: {
+    first_name: string;
+    last_name: string;
+    email: string;
+    phone: string | null;
+  };
 }
 
 export const useTeachers = () => {
@@ -34,7 +39,15 @@ export const useTeachers = () => {
       if (!schoolId) return [];
       const { data, error } = await supabase
         .from('teachers')
-        .select('*')
+        .select(`
+          *,
+          profiles!teachers_profile_id_fkey (
+            first_name,
+            last_name,
+            email,
+            phone
+          )
+        `)
         .eq('school_id', schoolId)
         .order('created_at', { ascending: false });
 
@@ -45,12 +58,36 @@ export const useTeachers = () => {
   });
 
   const createTeacher = useMutation({
-    mutationFn: async (teacherData: Omit<Teacher, 'id' | 'created_at' | 'updated_at' | 'school_id'>) => {
+    mutationFn: async (teacherData: { first_name: string; last_name: string; email: string; qualification?: string; experience_years?: number; salary?: number; class_id?: string }) => {
       if (!schoolId) throw new Error('No active school selected');
 
+      // First create a profile
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .insert({
+          first_name: teacherData.first_name,
+          last_name: teacherData.last_name,
+          email: teacherData.email,
+          role: 'teacher',
+          school_id: schoolId,
+          user_id: crypto.randomUUID(), // This should be a real user ID in production
+        })
+        .select()
+        .single();
+
+      if (profileError) throw profileError;
+
+      // Then create the teacher record
       const { data, error } = await supabase
         .from('teachers')
-        .insert({ ...teacherData, school_id: schoolId })
+        .insert({
+          profile_id: profile.id,
+          school_id: schoolId,
+          qualification: teacherData.qualification,
+          experience_years: teacherData.experience_years,
+          salary: teacherData.salary,
+          class_id: teacherData.class_id,
+        })
         .select()
         .single();
 
