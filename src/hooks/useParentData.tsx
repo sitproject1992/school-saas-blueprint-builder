@@ -31,7 +31,7 @@ const getParentData = async (userId: string) => {
       *,
       profiles (*),
       classes (
-        name,
+        *,
         syllabus (
           *,
           subjects (name)
@@ -49,6 +49,10 @@ const getParentData = async (userId: string) => {
         subjects (name)
       ),
       invoices (
+        *,
+        fee_structures (*)
+      ),
+      fee_payments (
         *,
         fee_structures (*)
       )

@@ -9,10 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useClasses } from '@/hooks/useClasses';
 import { Tables } from '@/integrations/supabase/types';
 
-type Teacher = Tables<'teachers'> & {
-  profile: Tables<'profiles'>;
-  class?: Tables<'classes'>;
-};
+import { Teacher } from '@/hooks/useTeachers';
 
 interface TeacherFormProps {
   teacher?: Teacher;
@@ -27,12 +24,12 @@ export function TeacherForm({ teacher, onSubmit, onCancel, isLoading }: TeacherF
   
   const [formData, setFormData] = useState({
     // Profile data
-    first_name: teacher?.profile?.first_name || '',
-    last_name: teacher?.profile?.last_name || '',
-    email: teacher?.profile?.email || '',
-    phone: teacher?.profile?.phone || '',
-    address: teacher?.profile?.address || '',
-    date_of_birth: teacher?.profile?.date_of_birth || '',
+    first_name: teacher?.profiles?.first_name || '',
+    last_name: teacher?.profiles?.last_name || '',
+    email: teacher?.profiles?.email || '',
+    phone: teacher?.profiles?.phone || '',
+    address: '',
+    date_of_birth: '',
     
     // Teacher data
     qualification: teacher?.qualification || '',
@@ -63,7 +60,7 @@ export function TeacherForm({ teacher, onSubmit, onCancel, isLoading }: TeacherF
       experience_years: formData.experience_years,
       joining_date: formData.joining_date,
       salary: formData.salary ? parseFloat(String(formData.salary)) : null,
-      class_id: formData.class_id || null,
+      class_id: formData.class_id === 'none' ? null : formData.class_id || null,
       is_class_teacher: formData.is_class_teacher,
     };
 
@@ -213,7 +210,7 @@ export function TeacherForm({ teacher, onSubmit, onCancel, isLoading }: TeacherF
                     <SelectValue placeholder="Select a class" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">No class assigned</SelectItem>
+                    <SelectItem value="none">No class assigned</SelectItem>
                     {safeClasses.map((cls) => (
                       <SelectItem key={cls.id} value={cls.id}>
                         {cls.name} {cls.section && `- ${cls.section}`}

@@ -27,12 +27,18 @@ import AdminSetup from "./pages/AdminSetup";
 import TeacherRegistration from "./pages/TeacherRegistration";
 import StudentRegistration from "./pages/StudentRegistration";
 import RegistrationComplete from "./pages/RegistrationComplete";
+<<<<<<< HEAD
 import Exams from "./pages/Exams";
 import Announcements from "./pages/Announcements";
 import Statistics from "./pages/Statistics";
 import Schools from "./pages/Schools";
 import Users from "./pages/Users";
 import Settings from "./pages/Settings";
+=======
+import SettingsPage from "./pages/Settings";
+import SchoolsPage from "./pages/Schools";
+import UsersPage from "./pages/Users";
+>>>>>>> origin/main
 
 const queryClient = new QueryClient();
 
@@ -54,7 +60,10 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-function AppLayout({ children }: { children: React.ReactNode }) {
+import { SchoolProvider } from "@/hooks/useSchool";
+import { ProtectedRoutes } from "./ProtectedRoutes";
+
+export function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full">
@@ -71,6 +80,7 @@ function AppLayout({ children }: { children: React.ReactNode }) {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
+<<<<<<< HEAD
       <TooltipProvider>
         <Toaster />
         <Sonner />
@@ -309,6 +319,34 @@ const App = () => (
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
+=======
+      <SchoolProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/auth" element={<AuthPage />} />
+              <Route path="/school-registration" element={<SchoolRegistration />} />
+              <Route path="/setup-admin" element={<AdminSetup />} />
+              <Route path="/teacher-registration" element={<TeacherRegistration />} />
+              <Route path="/student-registration" element={<StudentRegistration />} />
+              <Route path="/registration-complete" element={<RegistrationComplete />} />
+              <Route
+                path="/*"
+                element={
+                  <ProtectedRoute>
+                    <ProtectedRoutes />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </SchoolProvider>
+>>>>>>> origin/main
     </AuthProvider>
   </QueryClientProvider>
 );

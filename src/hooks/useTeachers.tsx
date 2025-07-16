@@ -2,46 +2,30 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
+import { useSchool } from './useSchool';
+
 export interface Teacher {
   id: string;
-  profile_id: string;
   school_id: string;
+  profile_id: string;
   class_id: string | null;
+  qualification: string | null;
   experience_years: number | null;
+  salary: number | null;
   is_class_teacher: boolean | null;
   joining_date: string | null;
-  qualification: string | null;
-  salary: number | null;
   created_at: string;
   updated_at: string;
-  profiles: {
+  profiles?: {
     first_name: string;
     last_name: string;
     email: string;
     phone: string | null;
-    date_of_birth: string | null;
-    address: string | null;
   };
 }
 
-type TeacherInsert = {
-  class_id?: string;
-  experience_years?: number;
-  is_class_teacher?: boolean;
-  joining_date?: string;
-  qualification?: string;
-  salary?: number;
-  profile: {
-    first_name: string;
-    last_name: string;
-    email: string;
-    phone?: string | null;
-    address?: string | null;
-    date_of_birth?: string | null;
-  };
-};
-
 export const useTeachers = () => {
+  const { schoolId } = useSchool();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -50,71 +34,65 @@ export const useTeachers = () => {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ['teachers'],
+    queryKey: ['teachers', schoolId],
     queryFn: async () => {
+      if (!schoolId) return [];
       const { data, error } = await supabase
         .from('teachers')
         .select(`
           *,
-          profiles:profile_id (
+          profiles!teachers_profile_id_fkey (
             first_name,
             last_name,
             email,
-            phone,
-            date_of_birth,
-            address
+            phone
           )
         `)
+        .eq('school_id', schoolId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
       return data as Teacher[];
     },
+    enabled: !!schoolId,
   });
 
   const createTeacher = useMutation({
-    mutationFn: async (teacherData: TeacherInsert) => {
-      // Create a user account first
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: teacherData.profile.email,
-        password: Math.random().toString(36).slice(-8), // Temporary password
-      });
+    mutationFn: async (teacherData: { first_name: string; last_name: string; email: string; qualification?: string; experience_years?: number; salary?: number; class_id?: string }) => {
+      if (!schoolId) throw new Error('No active school selected');
 
-      if (authError) throw authError;
-
-      if (!authData.user) throw new Error('Failed to create user');
-
-      // Create the profile
+      // First create a profile
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .insert({
-          user_id: authData.user.id,
-          ...teacherData.profile,
-          role: 'teacher'
+          first_name: teacherData.first_name,
+          last_name: teacherData.last_name,
+          email: teacherData.email,
+          role: 'teacher',
+          school_id: schoolId,
+          user_id: crypto.randomUUID(), // This should be a real user ID in production
         })
         .select()
         .single();
 
       if (profileError) throw profileError;
 
-      // Create the teacher record
-      const { data: teacher, error: teacherError } = await supabase
+      // Then create the teacher record
+      const { data, error } = await supabase
         .from('teachers')
         .insert({
           profile_id: profile.id,
-          school_id: profile.school_id || '1', // Default school
-          class_id: teacherData.class_id,
-          experience_years: teacherData.experience_years,
-          is_class_teacher: teacherData.is_class_teacher,
-          joining_date: teacherData.joining_date,
+          school_id: schoolId,
           qualification: teacherData.qualification,
+          experience_years: teacherData.experience_years,
           salary: teacherData.salary,
+          class_id: teacherData.class_id,
         })
         .select()
         .single();
 
-      if (teacherError) throw teacherError;
-      return teacher;
+      if (error) throw error;
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['teachers'] });
@@ -189,8 +167,11 @@ export const useTeachers = () => {
     teachers,
     isLoading,
     error,
-    createTeacher,
-    updateTeacher,
-    deleteTeacher,
+    createTeacher: createTeacher.mutate,
+    updateTeacher: updateTeacher.mutate,
+    deleteTeacher: deleteTeacher.mutate,
+    isCreating: createTeacher.isPending,
+    isUpdating: updateTeacher.isPending,
+    isDeleting: deleteTeacher.isPending,
   };
 };

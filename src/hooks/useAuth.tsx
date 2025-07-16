@@ -3,7 +3,8 @@ import { supabase } from '@/integrations/supabase/client';
 import type { User } from '@supabase/supabase-js';
 
 interface AppUser extends User {
-  roles: string[];
+  profile: any; // Replace 'any' with a proper profile type
+  roles?: string[]; // Add roles for compatibility
 }
 
 interface AuthContextType {
@@ -16,38 +17,27 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Demo credentials that will work with simple authentication
-const demoCredentials = [
-  { email: 'admin@skooler.com', password: 'admin123', role: 'school_admin' },
-  { email: 'teacher@skooler.com', password: 'teacher123', role: 'teacher' },
-  { email: 'student@skooler.com', password: 'student123', role: 'student' },
-  { email: 'parent@skooler.com', password: 'parent123', role: 'parent' }
-];
-
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchUserRoles = async (user: User) => {
+  const fetchUserProfile = async (user: User) => {
     try {
       const { data, error } = await supabase
-        .from('user_roles')
-        .select('roles(name)')
-        .eq('user_id', user.id);
+        .from('profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
 
       if (error) {
-        console.error('Error fetching user roles:', error);
-        // For demo purposes, assign role based on email
-        const demoUser = demoCredentials.find(cred => cred.email === user.email);
-        return demoUser ? [demoUser.role] : ['student'];
+        console.error('Error fetching user profile:', error);
+        return null;
       }
 
-      return data ? data.map((item: any) => item.roles.name) : [];
+      return data;
     } catch (error) {
-      console.error('Error in fetchUserRoles:', error);
-      // For demo purposes, assign role based on email
-      const demoUser = demoCredentials.find(cred => cred.email === user.email);
-      return demoUser ? [demoUser.role] : ['student'];
+      console.error('Error in fetchUserProfile:', error);
+      return null;
     }
   };
 
@@ -55,10 +45,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const bootstrapAuth = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user) {
-          const roles = await fetchUserRoles(session.user);
-          setUser({ ...session.user, roles });
-        }
+      if (session?.user) {
+        const profile = await fetchUserProfile(session.user);
+        setUser({ 
+          ...session.user, 
+          profile,
+          roles: profile?.role ? [profile.role] : []
+        });
+      }
       } catch (error) {
         console.error('Error in bootstrapAuth:', error);
       } finally {
@@ -71,8 +65,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       try {
         if (session?.user) {
-          const roles = await fetchUserRoles(session.user);
-          setUser({ ...session.user, roles });
+          const profile = await fetchUserProfile(session.user);
+          setUser({ 
+            ...session.user, 
+            profile,
+            roles: profile?.role ? [profile.role] : []
+          });
         } else {
           setUser(null);
         }
@@ -88,34 +86,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
-      // Check if this is a demo credential
-      const demoUser = demoCredentials.find(cred => cred.email === email && cred.password === password);
+      // Check if it's a demo account
+      const demoAccounts = [
+        { email: 'admin@skooler.com', password: 'admin123', role: 'school_admin', user_id: '11111111-1111-1111-1111-111111111111' },
+        { email: 'teacher@skooler.com', password: 'teacher123', role: 'teacher', user_id: '22222222-2222-2222-2222-222222222222' },
+        { email: 'student@skooler.com', password: 'student123', role: 'student', user_id: '33333333-3333-3333-3333-333333333333' },
+        { email: 'parent@skooler.com', password: 'parent123', role: 'parent', user_id: '44444444-4444-4444-4444-444444444444' }
+      ];
       
-      if (demoUser) {
-        // For demo purposes, create a mock session
-        const mockUser: AppUser = {
-          id: `demo-${demoUser.role}`,
-          email: demoUser.email,
+      const demoAccount = demoAccounts.find(acc => acc.email === email && acc.password === password);
+      
+      if (demoAccount) {
+        // Handle demo login - create a mock session
+        const mockUser = {
+          id: demoAccount.user_id,
+          email: email,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
-          email_confirmed_at: new Date().toISOString(),
-          confirmed_at: new Date().toISOString(),
-          last_sign_in_at: new Date().toISOString(),
-          app_metadata: {},
-          user_metadata: {},
-          identities: [],
-          aud: 'authenticated',
-          role: 'authenticated',
-          roles: [demoUser.role]
-        };
+          profile: {
+            role: demoAccount.role,
+            first_name: demoAccount.role.charAt(0).toUpperCase() + demoAccount.role.slice(1),
+            last_name: 'Demo',
+            email: email,
+            school_id: 'demo-school'
+          },
+          roles: [demoAccount.role]
+        } as AppUser;
         
         setUser(mockUser);
-        // Store in localStorage for persistence
-        localStorage.setItem('demo_user', JSON.stringify(mockUser));
         return;
       }
 
-      // Try regular Supabase authentication
+      // Regular Supabase auth for non-demo accounts
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -145,11 +147,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     try {
-      // Clear demo user from localStorage
-      localStorage.removeItem('demo_user');
-      setUser(null);
-      
-      // Also sign out from Supabase
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
     } catch (error: any) {
@@ -157,20 +154,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       throw error;
     }
   };
-
-  // Check for demo user in localStorage on initialization
-  useEffect(() => {
-    const demoUser = localStorage.getItem('demo_user');
-    if (demoUser && !user) {
-      try {
-        const parsedUser = JSON.parse(demoUser);
-        setUser(parsedUser);
-      } catch (error) {
-        console.error('Error parsing demo user:', error);
-        localStorage.removeItem('demo_user');
-      }
-    }
-  }, []);
 
   const value = {
     user,

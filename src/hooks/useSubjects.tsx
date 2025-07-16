@@ -2,14 +2,16 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
+import { useSchool } from './useSchool';
+
 export interface Subject {
   id: string;
+  school_id: string;
   name: string;
-  teacher_id: string | null;
-  class_id: string | null;
-  school_id?: string | null;
-  created_at?: string;
-  updated_at?: string;
+  code: string | null;
+  description: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 async function getSubjects(): Promise<Subject[]> {

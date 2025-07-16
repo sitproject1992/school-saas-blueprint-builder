@@ -60,7 +60,15 @@ const createLessonPlan = async (
 ) => {
   const { data, error } = await supabase
     .from("lesson_plans")
-    .insert(newLessonPlan)
+    .insert({
+      title: newLessonPlan.title,
+      objectives: newLessonPlan.objectives,
+      content: newLessonPlan.content,
+      planned_date: newLessonPlan.planned_date,
+      class_id: newLessonPlan.class_id,
+      subject_id: newLessonPlan.subject_id,
+      teacher_id: newLessonPlan.teacher_id,
+    })
     .select();
   if (error) throw new Error(error.message);
   return data;
@@ -158,6 +166,11 @@ export default function LessonPlans() {
   });
 
   const onSubmit = (values: z.infer<typeof lessonPlanSchema>) => {
+    // Validate required fields
+    if (!values.title || !values.planned_date || !values.class_id || !values.subject_id) {
+      return;
+    }
+    
     if (selectedLessonPlan) {
       updateMutation.mutate({ id: selectedLessonPlan.id, ...values });
     } else {

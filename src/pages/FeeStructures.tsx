@@ -13,6 +13,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+<<<<<<< HEAD
+=======
+import { Button } from "@/components/ui/button";
+>>>>>>> origin/main
 import {
   Dialog,
   DialogContent,
@@ -20,6 +24,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+<<<<<<< HEAD
 import {
   Select,
   SelectContent,
@@ -287,6 +292,71 @@ export default function FeeStructures() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
+=======
+import FeeStructureForm from "../components/fees/FeeStructureForm";
+import { useInvoices } from "@/hooks/useInvoices";
+
+const getFeeStructures = async () => {
+  const { data, error } = await supabase.from("fee_structures").select("*");
+  if (error) throw new Error(error.message);
+  return data;
+};
+
+const deleteFeeStructure = async (id: string) => {
+  const { data, error } = await supabase
+    .from("fee_structures")
+    .delete()
+    .eq("id", id);
+  if (error) throw new Error(error.message);
+  return data;
+};
+
+export default function FeeStructures() {
+  const queryClient = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const [selectedFeeStructure, setSelectedFeeStructure] = useState<any>(null);
+
+  const {
+    data: feeStructures,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["feeStructures"],
+    queryFn: getFeeStructures,
+  });
+
+  const { generateInvoicesMutation } = useInvoices();
+
+  const deleteMutation = useMutation({
+    mutationFn: deleteFeeStructure,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["feeStructures"] });
+    },
+  });
+
+  const handleEdit = (feeStructure: any) => {
+    setSelectedFeeStructure(feeStructure);
+    setOpen(true);
+  };
+
+  const handleAddNew = () => {
+    setSelectedFeeStructure(null);
+    setOpen(true);
+  };
+
+  const handleSuccess = () => {
+    setOpen(false);
+    queryClient.invalidateQueries({ queryKey: ["feeStructures"] });
+  };
+
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
+
+  return (
+    <div>
+      <div className="flex justify-between mb-4">
+        <h1 className="text-2xl font-bold">Fee Structures</h1>
+>>>>>>> origin/main
         <div>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
             Fee Structure Management
@@ -320,6 +390,7 @@ export default function FeeStructures() {
               <DialogHeader>
                 <DialogTitle>Create New Fee Structure</DialogTitle>
               </DialogHeader>
+<<<<<<< HEAD
               <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
@@ -391,6 +462,12 @@ export default function FeeStructures() {
                   </Button>
                 </div>
               </div>
+=======
+              <FeeStructureForm
+                feeStructure={selectedFeeStructure}
+                onSuccess={handleSuccess}
+              />
+>>>>>>> origin/main
             </DialogContent>
           </Dialog>
         </div>

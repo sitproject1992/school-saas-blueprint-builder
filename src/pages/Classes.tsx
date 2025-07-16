@@ -19,18 +19,7 @@ import { ClassForm } from "@/components/classes/ClassForm";
 import { useState } from "react";
 
 const fetchClasses = async () => {
-  const { data, error } = await supabase.from("classes").select(`
-    id,
-    name,
-    teacher_id,
-    teachers (
-      profile_id,
-      profiles (
-        first_name,
-        last_name
-      )
-    )
-  `);
+  const { data, error } = await supabase.from("classes").select("*");
   if (error) throw new Error(error.message);
   return data;
 };
@@ -80,7 +69,8 @@ export default function ClassesPage() {
         <TableHeader>
           <TableRow>
             <TableHead>Class Name</TableHead>
-            <TableHead>Teacher</TableHead>
+            <TableHead>Section</TableHead>
+            <TableHead>Capacity</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -88,11 +78,8 @@ export default function ClassesPage() {
           {classes?.map((classItem) => (
             <TableRow key={classItem.id}>
               <TableCell>{classItem.name}</TableCell>
-              <TableCell>
-                {classItem.teachers
-                  ? `${classItem.teachers.profiles.first_name} ${classItem.teachers.profiles.last_name}`
-                  : "Unassigned"}
-              </TableCell>
+              <TableCell>{classItem.section || 'N/A'}</TableCell>
+              <TableCell>{classItem.capacity || 0}</TableCell>
               <TableCell>
                 <Button variant="outline" size="sm" onClick={() => openForm(classItem)}>
                   Edit

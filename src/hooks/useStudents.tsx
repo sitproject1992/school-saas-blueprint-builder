@@ -2,27 +2,21 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
+import { useSchool } from './useSchool';
+
 export interface Student {
   id: string;
-  profile_id: string;
   school_id: string;
   class_id: string | null;
+  first_name: string;
+  last_name: string;
+  email: string;
+  date_of_birth: string | null;
   admission_number: string;
-  admission_date: string | null;
-  blood_group: string | null;
-  medical_conditions: string | null;
-  emergency_contact_name: string | null;
-  emergency_contact_phone: string | null;
+  digital_id_card_url: string | null;
+  health_records: any;
   created_at: string;
   updated_at: string;
-  profiles: {
-    first_name: string;
-    last_name: string;
-    email: string;
-    phone: string | null;
-    date_of_birth: string | null;
-    address: string | null;
-  };
   classes: {
     name: string;
     section: string | null;
@@ -30,94 +24,91 @@ export interface Student {
 }
 
 export function useStudents() {
+  const { schoolId } = useSchool();
   return useQuery({
-    queryKey: ['students'],
+    queryKey: ['students', schoolId],
     queryFn: async () => {
+      if (!schoolId) return [];
       const { data, error } = await supabase
         .from('students')
         .select(`
           *,
-          profiles:profile_id (
+          profiles!students_profile_id_fkey (
             first_name,
             last_name,
             email,
-            phone,
-            date_of_birth,
-            address
+            date_of_birth
           ),
-          classes:class_id (
+          classes (
             name,
             section
           )
         `)
+        .eq('school_id', schoolId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data as Student[];
-    }
+      return data?.map(student => ({
+        id: student.id,
+        school_id: student.school_id,
+        class_id: student.class_id,
+        admission_number: student.admission_number,
+        first_name: student.profiles?.first_name || '',
+        last_name: student.profiles?.last_name || '',
+        email: student.profiles?.email || '',
+        date_of_birth: student.profiles?.date_of_birth || null,
+        digital_id_card_url: null,
+        health_records: student.medical_conditions,
+        created_at: student.created_at,
+        updated_at: student.updated_at,
+        classes: student.classes,
+      })) as Student[] || [];
+    },
+    enabled: !!schoolId,
   });
 }
 
 export function useCreateStudent() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { schoolId } = useSchool();
 
   return useMutation({
-    mutationFn: async (data: {
-      student: {
-        admission_number: string;
-        admission_date?: string;
-        class_id?: string;
-        blood_group?: string;
-        medical_conditions?: string;
-        emergency_contact_name?: string;
-        emergency_contact_phone?: string;
-      };
-      profile: {
-        first_name: string;
-        last_name: string;
-        email: string;
-        phone?: string;
-        date_of_birth?: string;
-        address?: string;
-      };
-    }) => {
-      // Create a user account first
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: data.profile.email,
-        password: Math.random().toString(36).slice(-8), // Temporary password
-      });
+    mutationFn: async (studentData: Omit<Student, 'id' | 'created_at' | 'updated_at' | 'classes' | 'school_id'>) => {
+      if (!schoolId) throw new Error('No active school selected');
 
-      if (authError) throw authError;
-
-      if (!authData.user) throw new Error('Failed to create user');
-
-      // Create the profile
+      // First create a profile
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .insert({
-          user_id: authData.user.id,
-          ...data.profile,
-          role: 'student'
+          first_name: studentData.first_name,
+          last_name: studentData.last_name,
+          email: studentData.email,
+          date_of_birth: studentData.date_of_birth,
+          role: 'student',
+          school_id: schoolId,
+          user_id: crypto.randomUUID(), // This should be a real user ID in production
         })
         .select()
         .single();
 
       if (profileError) throw profileError;
 
-      // Create the student record
-      const { data: student, error: studentError } = await supabase
+      // Then create the student record
+      const { data, error } = await supabase
         .from('students')
-        .insert({
+        .insert({ 
+          admission_number: studentData.admission_number,
+          class_id: studentData.class_id,
+          medical_conditions: studentData.health_records,
+          school_id: schoolId,
           profile_id: profile.id,
-          school_id: profile.school_id || '1', // Default school
-          ...data.student
         })
         .select()
         .single();
 
-      if (studentError) throw studentError;
-      return student;
+      if (error) throw error;
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['students'] });

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Edit, Trash2, Search, GraduationCap, Mail, Phone, Calendar } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, GraduationCap, Mail, Phone, Calendar, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,12 +9,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useTeachers } from '@/hooks/useTeachers';
 import { TeacherForm } from '@/components/teachers/TeacherForm';
+import TeacherEvaluation from '@/components/teachers/TeacherEvaluation';
 import { Tables } from '@/integrations/supabase/types';
 
-type Teacher = Tables<'teachers'> & {
-  profile: Tables<'profiles'>;
-  class?: Tables<'classes'>;
-};
+import { Teacher } from '@/hooks/useTeachers';
 
 export default function Teachers() {
   const { teachers, isLoading, createTeacher, updateTeacher, deleteTeacher, isCreating, isUpdating, isDeleting } = useTeachers();
@@ -23,11 +21,12 @@ export default function Teachers() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [teacherToDelete, setTeacherToDelete] = useState<Teacher | null>(null);
+  const [isEvaluationOpen, setIsEvaluationOpen] = useState(false);
 
   const filteredTeachers = teachers.filter(teacher =>
-    teacher.profile.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    teacher.profile.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    teacher.profile.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    teacher.profiles?.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    teacher.profiles?.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    teacher.profiles?.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     teacher.qualification?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -44,6 +43,11 @@ export default function Teachers() {
   const handleDeleteTeacher = (teacher: Teacher) => {
     setTeacherToDelete(teacher);
     setIsDeleteDialogOpen(true);
+  };
+
+  const handleEvaluateTeacher = (teacher: Teacher) => {
+    setSelectedTeacher(teacher);
+    setIsEvaluationOpen(true);
   };
 
   const handleFormSubmit = (data: any) => {
@@ -117,14 +121,14 @@ export default function Teachers() {
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between">
                 <div className="flex items-center space-x-3">
-                  <Avatar className="h-12 w-12">
+                    <Avatar className="h-12 w-12">
                     <AvatarFallback className="bg-primary text-primary-foreground">
-                      {getInitials(teacher.profile.first_name, teacher.profile.last_name)}
+                      {getInitials(teacher.profiles?.first_name || '', teacher.profiles?.last_name || '')}
                     </AvatarFallback>
                   </Avatar>
                   <div>
                     <CardTitle className="text-lg">
-                      {teacher.profile.first_name} {teacher.profile.last_name}
+                      {teacher.profiles?.first_name} {teacher.profiles?.last_name}
                     </CardTitle>
                     {teacher.is_class_teacher && (
                       <Badge variant="secondary" className="text-xs">
@@ -134,6 +138,13 @@ export default function Teachers() {
                   </div>
                 </div>
                 <div className="flex space-x-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleEvaluateTeacher(teacher)}
+                  >
+                    <Star className="h-4 w-4" />
+                  </Button>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -154,13 +165,13 @@ export default function Teachers() {
             <CardContent className="space-y-3">
               <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                 <Mail className="h-4 w-4" />
-                <span>{teacher.profile.email}</span>
+                <span>{teacher.profiles?.email}</span>
               </div>
               
-              {teacher.profile.phone && (
+              {teacher.profiles?.phone && (
                 <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                   <Phone className="h-4 w-4" />
-                  <span>{teacher.profile.phone}</span>
+                  <span>{teacher.profiles.phone}</span>
                 </div>
               )}
 
@@ -178,10 +189,10 @@ export default function Teachers() {
                 </div>
               )}
 
-              {teacher.class && (
+              {teacher.class_id && (
                 <div className="pt-2">
                   <Badge variant="outline">
-                    {teacher.class.name} {teacher.class.section && `- ${teacher.class.section}`}
+                    Class Teacher
                   </Badge>
                 </div>
               )}
@@ -226,12 +237,23 @@ export default function Teachers() {
         </DialogContent>
       </Dialog>
 
+      <Dialog open={isEvaluationOpen} onOpenChange={setIsEvaluationOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              Evaluate {selectedTeacher?.profiles?.first_name} {selectedTeacher?.profiles?.last_name}
+            </DialogTitle>
+          </DialogHeader>
+          <TeacherEvaluation teacherId={selectedTeacher?.id} />
+        </DialogContent>
+      </Dialog>
+
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Teacher</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete {teacherToDelete?.profile.first_name} {teacherToDelete?.profile.last_name}? 
+              Are you sure you want to delete {teacherToDelete?.profiles?.first_name} {teacherToDelete?.profiles?.last_name}? 
               This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>

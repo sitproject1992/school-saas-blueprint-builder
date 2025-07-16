@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useCreateStudent, useUpdateStudent } from "@/hooks/useStudents";
+import { useCreateStudent, useUpdateStudent, Student } from "@/hooks/useStudents";
 import { useClasses } from "@/hooks/useClasses";
 
 const studentSchema = z.object({
@@ -16,18 +16,14 @@ const studentSchema = z.object({
   date_of_birth: z.string().optional(),
   class_id: z.string().optional(),
   admission_number: z.string().optional(),
-  phone: z.string().optional(),
-  address: z.string().optional(),
-  blood_group: z.string().optional(),
-  medical_conditions: z.string().optional(),
-  emergency_contact_name: z.string().optional(),
-  emergency_contact_phone: z.string().optional(),
+  digital_id_card_url: z.string().optional(),
+  health_records: z.string().optional(),
 });
 
 type StudentFormValues = z.infer<typeof studentSchema>;
 
 interface StudentFormProps {
-  student?: any;
+  student?: Student;
   onSuccess: () => void;
 }
 
@@ -44,20 +40,7 @@ export function StudentForm({ student, onSuccess }: StudentFormProps) {
     formState: { errors },
   } = useForm<StudentFormValues>({
     resolver: zodResolver(studentSchema),
-    defaultValues: student ? {
-      first_name: student.profiles?.first_name || "",
-      last_name: student.profiles?.last_name || "",
-      email: student.profiles?.email || "",
-      date_of_birth: student.profiles?.date_of_birth || "",
-      class_id: student.class_id || "",
-      admission_number: student.admission_number || "",
-      phone: student.profiles?.phone || "",
-      address: student.profiles?.address || "",
-      blood_group: student.blood_group || "",
-      medical_conditions: student.medical_conditions || "",
-      emergency_contact_name: student.emergency_contact_name || "",
-      emergency_contact_phone: student.emergency_contact_phone || "",
-    } : {},
+    defaultValues: student || {},
   });
 
   const onSubmit = async (data: StudentFormValues) => {
@@ -65,33 +48,18 @@ export function StudentForm({ student, onSuccess }: StudentFormProps) {
       if (student) {
         await updateStudent.mutateAsync({
           id: student.id,
-          updates: {
-            class_id: data.class_id || null,
-            admission_number: data.admission_number || student.admission_number,
-            blood_group: data.blood_group || null,
-            medical_conditions: data.medical_conditions || null,
-            emergency_contact_name: data.emergency_contact_name || null,
-            emergency_contact_phone: data.emergency_contact_phone || null,
-          }
+          student: data,
         });
       } else {
         await createStudent.mutateAsync({
-          student: {
-            admission_number: data.admission_number || `STU${Date.now()}`,
-            class_id: data.class_id || null,
-            blood_group: data.blood_group || null,
-            medical_conditions: data.medical_conditions || null,
-            emergency_contact_name: data.emergency_contact_name || null,
-            emergency_contact_phone: data.emergency_contact_phone || null,
-          },
-          profile: {
-            first_name: data.first_name,
-            last_name: data.last_name,
-            email: data.email,
-            phone: data.phone || null,
-            date_of_birth: data.date_of_birth || null,
-            address: data.address || null,
-          }
+          first_name: data.first_name || '',
+          last_name: data.last_name || '',
+          email: data.email || '',
+          date_of_birth: data.date_of_birth,
+          class_id: data.class_id,
+          admission_number: data.admission_number || `STU${Date.now()}`,
+          digital_id_card_url: data.digital_id_card_url || '',
+          health_records: data.health_records || '',
         });
       }
       onSuccess();
@@ -151,6 +119,16 @@ export function StudentForm({ student, onSuccess }: StudentFormProps) {
           <div className="grid gap-2">
             <Label htmlFor="admission_number">Admission Number</Label>
             <Input id="admission_number" {...register("admission_number")} />
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="digital_id_card_url">Digital ID Card URL</Label>
+            <Input id="digital_id_card_url" {...register("digital_id_card_url")} />
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="health_records">Health Records</Label>
+            <Input id="health_records" {...register("health_records")} />
           </div>
           
           <Button type="submit" className="w-full" disabled={createStudent.isPending || updateStudent.isPending}>

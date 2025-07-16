@@ -120,26 +120,26 @@ export default function SchoolRegistration() {
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [schoolData, setSchoolData] = useState<SchoolData>({
-    schoolName: "",
-    subdomain: "",
-    schoolType: "",
-    establishedYear: "",
-    email: "",
-    phone: "",
+    schoolName: "Global Academy English School",
+    subdomain: "global-academy",
+    schoolType: "K-12 School",
+    establishedYear: "2010",
+    email: "sujan1nepal@gmail.com",
+    phone: "+977 1234567890",
     website: "",
-    address: "",
-    city: "",
-    state: "",
-    pincode: "",
-    adminFirstName: "",
-    adminLastName: "",
-    adminEmail: "",
-    adminPhone: "",
-    adminPosition: "",
-    totalStudents: "",
-    totalTeachers: "",
-    gradeRange: "",
-    curriculum: "",
+    address: "Suryavinayak 10",
+    city: "Bhaktapur",
+    state: "Bagmati",
+    pincode: "00977",
+    adminFirstName: "Krishna",
+    adminLastName: "Ngakhusi",
+    adminEmail: "sujan1nepal@gmail.com",
+    adminPhone: "+977 1234567890",
+    adminPosition: "Principal",
+    totalStudents: "500",
+    totalTeachers: "300",
+    gradeRange: "1-12",
+    curriculum: "National Curriculum",
     subscriptionPlan: "professional",
   });
 
@@ -222,13 +222,13 @@ export default function SchoolRegistration() {
     setIsLoading(true);
     try {
       // Validate subdomain uniqueness
-      const { data: existingSchool, error: checkError } = await supabase
+      const { data: existingSchoolData, error: checkError } = await supabase
         .from("schools")
         .select("id")
         .eq("subdomain", schoolData.subdomain)
-        .single();
+        .maybeSingle();
 
-      if (existingSchool) {
+      if (existingSchoolData) {
         toast({
           title: "Subdomain Already Exists",
           description: "This subdomain is already taken. Please choose a different one.",
@@ -286,7 +286,11 @@ export default function SchoolRegistration() {
       
       let errorMessage = "Failed to register school. Please try again.";
       if (error.message?.includes("duplicate key")) {
-        errorMessage = "This subdomain is already taken. Please choose a different one.";
+        if (error.message?.includes('unique constraint "subjects_school_id_code_key"')) {
+          errorMessage = "A problem occurred during initial setup. Please try again with a different school name or contact support. (Error: Duplicate subject code)";
+        } else {
+          errorMessage = "This subdomain is already taken. Please choose a different one.";
+        }
       } else if (error.message?.includes("violates")) {
         errorMessage = "Please check your input data and try again.";
       } else if (error.message) {
