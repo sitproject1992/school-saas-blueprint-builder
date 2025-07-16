@@ -38,10 +38,12 @@ export function AuthPage() {
   const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
     try {
       if (isLogin) {
         await signIn(email, password);
@@ -51,7 +53,9 @@ export function AuthPage() {
       }
       navigate("/dashboard");
     } catch (error) {
-      alert(error instanceof Error ? error.message : "An error occurred");
+      const errorMessage =
+        error instanceof Error ? error.message : "An error occurred";
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -195,6 +199,30 @@ export function AuthPage() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-6">
+                    {error && (
+                      <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                        <div className="flex items-start gap-2">
+                          <div className="text-red-600 text-sm">
+                            <strong>Authentication Error:</strong>
+                          </div>
+                        </div>
+                        <p className="text-red-700 text-sm mt-1 whitespace-pre-line">
+                          {error}
+                        </p>
+                        {error.includes("demo accounts") && (
+                          <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded">
+                            <p className="text-blue-800 text-sm font-medium mb-2">
+                              Quick Demo Access:
+                            </p>
+                            <p className="text-blue-700 text-xs">
+                              Switch to the "Demo Access" tab above for
+                              one-click login to all demo accounts.
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
                     <form onSubmit={handleSubmit} className="space-y-4">
                       <div className="space-y-2">
                         <Label htmlFor="email" className="text-sm font-medium">
@@ -284,7 +312,7 @@ export function AuthPage() {
                       </Button>
                     </form>
 
-                    <div className="text-center">
+                    <div className="text-center space-y-4">
                       <Button
                         variant="link"
                         onClick={() => setIsLogin(!isLogin)}
@@ -294,6 +322,35 @@ export function AuthPage() {
                           ? "Don't have an account? Sign Up"
                           : "Already have an account? Sign In"}
                       </Button>
+
+                      {isLogin && (
+                        <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Shield className="h-4 w-4 text-blue-600" />
+                            <p className="text-sm font-medium text-blue-900">
+                              Demo Access Available
+                            </p>
+                          </div>
+                          <p className="text-xs text-blue-700 mb-3">
+                            Try the system with pre-configured demo accounts.
+                            Switch to the "Demo Access" tab for quick login.
+                          </p>
+                          <div className="grid grid-cols-2 gap-2 text-xs">
+                            <div className="text-blue-800">
+                              <strong>Admin:</strong> admin@skooler.com
+                            </div>
+                            <div className="text-blue-800">
+                              <strong>Teacher:</strong> teacher@skooler.com
+                            </div>
+                            <div className="text-blue-800">
+                              <strong>Student:</strong> student@skooler.com
+                            </div>
+                            <div className="text-blue-800">
+                              <strong>Parent:</strong> parent@skooler.com
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
