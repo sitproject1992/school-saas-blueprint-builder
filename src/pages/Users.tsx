@@ -29,7 +29,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   ShieldCheck,
-  Users,
+  Users as UsersIcon,
   UserPlus,
   Search,
   Filter,
