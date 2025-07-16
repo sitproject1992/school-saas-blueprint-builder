@@ -8,31 +8,12 @@ import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { Header } from "@/components/layout/Header";
 import { AuthPage } from "@/components/auth/AuthPage.tsx";
-import DashboardPage from "./pages/DashboardPage";
-import StudentsPage from "./pages/Students";
-import ClassesPage from "./pages/Classes";
-import TeachersPage from "./pages/Teachers";
-import AttendancePage from "./pages/Attendance";
 import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
-import ParentPortal from "./pages/ParentPortal";
-import FeeStructures from "./pages/FeeStructures";
-import Invoices from "./pages/Invoices";
-import Syllabus from "./pages/Syllabus";
-import LessonPlans from "./pages/LessonPlans";
-import SubjectsPage from "./pages/Subjects";
-import Inventory from "./pages/Inventory";
 import SchoolRegistration from "./pages/SchoolRegistration";
 import AdminSetup from "./pages/AdminSetup";
 import TeacherRegistration from "./pages/TeacherRegistration";
 import StudentRegistration from "./pages/StudentRegistration";
 import RegistrationComplete from "./pages/RegistrationComplete";
-import Exams from "./pages/Exams";
-import Announcements from "./pages/Announcements";
-import Statistics from "./pages/Statistics";
-import Schools from "./pages/Schools";
-import Users from "./pages/Users";
-import Settings from "./pages/Settings";
 import { SchoolProvider } from "@/hooks/useSchool";
 import { ProtectedRoutes } from "./ProtectedRoutes";
 
@@ -78,7 +59,35 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <ProtectedRoutes />
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/auth" element={<AuthPage />} />
+              <Route
+                path="/school-registration"
+                element={<SchoolRegistration />}
+              />
+              <Route path="/admin-setup" element={<AdminSetup />} />
+              <Route
+                path="/teacher-registration"
+                element={<TeacherRegistration />}
+              />
+              <Route
+                path="/student-registration"
+                element={<StudentRegistration />}
+              />
+              <Route
+                path="/registration-complete"
+                element={<RegistrationComplete />}
+              />
+              <Route
+                path="/*"
+                element={
+                  <ProtectedRoute>
+                    <ProtectedRoutes />
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
           </BrowserRouter>
         </TooltipProvider>
       </SchoolProvider>
