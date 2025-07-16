@@ -225,6 +225,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Check if credentials might be for a demo account with wrong password
       const isDemoEmail = demoAccounts.some((acc) => acc.email === email);
+      console.log("Is demo email:", isDemoEmail, email);
+
       if (isDemoEmail) {
         throw new Error(
           `Invalid password for demo account. Please use the correct demo credentials or try the "Demo Access" tab for quick login.`,
