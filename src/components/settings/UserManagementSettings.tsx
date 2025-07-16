@@ -232,7 +232,10 @@ export function UserManagementSettings({
     toast.success("User management settings reset to defaults");
   };
 
-  const updateSetting = (key: keyof UserManagementSettingsData, value: any) => {
+  const updateSetting = (
+    key: keyof UserManagementSettingsData,
+    value: string | number | boolean,
+  ) => {
     setSettings((prev) => ({ ...prev, [key]: value }));
   };
 
