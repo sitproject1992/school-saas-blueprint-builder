@@ -66,7 +66,7 @@ export default function Users() {
       title: "Total Users",
       value: "1,567",
       change: "+23 this month",
-      icon: Users,
+      icon: UsersIcon,
       color: "text-blue-600",
       bgColor: "bg-blue-50",
     },
@@ -108,7 +108,7 @@ export default function Users() {
       role: "Parents",
       count: 892,
       percentage: 56.9,
-      icon: Users,
+      icon: UsersIcon,
       color: "bg-green-500",
     },
     {
