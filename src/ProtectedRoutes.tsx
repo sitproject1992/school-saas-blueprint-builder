@@ -27,6 +27,7 @@ import ParentDashboard from "./pages/ParentDashboard";
 import StudentDashboard from "./pages/StudentDashboard";
 import TeacherDashboard from "./pages/TeacherDashboard";
 import SchoolDashboard from "./pages/SchoolDashboard";
+import MessagesPage from "./pages/Messages";
 
 export function ProtectedRoutes() {
   return (
@@ -47,6 +48,7 @@ export function ProtectedRoutes() {
         <Route path="/inventory" element={<Inventory />} />
         <Route path="/announcements" element={<AnnouncementsPage />} />
         <Route path="/chat" element={<ChatPage />} />
+        <Route path="/messages" element={<MessagesPage />} />
         <Route path="/events" element={<EventsPage />} />
         <Route path="/schools" element={<SchoolsPage />} />
         <Route path="/users" element={<UsersPage />} />
