@@ -435,9 +435,8 @@ export function useSchoolManagement() {
     if (!isAuthorized) return;
 
     try {
-      // In a real implementation, you would get the super admin ID from the session
-      // For now, we'll use a placeholder
-      await supabase.from("super_admin_audit_log").insert({
+      // Try to insert into the actual audit log table
+      const { error } = await supabase.from("super_admin_audit_log").insert({
         action,
         target_type: targetType,
         target_id: targetId,
@@ -446,8 +445,32 @@ export function useSchoolManagement() {
         ip_address: null, // Would be captured from request
         user_agent: navigator.userAgent,
       });
+
+      if (error) {
+        console.warn(
+          "Could not log to audit table, table may not exist:",
+          error.message,
+        );
+        // In development, we could add to local storage or just console log
+        console.info("Audit Log:", {
+          action,
+          targetType,
+          targetId,
+          details,
+          timestamp: new Date().toISOString(),
+        });
+      }
     } catch (err) {
-      console.error("Failed to log audit action:", err);
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      console.error("Failed to log audit action:", errorMessage);
+      // Log locally for development
+      console.info("Audit Log (fallback):", {
+        action,
+        targetType,
+        targetId,
+        details,
+        timestamp: new Date().toISOString(),
+      });
     }
   };
 
