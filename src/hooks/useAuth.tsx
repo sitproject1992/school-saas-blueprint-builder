@@ -113,16 +113,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         }
 
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
-        if (session?.user) {
-          const profile = await fetchUserProfile(session.user);
-          setUser({
-            ...session.user,
-            profile,
-            roles: profile?.role ? [profile.role] : [],
-          });
+        try {
+          const {
+            data: { session },
+            error: sessionError,
+          } = await supabase.auth.getSession();
+
+          if (sessionError) {
+            console.error("Session error:", sessionError);
+            return;
+          }
+
+          if (session?.user) {
+            const profile = await fetchUserProfile(session.user);
+            setUser({
+              ...session.user,
+              profile,
+              roles: profile?.role
+                ? [profile.role]
+                : profile?.user_role
+                  ? [profile.user_role]
+                  : [],
+            });
+          }
+        } catch (sessionError) {
+          console.error("Error getting session:", sessionError);
+          // Continue with the fallback authentication methods
         }
       } catch (error) {
         console.error("Error in bootstrapAuth:", error);
