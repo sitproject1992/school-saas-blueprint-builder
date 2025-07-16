@@ -158,13 +158,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser({
             ...session.user,
             profile,
-            roles: profile?.role ? [profile.role] : [],
+            roles: profile?.role
+              ? [profile.role]
+              : profile?.user_role
+                ? [profile.user_role]
+                : [],
           });
         } else {
           setUser(null);
         }
       } catch (error) {
         console.error("Error in auth state change:", error);
+        // On error, still clear the user to prevent auth loops
+        setUser(null);
       } finally {
         setLoading(false);
       }
