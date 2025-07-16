@@ -125,7 +125,10 @@ export function GeneralSettings({ onSave }: GeneralSettingsProps) {
     toast.success("Settings reset to defaults");
   };
 
-  const updateSetting = (key: keyof GeneralSettingsData, value: any) => {
+  const updateSetting = (
+    key: keyof GeneralSettingsData,
+    value: string | number | boolean,
+  ) => {
     setSettings((prev) => ({ ...prev, [key]: value }));
   };
 
