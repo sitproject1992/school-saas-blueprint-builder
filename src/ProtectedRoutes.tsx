@@ -20,6 +20,13 @@ import PaymentsPage from "./pages/Payments";
 import AnnouncementsPage from "./pages/Announcements";
 import ChatPage from "./pages/Chat";
 import EventsPage from "./pages/Events";
+import ReportsPage from "./pages/Reports";
+import StatisticsPage from "./pages/Statistics";
+import AdminDashboard from "./pages/AdminDashboard";
+import ParentDashboard from "./pages/ParentDashboard";
+import StudentDashboard from "./pages/StudentDashboard";
+import TeacherDashboard from "./pages/TeacherDashboard";
+import SchoolDashboard from "./pages/SchoolDashboard";
 
 export function ProtectedRoutes() {
   return (
@@ -45,6 +52,13 @@ export function ProtectedRoutes() {
         <Route path="/users" element={<UsersPage />} />
         <Route path="/parent-portal" element={<ParentPortal />} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/reports" element={<ReportsPage />} />
+        <Route path="/statistics" element={<StatisticsPage />} />
+        <Route path="/admin-dashboard" element={<AdminDashboard />} />
+        <Route path="/parent-dashboard" element={<ParentDashboard />} />
+        <Route path="/student-dashboard" element={<StudentDashboard />} />
+        <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
+        <Route path="/school-dashboard" element={<SchoolDashboard />} />
       </Routes>
     </AppLayout>
   );
