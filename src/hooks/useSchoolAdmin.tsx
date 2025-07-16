@@ -235,8 +235,6 @@ export function useSchoolAdmin() {
       setLoading(true);
       setError(null);
 
-      console.log("Creating school admin account:", data.email);
-
       // Try to use the RPC function if available
       const { data: result, error } = await supabase.rpc(
         "create_school_admin_account",
