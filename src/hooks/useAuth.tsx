@@ -347,22 +347,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       // Regular Supabase auth for non-demo accounts
-      const { error } = await supabase.auth.signInWithPassword({
-        email: trimmedEmail,
-        password: trimmedPassword,
-      });
+      try {
+        const { error } = await supabase.auth.signInWithPassword({
+          email: trimmedEmail,
+          password: trimmedPassword,
+        });
 
-      if (error) {
-        // Provide more helpful error messages
-        if (error.message === "Invalid login credentials") {
-          const availableDemoEmails = demoAccounts
-            .map((acc) => acc.email)
-            .join(", ");
+        if (error) {
+          // Handle different types of errors
+          if (error.message.includes("Database error querying schema")) {
+            throw new Error(
+              `Database connection issue. Please try again in a moment, or use one of the demo accounts for immediate access:\n\n${demoAccounts.map((acc) => `${acc.email} (${acc.password})`).join("\n")}\n\nUse the "Demo Access" tab for quick login.`,
+            );
+          } else if (error.message === "Invalid login credentials") {
+            const availableDemoEmails = demoAccounts
+              .map((acc) => acc.email)
+              .join(", ");
+            throw new Error(
+              `Login failed. Please check your credentials or try one of the demo accounts:\n\n${availableDemoEmails}\n\nUse the "Demo Access" tab for quick access to demo accounts.`,
+            );
+          }
+          throw error;
+        }
+      } catch (authError: any) {
+        console.error("Supabase auth error:", authError);
+        // If it's a database schema error, suggest demo accounts
+        if (
+          authError.message?.includes("Database error querying schema") ||
+          authError.message?.includes("schema")
+        ) {
           throw new Error(
-            `Login failed. Please check your credentials or try one of the demo accounts:\n\n${availableDemoEmails}\n\nUse the "Demo Access" tab for quick access to demo accounts.`,
+            `Database connection issue detected. Please try one of the demo accounts for immediate access:\n\n${demoAccounts.map((acc) => `${acc.email} (password: ${acc.password})`).join("\n")}\n\nSwitch to the "Demo Access" tab for quick login, or contact support if this issue persists.`,
           );
         }
-        throw error;
+        throw authError;
       }
     } catch (error: any) {
       console.error("Sign in error:", error);
