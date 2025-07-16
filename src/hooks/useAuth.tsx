@@ -244,8 +244,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     try {
+      // Clear super admin session if exists
+      localStorage.removeItem("super_admin_session");
+
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
+
+      // Reset user state
+      setUser(null);
     } catch (error: any) {
       console.error("Sign out error:", error);
       throw error;
