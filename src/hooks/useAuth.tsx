@@ -128,7 +128,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       // Check if it's the super admin account
       if (email === "sujan1nepal@gmail.com" && password === "precioussn") {
-        // Handle super admin login - create a mock session
+        // Handle super admin login - create a mock session with persistence
+        const sessionData = {
+          email: email,
+          loginTime: Date.now(),
+          expiresAt: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
+        };
+
+        localStorage.setItem(
+          "super_admin_session",
+          JSON.stringify(sessionData),
+        );
+
         const mockUser = {
           id: "00000000-0000-0000-0000-000000000000",
           email: email,
