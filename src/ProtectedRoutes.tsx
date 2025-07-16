@@ -67,6 +67,7 @@ export function ProtectedRoutes() {
         <Route path="/school-dashboard" element={<SchoolDashboard />} />
         <Route path="/payroll" element={<PayrollPage />} />
         <Route path="/admin-setup" element={<AdminSetupPage />} />
+        <Route path="*" element={<DashboardPage />} />
       </Routes>
     </AppLayout>
   );
