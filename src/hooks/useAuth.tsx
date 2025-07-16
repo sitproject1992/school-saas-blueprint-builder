@@ -200,10 +200,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         },
       ];
 
-      console.log("Checking demo accounts:", { email, password, demoAccounts });
+      console.log("Checking demo accounts:", {
+        trimmedEmail,
+        trimmedPassword,
+        demoAccounts: demoAccounts.map((acc) => ({
+          email: acc.email,
+          password: acc.password,
+        })),
+      });
 
       const demoAccount = demoAccounts.find(
-        (acc) => acc.email === email && acc.password === password,
+        (acc) => acc.email === trimmedEmail && acc.password === trimmedPassword,
       );
 
       console.log("Demo account found:", demoAccount);
@@ -212,7 +219,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Handle demo login - create a mock session
         const mockUser = {
           id: demoAccount.user_id,
-          email: email,
+          email: trimmedEmail,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
           profile: {
