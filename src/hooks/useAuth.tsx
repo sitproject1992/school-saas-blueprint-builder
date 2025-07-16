@@ -224,8 +224,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       // Check if it's a school admin account created through super admin panel
-      console.log("Checking for school admin account:", trimmedEmail);
-
       const { data: schoolAdminData, error: schoolAdminError } = await supabase
         .from("school_admin_accounts")
         .select(
@@ -243,12 +241,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .single();
 
       if (!schoolAdminError && schoolAdminData) {
-        console.log("Found school admin account:", schoolAdminData);
-
         // For now, we'll do a simple password check (in production, this should be properly hashed)
         if (schoolAdminData.password_hash === trimmedPassword) {
-          console.log("School admin password matches, creating session");
-
           // Create a mock user session for the school admin
           const mockUser = {
             id: schoolAdminData.id,
