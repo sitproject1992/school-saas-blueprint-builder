@@ -1,6 +1,6 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AnnouncementForm } from "@/components/communication/AnnouncementForm";
+import AnnouncementForm from "@/components/communication/AnnouncementForm";
 import { Megaphone } from "lucide-react";
 
 export default function Announcements() {
