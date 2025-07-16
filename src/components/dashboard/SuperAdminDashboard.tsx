@@ -66,6 +66,11 @@ import { toast } from "sonner";
 import { SchoolAdminForm } from "@/components/admin/SchoolAdminForm";
 import { SchoolForm } from "@/components/admin/SchoolForm";
 import { ChangePasswordForm } from "@/components/admin/ChangePasswordForm";
+import { GeneralSettings } from "@/components/settings/GeneralSettings";
+import { SecuritySettings } from "@/components/settings/SecuritySettings";
+import { UserManagementSettings } from "@/components/settings/UserManagementSettings";
+import { SystemMaintenance } from "@/components/settings/SystemMaintenance";
+import { AccountSettings } from "@/components/settings/AccountSettings";
 import { useNavigate } from "react-router-dom";
 
 interface SchoolAdminFormData {
@@ -127,6 +132,7 @@ export function SuperAdminDashboard() {
   const [showAdminForm, setShowAdminForm] = useState(false);
   const [showSchoolForm, setShowSchoolForm] = useState(false);
   const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [activeSettingsTab, setActiveSettingsTab] = useState("general");
   const [editingAdmin, setEditingAdmin] = useState<SchoolAdmin | null>(null);
   const [editingSchool, setEditingSchool] = useState<any>(null);
   const [deleteDialog, setDeleteDialog] = useState<{
@@ -876,69 +882,39 @@ export function SuperAdminDashboard() {
           </TabsContent>
 
           <TabsContent value="settings" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>System Settings</CardTitle>
-                  <CardDescription>
-                    Configure global system parameters
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <Button variant="outline" className="w-full justify-start">
-                    <Settings className="mr-2 h-4 w-4" />
-                    General Settings
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <Shield className="mr-2 h-4 w-4" />
-                    Security Settings
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <Users className="mr-2 h-4 w-4" />
-                    User Management
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <Calendar className="mr-2 h-4 w-4" />
-                    System Maintenance
-                  </Button>
-                </CardContent>
-              </Card>
+            <Tabs
+              value={activeSettingsTab}
+              onValueChange={setActiveSettingsTab}
+              className="space-y-6"
+            >
+              <TabsList className="grid w-full grid-cols-5">
+                <TabsTrigger value="general">General</TabsTrigger>
+                <TabsTrigger value="security">Security</TabsTrigger>
+                <TabsTrigger value="users">User Management</TabsTrigger>
+                <TabsTrigger value="maintenance">Maintenance</TabsTrigger>
+                <TabsTrigger value="account">Account</TabsTrigger>
+              </TabsList>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Account Settings</CardTitle>
-                  <CardDescription>
-                    Manage your super admin account
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <Button variant="outline" className="w-full justify-start">
-                    <Edit className="mr-2 h-4 w-4" />
-                    Edit Profile
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start"
-                    onClick={() => setShowPasswordForm(true)}
-                  >
-                    <Key className="mr-2 h-4 w-4" />
-                    Change Password
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <Activity className="mr-2 h-4 w-4" />
-                    View Activity Log
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start text-red-600 hover:text-red-700"
-                    onClick={handleLogout}
-                  >
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Logout
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
+              <TabsContent value="general">
+                <GeneralSettings />
+              </TabsContent>
+
+              <TabsContent value="security">
+                <SecuritySettings />
+              </TabsContent>
+
+              <TabsContent value="users">
+                <UserManagementSettings />
+              </TabsContent>
+
+              <TabsContent value="maintenance">
+                <SystemMaintenance />
+              </TabsContent>
+
+              <TabsContent value="account">
+                <AccountSettings />
+              </TabsContent>
+            </Tabs>
           </TabsContent>
         </Tabs>
       </div>

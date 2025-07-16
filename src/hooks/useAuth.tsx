@@ -126,11 +126,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
+      // Trim inputs to avoid whitespace issues
+      const trimmedEmail = email.trim().toLowerCase();
+      const trimmedPassword = password.trim();
+
       // Check if it's the super admin account
-      if (email === "sujan1nepal@gmail.com" && password === "precioussn") {
+      if (
+        trimmedEmail === "sujan1nepal@gmail.com" &&
+        trimmedPassword === "precioussn"
+      ) {
         // Handle super admin login - create a mock session with persistence
         const sessionData = {
-          email: email,
+          email: trimmedEmail,
           loginTime: Date.now(),
           expiresAt: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
         };
@@ -142,14 +149,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         const mockUser = {
           id: "00000000-0000-0000-0000-000000000000",
-          email: email,
+          email: trimmedEmail,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
           profile: {
             role: "super_admin",
             first_name: "Super",
             last_name: "Admin",
-            email: email,
+            email: trimmedEmail,
             school_id: null,
           },
           roles: ["super_admin"],
@@ -188,14 +195,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       ];
 
       const demoAccount = demoAccounts.find(
-        (acc) => acc.email === email && acc.password === password,
+        (acc) =>
+          acc.email.toLowerCase() === trimmedEmail &&
+          acc.password === trimmedPassword,
       );
 
       if (demoAccount) {
         // Handle demo login - create a mock session
         const mockUser = {
           id: demoAccount.user_id,
-          email: email,
+          email: trimmedEmail,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
           profile: {
@@ -204,7 +213,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               demoAccount.role.charAt(0).toUpperCase() +
               demoAccount.role.slice(1),
             last_name: "Demo",
-            email: email,
+            email: trimmedEmail,
             school_id: "demo-school",
           },
           roles: [demoAccount.role],
@@ -214,18 +223,78 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
+      // Check if it's a school admin account created through super admin panel
+      const { data: schoolAdminData, error: schoolAdminError } = await supabase
+        .from("school_admin_accounts")
+        .select(
+          `
+          *,
+          schools!inner(
+            id,
+            name,
+            subdomain
+          )
+        `,
+        )
+        .eq("email", trimmedEmail)
+        .eq("is_active", true)
+        .single();
+
+      if (!schoolAdminError && schoolAdminData) {
+        // For now, we'll do a simple password check (in production, this should be properly hashed)
+        if (schoolAdminData.password_hash === trimmedPassword) {
+          // Create a mock user session for the school admin
+          const mockUser = {
+            id: schoolAdminData.id,
+            email: trimmedEmail,
+            created_at: schoolAdminData.created_at,
+            updated_at: schoolAdminData.updated_at,
+            profile: {
+              role: "school_admin",
+              first_name: schoolAdminData.first_name,
+              last_name: schoolAdminData.last_name,
+              email: trimmedEmail,
+              phone: schoolAdminData.phone,
+              school_id: schoolAdminData.school_id,
+              school_name: schoolAdminData.schools?.name,
+            },
+            roles: ["school_admin"],
+          } as AppUser;
+
+          setUser(mockUser);
+
+          // Update last login
+          await supabase
+            .from("school_admin_accounts")
+            .update({ last_login: new Date().toISOString() })
+            .eq("id", schoolAdminData.id);
+
+          return;
+        } else {
+          throw new Error(
+            `Invalid password for school admin account "${trimmedEmail}". Please check your password or contact your super administrator.`,
+          );
+        }
+      }
+
       // Check if credentials might be for a demo account with wrong password
-      const isDemoEmail = demoAccounts.some((acc) => acc.email === email);
+      const isDemoEmail = demoAccounts.some(
+        (acc) => acc.email.toLowerCase() === trimmedEmail,
+      );
+
       if (isDemoEmail) {
+        const demoAccountForEmail = demoAccounts.find(
+          (acc) => acc.email.toLowerCase() === trimmedEmail,
+        );
         throw new Error(
-          `Invalid password for demo account. Please use the correct demo credentials or try the "Demo Access" tab for quick login.`,
+          `Invalid password for demo account "${trimmedEmail}". The correct password is "${demoAccountForEmail?.password}". Please use the correct demo credentials or try the "Demo Access" tab for quick login.`,
         );
       }
 
       // Regular Supabase auth for non-demo accounts
       const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+        email: trimmedEmail,
+        password: trimmedPassword,
       });
 
       if (error) {

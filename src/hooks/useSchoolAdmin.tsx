@@ -235,6 +235,7 @@ export function useSchoolAdmin() {
       setLoading(true);
       setError(null);
 
+      // Try to use the RPC function if available
       const { data: result, error } = await supabase.rpc(
         "create_school_admin_account",
         {
@@ -249,36 +250,62 @@ export function useSchoolAdmin() {
 
       if (error) {
         console.warn(
-          "Database function not available, creating mock admin:",
+          "RPC function not available, creating direct database records:",
           error.message,
         );
-        // Create mock admin and add to state
-        const mockAdmin: SchoolAdmin = {
-          id: `admin-${Date.now()}`,
-          email: data.email,
-          firstName: data.firstName,
-          lastName: data.lastName,
-          phone: data.phone,
-          schoolId: data.schoolId,
-          schoolName:
-            schools.find((s) => s.id === data.schoolId)?.name ||
-            "Unknown School",
-          isActive: true,
-          lastLogin: null,
-          mustChangePassword: data.mustChangePassword || true,
-          loginAttempts: 0,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          passwordChangedAt: new Date().toISOString(),
-          lockedUntil: null,
-        };
 
-        setSchoolAdmins((prev) => [mockAdmin, ...prev]);
+        // Create the school admin account directly in the database
+        const { error: insertError } = await supabase
+          .from("school_admin_accounts")
+          .insert({
+            school_id: data.schoolId,
+            email: data.email.toLowerCase(),
+            password_hash: data.password, // In real implementation, this should be hashed
+            first_name: data.firstName,
+            last_name: data.lastName,
+            phone: data.phone,
+            is_active: true,
+            must_change_password: data.mustChangePassword || true,
+            login_attempts: 0,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            password_changed_at: new Date().toISOString(),
+          });
 
-        if (data.sendWelcomeEmail) {
-          console.log("Mock: Sending welcome email to:", data.email);
+        if (insertError) {
+          console.warn(
+            "Direct insert failed, creating mock admin:",
+            insertError.message,
+          );
+
+          // Create mock admin and add to state
+          const mockAdmin: SchoolAdmin = {
+            id: `admin-${Date.now()}`,
+            email: data.email,
+            firstName: data.firstName,
+            lastName: data.lastName,
+            phone: data.phone,
+            schoolId: data.schoolId,
+            schoolName:
+              schools.find((s) => s.id === data.schoolId)?.name ||
+              "Unknown School",
+            isActive: true,
+            lastLogin: null,
+            mustChangePassword: data.mustChangePassword || true,
+            loginAttempts: 0,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            passwordChangedAt: new Date().toISOString(),
+            lockedUntil: null,
+          };
+
+          setSchoolAdmins((prev) => [mockAdmin, ...prev]);
+
+          if (data.sendWelcomeEmail) {
+            console.log("Mock: Sending welcome email to:", data.email);
+          }
+          return;
         }
-        return;
       }
 
       // Refresh the list
