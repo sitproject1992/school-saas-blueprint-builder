@@ -43,105 +43,53 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
+import { useSchoolAdmin, SchoolAdmin, School } from "@/hooks/useSchoolAdmin";
+import { toast } from "sonner";
+import { SchoolAdminForm } from "@/components/admin/SchoolAdminForm";
 
-interface SchoolAdmin {
-  id: string;
-  email: string;
+interface SuperAdminDashboardProps {
+  onAddAdmin?: () => void;
+}
+
+interface SchoolAdminFormData {
   firstName: string;
   lastName: string;
-  schoolName: string;
+  email: string;
+  phone?: string;
   schoolId: string;
-  isActive: boolean;
-  lastLogin: string | null;
+  password: string;
+  confirmPassword: string;
   mustChangePassword: boolean;
-  loginAttempts: number;
-  createdAt: string;
+  sendWelcomeEmail: boolean;
 }
 
-interface School {
-  id: string;
-  name: string;
-  subdomain: string;
-  email: string | null;
-  phone: string | null;
-  address: string | null;
-  subscriptionStatus: string;
-  subscriptionExpiresAt: string | null;
-  adminCount: number;
-  studentCount: number;
-  createdAt: string;
-}
-
-export function SuperAdminDashboard() {
+export function SuperAdminDashboard({
+  onAddAdmin,
+}: SuperAdminDashboardProps = {}) {
   const { user } = useAuth();
+  const {
+    schoolAdmins,
+    schools,
+    loading,
+    error,
+    createSchoolAdmin,
+    deleteSchoolAdmin,
+    toggleSchoolAdminStatus,
+    resetSchoolAdminPassword,
+    updateSchoolAdmin,
+  } = useSchoolAdmin();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTab, setSelectedTab] = useState("overview");
-
-  // Mock data - in real implementation, this would come from API
-  const [schoolAdmins] = useState<SchoolAdmin[]>([
-    {
-      id: "1",
-      email: "admin@greenvalley.edu",
-      firstName: "John",
-      lastName: "Smith",
-      schoolName: "Green Valley High School",
-      schoolId: "school-1",
-      isActive: true,
-      lastLogin: "2024-01-15T10:30:00Z",
-      mustChangePassword: false,
-      loginAttempts: 0,
-      createdAt: "2024-01-01T00:00:00Z",
-    },
-    {
-      id: "2",
-      email: "admin@brightfuture.edu",
-      firstName: "Sarah",
-      lastName: "Johnson",
-      schoolName: "Bright Future Academy",
-      schoolId: "school-2",
-      isActive: true,
-      lastLogin: null,
-      mustChangePassword: true,
-      loginAttempts: 0,
-      createdAt: "2024-01-10T00:00:00Z",
-    },
-  ]);
-
-  const [schools] = useState<School[]>([
-    {
-      id: "school-1",
-      name: "Green Valley High School",
-      subdomain: "greenvalley",
-      email: "contact@greenvalley.edu",
-      phone: "+1 (555) 123-4567",
-      address: "123 Education St, Learning City, LC 12345",
-      subscriptionStatus: "active",
-      subscriptionExpiresAt: "2024-12-31T23:59:59Z",
-      adminCount: 1,
-      studentCount: 250,
-      createdAt: "2024-01-01T00:00:00Z",
-    },
-    {
-      id: "school-2",
-      name: "Bright Future Academy",
-      subdomain: "brightfuture",
-      email: "info@brightfuture.edu",
-      phone: "+1 (555) 987-6543",
-      address: "456 Knowledge Ave, Study Town, ST 67890",
-      subscriptionStatus: "active",
-      subscriptionExpiresAt: "2024-06-30T23:59:59Z",
-      adminCount: 1,
-      studentCount: 180,
-      createdAt: "2024-01-10T00:00:00Z",
-    },
-  ]);
+  const [showAdminForm, setShowAdminForm] = useState(false);
+  const [editingAdmin, setEditingAdmin] = useState<SchoolAdmin | null>(null);
 
   const filteredSchoolAdmins = schoolAdmins.filter(
     (admin) =>
       admin.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       admin.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       admin.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      admin.schoolName.toLowerCase().includes(searchTerm.toLowerCase()),
+      (admin.schoolName &&
+        admin.schoolName.toLowerCase().includes(searchTerm.toLowerCase())),
   );
 
   const filteredSchools = schools.filter(
@@ -157,10 +105,75 @@ export function SuperAdminDashboard() {
     totalAdmins: schoolAdmins.length,
     activeSchools: schools.filter((s) => s.subscriptionStatus === "active")
       .length,
-    totalStudents: schools.reduce(
-      (sum, school) => sum + school.studentCount,
-      0,
-    ),
+    totalStudents: 0, // This would need to be calculated from actual student data
+  };
+
+  const handleAddAdmin = () => {
+    setEditingAdmin(null);
+    setShowAdminForm(true);
+    onAddAdmin?.();
+  };
+
+  const handleEditAdmin = (admin: SchoolAdmin) => {
+    setEditingAdmin(admin);
+    setShowAdminForm(true);
+  };
+
+  const handleDeleteAdmin = async (adminId: string) => {
+    if (confirm("Are you sure you want to delete this administrator?")) {
+      try {
+        await deleteSchoolAdmin(adminId);
+        toast.success("School administrator deleted successfully");
+      } catch (error) {
+        toast.error("Failed to delete administrator");
+      }
+    }
+  };
+
+  const handleToggleStatus = async (adminId: string, isActive: boolean) => {
+    try {
+      await toggleSchoolAdminStatus(adminId, isActive);
+      toast.success(
+        `Administrator ${isActive ? "activated" : "deactivated"} successfully`,
+      );
+    } catch (error) {
+      toast.error("Failed to update administrator status");
+    }
+  };
+
+  const handleResetPassword = async (adminId: string) => {
+    const newPassword = prompt("Enter new password for the administrator:");
+    if (newPassword) {
+      try {
+        await resetSchoolAdminPassword(adminId, newPassword);
+        toast.success("Password reset successfully");
+      } catch (error) {
+        toast.error("Failed to reset password");
+      }
+    }
+  };
+
+  const handleFormSubmit = async (data: SchoolAdminFormData) => {
+    if (editingAdmin) {
+      // Update existing admin
+      await updateSchoolAdmin(editingAdmin.id, {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        phone: data.phone,
+      });
+    } else {
+      // Create new admin
+      await createSchoolAdmin({
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        phone: data.phone,
+        schoolId: data.schoolId,
+        password: data.password,
+        mustChangePassword: data.mustChangePassword,
+        sendWelcomeEmail: data.sendWelcomeEmail,
+      });
+    }
   };
 
   const formatDate = (dateString: string | null) => {
@@ -180,6 +193,17 @@ export function SuperAdminDashboard() {
     return <Badge variant={variants[status] || "outline"}>{status}</Badge>;
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-2 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -195,7 +219,10 @@ export function SuperAdminDashboard() {
             </p>
           </div>
           <div className="flex gap-3">
-            <Button className="bg-blue-600 hover:bg-blue-700">
+            <Button
+              className="bg-blue-600 hover:bg-blue-700"
+              onClick={handleAddAdmin}
+            >
               <UserPlus className="h-4 w-4 mr-2" />
               Add School Admin
             </Button>
@@ -205,6 +232,13 @@ export function SuperAdminDashboard() {
             </Button>
           </div>
         </div>
+
+        {/* Error Display */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <p className="text-red-800">{error}</p>
+          </div>
+        )}
 
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -293,39 +327,22 @@ export function SuperAdminDashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                      <UserPlus className="h-4 w-4 text-green-600" />
-                      <div className="flex-1">
-                        <p className="text-sm font-medium">
-                          New school admin created
-                        </p>
-                        <p className="text-xs text-gray-600">
-                          sarah@brightfuture.edu - 5 days ago
-                        </p>
+                    {schoolAdmins.slice(0, 3).map((admin) => (
+                      <div
+                        key={admin.id}
+                        className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg"
+                      >
+                        <UserPlus className="h-4 w-4 text-green-600" />
+                        <div className="flex-1">
+                          <p className="text-sm font-medium">
+                            {admin.firstName} {admin.lastName} added
+                          </p>
+                          <p className="text-xs text-gray-600">
+                            {admin.email} - {formatDate(admin.createdAt)}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                      <Building className="h-4 w-4 text-blue-600" />
-                      <div className="flex-1">
-                        <p className="text-sm font-medium">
-                          School subscription renewed
-                        </p>
-                        <p className="text-xs text-gray-600">
-                          Green Valley High School - 1 week ago
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                      <Key className="h-4 w-4 text-orange-600" />
-                      <div className="flex-1">
-                        <p className="text-sm font-medium">
-                          Password reset requested
-                        </p>
-                        <p className="text-xs text-gray-600">
-                          admin@greenvalley.edu - 2 weeks ago
-                        </p>
-                      </div>
-                    </div>
+                    ))}
                   </div>
                 </CardContent>
               </Card>
@@ -339,17 +356,6 @@ export function SuperAdminDashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <div className="flex items-center gap-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                      <Activity className="h-4 w-4 text-yellow-600" />
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-yellow-800">
-                          Bright Future Academy subscription expires soon
-                        </p>
-                        <p className="text-xs text-yellow-600">
-                          Expires in 6 months
-                        </p>
-                      </div>
-                    </div>
                     <div className="flex items-center gap-3 p-3 bg-green-50 border border-green-200 rounded-lg">
                       <Shield className="h-4 w-4 text-green-600" />
                       <div className="flex-1">
@@ -377,7 +383,10 @@ export function SuperAdminDashboard() {
                       Manage school admin accounts and permissions
                     </CardDescription>
                   </div>
-                  <Button className="bg-blue-600 hover:bg-blue-700">
+                  <Button
+                    className="bg-blue-600 hover:bg-blue-700"
+                    onClick={handleAddAdmin}
+                  >
                     <UserPlus className="h-4 w-4 mr-2" />
                     Add Admin
                   </Button>
@@ -420,7 +429,9 @@ export function SuperAdminDashboard() {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <p className="font-medium">{admin.schoolName}</p>
+                          <p className="font-medium">
+                            {admin.schoolName || "Unknown School"}
+                          </p>
                         </TableCell>
                         <TableCell>
                           <div className="flex flex-col gap-1">
@@ -446,19 +457,23 @@ export function SuperAdminDashboard() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem>
-                                <Eye className="mr-2 h-4 w-4" />
-                                View Details
-                              </DropdownMenuItem>
-                              <DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => handleEditAdmin(admin)}
+                              >
                                 <Edit className="mr-2 h-4 w-4" />
                                 Edit
                               </DropdownMenuItem>
-                              <DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => handleResetPassword(admin.id)}
+                              >
                                 <Key className="mr-2 h-4 w-4" />
                                 Reset Password
                               </DropdownMenuItem>
-                              <DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  handleToggleStatus(admin.id, !admin.isActive)
+                                }
+                              >
                                 {admin.isActive ? (
                                   <>
                                     <Lock className="mr-2 h-4 w-4" />
@@ -471,7 +486,10 @@ export function SuperAdminDashboard() {
                                   </>
                                 )}
                               </DropdownMenuItem>
-                              <DropdownMenuItem className="text-red-600">
+                              <DropdownMenuItem
+                                className="text-red-600"
+                                onClick={() => handleDeleteAdmin(admin.id)}
+                              >
                                 <Trash2 className="mr-2 h-4 w-4" />
                                 Delete
                               </DropdownMenuItem>
@@ -520,8 +538,7 @@ export function SuperAdminDashboard() {
                       <TableHead>School</TableHead>
                       <TableHead>Subdomain</TableHead>
                       <TableHead>Subscription</TableHead>
-                      <TableHead>Students</TableHead>
-                      <TableHead>Admins</TableHead>
+                      <TableHead>Created</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -552,8 +569,7 @@ export function SuperAdminDashboard() {
                             )}
                           </div>
                         </TableCell>
-                        <TableCell>{school.studentCount}</TableCell>
-                        <TableCell>{school.adminCount}</TableCell>
+                        <TableCell>{formatDate(school.createdAt)}</TableCell>
                         <TableCell className="text-right">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -640,6 +656,27 @@ export function SuperAdminDashboard() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* School Admin Form Dialog */}
+      <SchoolAdminForm
+        open={showAdminForm}
+        onOpenChange={setShowAdminForm}
+        onSubmit={handleFormSubmit}
+        schools={schools}
+        editData={
+          editingAdmin
+            ? {
+                id: editingAdmin.id,
+                firstName: editingAdmin.firstName,
+                lastName: editingAdmin.lastName,
+                email: editingAdmin.email,
+                phone: editingAdmin.phone,
+                schoolId: editingAdmin.schoolId,
+                mustChangePassword: editingAdmin.mustChangePassword,
+              }
+            : undefined
+        }
+      />
     </div>
   );
 }
