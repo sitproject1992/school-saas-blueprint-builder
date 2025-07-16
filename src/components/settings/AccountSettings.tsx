@@ -213,7 +213,10 @@ export function AccountSettings({ onSave }: AccountSettingsProps) {
     }
   };
 
-  const updateProfile = (key: keyof ProfileData, value: any) => {
+  const updateProfile = (
+    key: keyof ProfileData,
+    value: string | ProfileData["notifications"],
+  ) => {
     setProfile((prev) => ({ ...prev, [key]: value }));
   };
 
