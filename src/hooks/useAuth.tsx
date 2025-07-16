@@ -225,7 +225,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const isDemoEmail = demoAccounts.some(
         (acc) => acc.email === trimmedEmail,
       );
-      console.log("Is demo email:", isDemoEmail, trimmedEmail);
 
       if (isDemoEmail) {
         const demoAccountForEmail = demoAccounts.find(
