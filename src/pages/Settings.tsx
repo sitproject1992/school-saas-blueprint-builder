@@ -1,46 +1,91 @@
-import React from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import SchoolProfileForm from '@/components/settings/SchoolProfileForm';
-import UserManagement from '@/components/settings/UserManagement';
-import AcademicYear from '@/components/settings/AcademicYear';
-import GradingSystem from '@/components/settings/GradingSystem';
-import NotificationSettings from '@/components/settings/NotificationSettings';
-import SystemConfiguration from '@/components/settings/SystemConfiguration';
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import SchoolProfileForm from "@/components/settings/SchoolProfileForm";
+import AcademicYear from "@/components/settings/AcademicYear";
+import GradingSystem from "@/components/settings/GradingSystem";
+import NotificationSettings from "@/components/settings/NotificationSettings";
+import UserManagement from "@/components/settings/UserManagement";
+import SystemConfiguration from "@/components/settings/SystemConfiguration";
+import {
+  Settings as SettingsIcon,
+  School,
+  Users,
+  Bell,
+  Cog,
+  BookOpen,
+} from "lucide-react";
 
-const SettingsPage: React.FC = () => {
+export default function Settings() {
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Settings</h1>
-      <Tabs defaultValue="school-profile">
-        <TabsList>
-          <TabsTrigger value="school-profile">School Profile</TabsTrigger>
-          <TabsTrigger value="user-management">User Management</TabsTrigger>
-          <TabsTrigger value="academic-year">Academic Year</TabsTrigger>
-          <TabsTrigger value="grading-system">Grading System</TabsTrigger>
-          <TabsTrigger value="notification-settings">Notification Settings</TabsTrigger>
-          <TabsTrigger value="system-configuration">System Configuration</TabsTrigger>
+    <div className="container mx-auto p-6 space-y-6">
+      <div className="flex items-center space-x-2">
+        <SettingsIcon className="h-8 w-8" />
+        <h1 className="text-3xl font-bold">Settings</h1>
+      </div>
+
+      <Tabs defaultValue="school" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-6">
+          <TabsTrigger value="school" className="flex items-center space-x-2">
+            <School className="h-4 w-4" />
+            <span>School</span>
+          </TabsTrigger>
+          <TabsTrigger value="academic" className="flex items-center space-x-2">
+            <BookOpen className="h-4 w-4" />
+            <span>Academic</span>
+          </TabsTrigger>
+          <TabsTrigger value="grading" className="flex items-center space-x-2">
+            <BookOpen className="h-4 w-4" />
+            <span>Grading</span>
+          </TabsTrigger>
+          <TabsTrigger
+            value="notifications"
+            className="flex items-center space-x-2"
+          >
+            <Bell className="h-4 w-4" />
+            <span>Notifications</span>
+          </TabsTrigger>
+          <TabsTrigger value="users" className="flex items-center space-x-2">
+            <Users className="h-4 w-4" />
+            <span>Users</span>
+          </TabsTrigger>
+          <TabsTrigger value="system" className="flex items-center space-x-2">
+            <Cog className="h-4 w-4" />
+            <span>System</span>
+          </TabsTrigger>
         </TabsList>
-        <TabsContent value="school-profile">
-          <SchoolProfileForm />
+
+        <TabsContent value="school">
+          <Card>
+            <CardHeader>
+              <CardTitle>School Profile</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <SchoolProfileForm />
+            </CardContent>
+          </Card>
         </TabsContent>
-        <TabsContent value="user-management">
-          <UserManagement />
-        </TabsContent>
-        <TabsContent value="academic-year">
+
+        <TabsContent value="academic">
           <AcademicYear />
         </TabsContent>
-        <TabsContent value="grading-system">
+
+        <TabsContent value="grading">
           <GradingSystem />
         </TabsContent>
-        <TabsContent value="notification-settings">
+
+        <TabsContent value="notifications">
           <NotificationSettings />
         </TabsContent>
-        <TabsContent value="system-configuration">
+
+        <TabsContent value="users">
+          <UserManagement />
+        </TabsContent>
+
+        <TabsContent value="system">
           <SystemConfiguration />
         </TabsContent>
       </Tabs>
     </div>
   );
-};
-
-export default SettingsPage;
+}
