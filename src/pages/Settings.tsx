@@ -1,12 +1,12 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { SchoolProfileForm } from "@/components/settings/SchoolProfileForm";
-import { AcademicYear } from "@/components/settings/AcademicYear";
-import { GradingSystem } from "@/components/settings/GradingSystem";
-import { NotificationSettings } from "@/components/settings/NotificationSettings";
-import { UserManagement } from "@/components/settings/UserManagement";
-import { SystemConfiguration } from "@/components/settings/SystemConfiguration";
+import SchoolProfileForm from "@/components/settings/SchoolProfileForm";
+import AcademicYear from "@/components/settings/AcademicYear";
+import GradingSystem from "@/components/settings/GradingSystem";
+import NotificationSettings from "@/components/settings/NotificationSettings";
+import UserManagement from "@/components/settings/UserManagement";
+import SystemConfiguration from "@/components/settings/SystemConfiguration";
 import {
   Settings as SettingsIcon,
   School,
