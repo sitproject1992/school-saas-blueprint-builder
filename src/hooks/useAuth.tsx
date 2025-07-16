@@ -192,9 +192,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         },
       ];
 
+      console.log("Checking demo accounts:", { email, password, demoAccounts });
+
       const demoAccount = demoAccounts.find(
         (acc) => acc.email === email && acc.password === password,
       );
+
+      console.log("Demo account found:", demoAccount);
 
       if (demoAccount) {
         // Handle demo login - create a mock session
