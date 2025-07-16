@@ -228,7 +228,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               demoAccount.role.charAt(0).toUpperCase() +
               demoAccount.role.slice(1),
             last_name: "Demo",
-            email: email,
+            email: trimmedEmail,
             school_id: "demo-school",
           },
           roles: [demoAccount.role],
@@ -239,8 +239,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       // Check if credentials might be for a demo account with wrong password
-      const isDemoEmail = demoAccounts.some((acc) => acc.email === email);
-      console.log("Is demo email:", isDemoEmail, email);
+      const isDemoEmail = demoAccounts.some(
+        (acc) => acc.email === trimmedEmail,
+      );
+      console.log("Is demo email:", isDemoEmail, trimmedEmail);
 
       if (isDemoEmail) {
         const demoAccountForEmail = demoAccounts.find(
