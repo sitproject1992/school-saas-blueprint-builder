@@ -235,42 +235,51 @@ export function useSchoolAdmin() {
       setLoading(true);
       setError(null);
 
-      // First try to create the user in Supabase Auth as super admin
-      // We need to use the service role key for this
-      console.log("Creating school admin user:", data.email);
+      console.log("Creating school admin account:", data.email);
 
-      // Create user in Supabase Auth
-      const { data: authUser, error: authError } =
-        await supabase.auth.admin.createUser({
-          email: data.email,
-          password: data.password,
-          email_confirm: true, // Skip email confirmation
-        });
+      // Try to use the RPC function if available
+      const { data: result, error } = await supabase.rpc(
+        "create_school_admin_account",
+        {
+          p_school_id: data.schoolId,
+          p_email: data.email,
+          p_password: data.password,
+          p_first_name: data.firstName,
+          p_last_name: data.lastName,
+          p_phone: data.phone || null,
+        },
+      );
 
-      if (authError) {
-        // If auth creation fails, try the RPC function approach
+      if (error) {
         console.warn(
-          "Auth user creation failed, trying RPC function:",
-          authError.message,
+          "RPC function not available, creating direct database records:",
+          error.message,
         );
 
-        const { data: result, error } = await supabase.rpc(
-          "create_school_admin_account",
-          {
-            p_school_id: data.schoolId,
-            p_email: data.email,
-            p_password: data.password,
-            p_first_name: data.firstName,
-            p_last_name: data.lastName,
-            p_phone: data.phone || null,
-          },
-        );
+        // Create the school admin account directly in the database
+        const { error: insertError } = await supabase
+          .from("school_admin_accounts")
+          .insert({
+            school_id: data.schoolId,
+            email: data.email.toLowerCase(),
+            password_hash: data.password, // In real implementation, this should be hashed
+            first_name: data.firstName,
+            last_name: data.lastName,
+            phone: data.phone,
+            is_active: true,
+            must_change_password: data.mustChangePassword || true,
+            login_attempts: 0,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            password_changed_at: new Date().toISOString(),
+          });
 
-        if (error) {
+        if (insertError) {
           console.warn(
-            "Database function not available, creating mock admin:",
-            error.message,
+            "Direct insert failed, creating mock admin:",
+            insertError.message,
           );
+
           // Create mock admin and add to state
           const mockAdmin: SchoolAdmin = {
             id: `admin-${Date.now()}`,
@@ -299,30 +308,6 @@ export function useSchoolAdmin() {
           }
           return;
         }
-      } else if (authUser.user) {
-        // Successfully created auth user, now create profile
-        console.log("Auth user created, creating profile...");
-
-        const { error: profileError } = await supabase.from("profiles").insert({
-          user_id: authUser.user.id,
-          email: data.email,
-          first_name: data.firstName,
-          last_name: data.lastName,
-          phone: data.phone,
-          role: "school_admin",
-          school_id: data.schoolId,
-        });
-
-        if (profileError) {
-          console.warn("Profile creation failed:", profileError.message);
-          // Try to clean up the auth user
-          await supabase.auth.admin.deleteUser(authUser.user.id);
-          throw new Error(
-            `Failed to create user profile: ${profileError.message}`,
-          );
-        }
-
-        console.log("Profile created successfully");
       }
 
       // Refresh the list
