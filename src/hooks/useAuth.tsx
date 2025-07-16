@@ -126,9 +126,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
+      console.log("signIn called with:", { email, password });
+
       // Trim inputs to avoid whitespace issues
       const trimmedEmail = email.trim().toLowerCase();
       const trimmedPassword = password.trim();
+
+      console.log("After trimming:", { trimmedEmail, trimmedPassword });
 
       // Check if it's the super admin account
       if (
