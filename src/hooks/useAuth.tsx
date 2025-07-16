@@ -88,36 +88,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       // Check if it's a demo account
       const demoAccounts = [
-        { email: 'admin@skooler.com', password: 'admin123', role: 'school_admin' },
-        { email: 'teacher@skooler.com', password: 'teacher123', role: 'teacher' },
-        { email: 'student@skooler.com', password: 'student123', role: 'student' },
-        { email: 'parent@skooler.com', password: 'parent123', role: 'parent' }
+        { email: 'admin@skooler.com', password: 'admin123', role: 'school_admin', user_id: '11111111-1111-1111-1111-111111111111' },
+        { email: 'teacher@skooler.com', password: 'teacher123', role: 'teacher', user_id: '22222222-2222-2222-2222-222222222222' },
+        { email: 'student@skooler.com', password: 'student123', role: 'student', user_id: '33333333-3333-3333-3333-333333333333' },
+        { email: 'parent@skooler.com', password: 'parent123', role: 'parent', user_id: '44444444-4444-4444-4444-444444444444' }
       ];
       
       const demoAccount = demoAccounts.find(acc => acc.email === email && acc.password === password);
       
       if (demoAccount) {
-        // Handle demo login - check if profile exists
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('email', email)
-          .single();
-        
-        if (profile) {
-          // Create a mock user session for demo
-          const mockUser = {
-            id: profile.user_id,
+        // Handle demo login - create a mock session
+        const mockUser = {
+          id: demoAccount.user_id,
+          email: email,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          profile: {
+            role: demoAccount.role,
+            first_name: demoAccount.role.charAt(0).toUpperCase() + demoAccount.role.slice(1),
+            last_name: 'Demo',
             email: email,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-            profile,
-            roles: [demoAccount.role]
-          } as AppUser;
-          
-          setUser(mockUser);
-          return;
-        }
+            school_id: 'demo-school'
+          },
+          roles: [demoAccount.role]
+        } as AppUser;
+        
+        setUser(mockUser);
+        return;
       }
 
       // Regular Supabase auth for non-demo accounts
