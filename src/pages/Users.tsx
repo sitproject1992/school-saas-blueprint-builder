@@ -1,6 +1,6 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { UserForm } from "@/components/settings/UserForm";
+import UserForm from "@/components/settings/UserForm";
 import { Users as UsersIcon } from "lucide-react";
 
 export default function Users() {
