@@ -23,21 +23,54 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const fetchUserProfile = async (user: User) => {
     try {
-      const { data, error } = await supabase
+      // Try to fetch profile by user_id first
+      let { data, error } = await supabase
         .from("profiles")
         .select("*")
         .eq("user_id", user.id)
         .single();
 
+      // If that fails, try by id column
+      if (error || !data) {
+        const result = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", user.id)
+          .single();
+
+        data = result.data;
+        error = result.error;
+      }
+
       if (error) {
         console.error("Error fetching user profile:", error);
-        return null;
+        // Return a minimal profile for authentication to work
+        return {
+          id: user.id,
+          user_id: user.id,
+          email: user.email,
+          first_name: user.email?.split("@")[0] || "User",
+          last_name: "",
+          role: "student",
+          user_role: "student",
+          school_id: null,
+        };
       }
 
       return data;
     } catch (error) {
       console.error("Error in fetchUserProfile:", error);
-      return null;
+      // Return a minimal profile for authentication to work
+      return {
+        id: user.id,
+        user_id: user.id,
+        email: user.email,
+        first_name: user.email?.split("@")[0] || "User",
+        last_name: "",
+        role: "student",
+        user_role: "student",
+        school_id: null,
+      };
     }
   };
 
