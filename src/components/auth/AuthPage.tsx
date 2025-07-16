@@ -312,7 +312,7 @@ export function AuthPage() {
                       </Button>
                     </form>
 
-                    <div className="text-center">
+                    <div className="text-center space-y-4">
                       <Button
                         variant="link"
                         onClick={() => setIsLogin(!isLogin)}
@@ -322,6 +322,35 @@ export function AuthPage() {
                           ? "Don't have an account? Sign Up"
                           : "Already have an account? Sign In"}
                       </Button>
+
+                      {isLogin && (
+                        <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Shield className="h-4 w-4 text-blue-600" />
+                            <p className="text-sm font-medium text-blue-900">
+                              Demo Access Available
+                            </p>
+                          </div>
+                          <p className="text-xs text-blue-700 mb-3">
+                            Try the system with pre-configured demo accounts.
+                            Switch to the "Demo Access" tab for quick login.
+                          </p>
+                          <div className="grid grid-cols-2 gap-2 text-xs">
+                            <div className="text-blue-800">
+                              <strong>Admin:</strong> admin@skooler.com
+                            </div>
+                            <div className="text-blue-800">
+                              <strong>Teacher:</strong> teacher@skooler.com
+                            </div>
+                            <div className="text-blue-800">
+                              <strong>Student:</strong> student@skooler.com
+                            </div>
+                            <div className="text-blue-800">
+                              <strong>Parent:</strong> parent@skooler.com
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
