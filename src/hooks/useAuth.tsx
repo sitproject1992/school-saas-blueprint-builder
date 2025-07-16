@@ -223,6 +223,66 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
+      // Check if it's a school admin account created through super admin panel
+      console.log("Checking for school admin account:", trimmedEmail);
+
+      const { data: schoolAdminData, error: schoolAdminError } = await supabase
+        .from("school_admin_accounts")
+        .select(
+          `
+          *,
+          schools!inner(
+            id,
+            name,
+            subdomain
+          )
+        `,
+        )
+        .eq("email", trimmedEmail)
+        .eq("is_active", true)
+        .single();
+
+      if (!schoolAdminError && schoolAdminData) {
+        console.log("Found school admin account:", schoolAdminData);
+
+        // For now, we'll do a simple password check (in production, this should be properly hashed)
+        if (schoolAdminData.password_hash === trimmedPassword) {
+          console.log("School admin password matches, creating session");
+
+          // Create a mock user session for the school admin
+          const mockUser = {
+            id: schoolAdminData.id,
+            email: trimmedEmail,
+            created_at: schoolAdminData.created_at,
+            updated_at: schoolAdminData.updated_at,
+            profile: {
+              role: "school_admin",
+              first_name: schoolAdminData.first_name,
+              last_name: schoolAdminData.last_name,
+              email: trimmedEmail,
+              phone: schoolAdminData.phone,
+              school_id: schoolAdminData.school_id,
+              school_name: schoolAdminData.schools?.name,
+            },
+            roles: ["school_admin"],
+          } as AppUser;
+
+          setUser(mockUser);
+
+          // Update last login
+          await supabase
+            .from("school_admin_accounts")
+            .update({ last_login: new Date().toISOString() })
+            .eq("id", schoolAdminData.id);
+
+          return;
+        } else {
+          throw new Error(
+            `Invalid password for school admin account "${trimmedEmail}". Please check your password or contact your super administrator.`,
+          );
+        }
+      }
+
       // Check if credentials might be for a demo account with wrong password
       const isDemoEmail = demoAccounts.some(
         (acc) => acc.email.toLowerCase() === trimmedEmail,
