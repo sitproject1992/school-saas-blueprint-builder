@@ -8,6 +8,8 @@ import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { Header } from "@/components/layout/Header";
 import { AuthPage } from "@/components/auth/AuthPage.tsx";
+import { SuperAdminAuth } from "@/components/auth/SuperAdminAuth";
+import { SuperAdminPage } from "./pages/SuperAdminPage";
 import Index from "./pages/Index";
 import SchoolRegistration from "./pages/SchoolRegistration";
 import AdminSetup from "./pages/AdminSetup";
@@ -32,6 +34,32 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
   if (!user) {
     return <Navigate to="/auth" replace />;
+  }
+
+  // Redirect super admin to their special dashboard
+  if (user.profile?.role === "super_admin") {
+    return <Navigate to="/super-admin" replace />;
+  }
+
+  return <>{children}</>;
+}
+
+function SuperAdminRoute({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-2 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user || user.profile?.role !== "super_admin") {
+    return <SuperAdminAuth />;
   }
 
   return <>{children}</>;
@@ -62,6 +90,14 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<AuthPage />} />
+              <Route
+                path="/super-admin"
+                element={
+                  <SuperAdminRoute>
+                    <SuperAdminPage />
+                  </SuperAdminRoute>
+                }
+              />
               <Route
                 path="/school-registration"
                 element={<SchoolRegistration />}
