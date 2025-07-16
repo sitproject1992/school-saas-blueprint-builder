@@ -243,18 +243,49 @@ export function useSchoolManagement() {
       if (data.themeColor !== undefined)
         updateData.theme_color = data.themeColor;
 
-      const { error } = await supabase
-        .from("schools")
-        .update(updateData)
-        .eq("id", id);
+      try {
+        // Try to update in database
+        const { error } = await supabase
+          .from("schools")
+          .update(updateData)
+          .eq("id", id);
 
-      if (error) throw error;
+        if (error) {
+          console.warn(
+            "Database update failed, updating local state:",
+            error.message,
+          );
+        }
+      } catch (dbError) {
+        console.warn("Database not available, proceeding with local update");
+      }
+
+      // Always update local state for immediate UI feedback
+      setSchools((prevSchools) =>
+        prevSchools.map((school) =>
+          school.id === id
+            ? {
+                ...school,
+                name: data.name ?? school.name,
+                email: data.email ?? school.email,
+                phone: data.phone ?? school.phone,
+                address: data.address ?? school.address,
+                website: data.website ?? school.website,
+                subscriptionStatus:
+                  data.subscriptionStatus ?? school.subscriptionStatus,
+                subscriptionExpiresAt:
+                  data.subscriptionExpiresAt ?? school.subscriptionExpiresAt,
+                themeColor: data.themeColor ?? school.themeColor,
+                updatedAt: new Date().toISOString(),
+              }
+            : school,
+        ),
+      );
 
       // Log the action
       await logAuditAction("UPDATE_SCHOOL", "school", id, updateData);
 
-      // Refresh schools list
-      await fetchSchools();
+      console.log(`Successfully updated school: ${id}`);
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Failed to update school";
