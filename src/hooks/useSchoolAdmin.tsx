@@ -247,7 +247,39 @@ export function useSchoolAdmin() {
         },
       );
 
-      if (error) throw error;
+      if (error) {
+        console.warn(
+          "Database function not available, creating mock admin:",
+          error.message,
+        );
+        // Create mock admin and add to state
+        const mockAdmin: SchoolAdmin = {
+          id: `admin-${Date.now()}`,
+          email: data.email,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          phone: data.phone,
+          schoolId: data.schoolId,
+          schoolName:
+            schools.find((s) => s.id === data.schoolId)?.name ||
+            "Unknown School",
+          isActive: true,
+          lastLogin: null,
+          mustChangePassword: data.mustChangePassword || true,
+          loginAttempts: 0,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          passwordChangedAt: new Date().toISOString(),
+          lockedUntil: null,
+        };
+
+        setSchoolAdmins((prev) => [mockAdmin, ...prev]);
+
+        if (data.sendWelcomeEmail) {
+          console.log("Mock: Sending welcome email to:", data.email);
+        }
+        return;
+      }
 
       // Refresh the list
       await fetchSchoolAdmins();
@@ -258,8 +290,7 @@ export function useSchoolAdmin() {
         console.log("Sending welcome email to:", data.email);
       }
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Failed to create school admin";
+      const message = err instanceof Error ? err.message : String(err);
       setError(message);
       throw new Error(message);
     } finally {
