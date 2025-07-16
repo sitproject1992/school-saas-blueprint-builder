@@ -246,10 +246,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (isDemoEmail) {
         const demoAccountForEmail = demoAccounts.find(
-          (acc) => acc.email === email,
+          (acc) => acc.email === trimmedEmail,
         );
         throw new Error(
-          `Invalid password for demo account "${email}". The correct password is "${demoAccountForEmail?.password}". Please use the correct demo credentials or try the "Demo Access" tab for quick login.`,
+          `Invalid password for demo account "${trimmedEmail}". The correct password is "${demoAccountForEmail?.password}". Please use the correct demo credentials or try the "Demo Access" tab for quick login.`,
         );
       }
 
