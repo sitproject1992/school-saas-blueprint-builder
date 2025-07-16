@@ -28,6 +28,9 @@ import StudentDashboard from "./pages/StudentDashboard";
 import TeacherDashboard from "./pages/TeacherDashboard";
 import SchoolDashboard from "./pages/SchoolDashboard";
 import MessagesPage from "./pages/Messages";
+import PayrollPage from "./pages/Payroll";
+import AdminSetupPage from "./pages/AdminSetup";
+import ExamsPage from "./pages/Exams";
 
 export function ProtectedRoutes() {
   return (
@@ -41,7 +44,8 @@ export function ProtectedRoutes() {
         <Route path="/attendance" element={<AttendancePage />} />
         <Route path="/syllabus" element={<Syllabus />} />
         <Route path="/lesson-plans" element={<LessonPlans />} />
-        <Route path="/exams" element={<TestsPage />} />
+        <Route path="/exams" element={<ExamsPage />} />
+        <Route path="/tests" element={<TestsPage />} />
         <Route path="/fees" element={<FeeStructures />} />
         <Route path="/invoices" element={<Invoices />} />
         <Route path="/payments" element={<PaymentsPage />} />
@@ -61,6 +65,8 @@ export function ProtectedRoutes() {
         <Route path="/student-dashboard" element={<StudentDashboard />} />
         <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
         <Route path="/school-dashboard" element={<SchoolDashboard />} />
+        <Route path="/payroll" element={<PayrollPage />} />
+        <Route path="/admin-setup" element={<AdminSetupPage />} />
       </Routes>
     </AppLayout>
   );
