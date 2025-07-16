@@ -2,6 +2,7 @@ import { useState } from "react";
 import { SuperAdminDashboard } from "@/components/dashboard/SuperAdminDashboard";
 import { SchoolAdminForm } from "@/components/admin/SchoolAdminForm";
 import { useAuth } from "@/hooks/useAuth";
+import { useSchoolAdmin } from "@/hooks/useSchoolAdmin";
 import { Navigate } from "react-router-dom";
 
 interface SchoolAdminFormData {
@@ -18,27 +19,12 @@ interface SchoolAdminFormData {
 
 export function SuperAdminPage() {
   const { user, loading } = useAuth();
+  const {
+    schools,
+    createSchoolAdmin,
+    loading: adminLoading,
+  } = useSchoolAdmin();
   const [showAdminForm, setShowAdminForm] = useState(false);
-
-  // Mock schools data - in real implementation, this would come from API
-  const schools = [
-    {
-      id: "school-1",
-      name: "Green Valley High School",
-      subdomain: "greenvalley",
-    },
-    {
-      id: "school-2",
-      name: "Bright Future Academy",
-      subdomain: "brightfuture",
-    },
-    { id: "school-3", name: "Sunrise Elementary", subdomain: "sunrise" },
-    {
-      id: "school-4",
-      name: "Ocean View Middle School",
-      subdomain: "oceanview",
-    },
-  ];
 
   // Show loading state
   if (loading) {
@@ -58,23 +44,16 @@ export function SuperAdminPage() {
   }
 
   const handleCreateSchoolAdmin = async (data: SchoolAdminFormData) => {
-    // In real implementation, this would call the API
-    console.log("Creating school admin:", data);
-
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    // This would typically make a call to the Supabase function
-    // await supabase.rpc('create_school_admin_account', {
-    //   p_school_id: data.schoolId,
-    //   p_email: data.email,
-    //   p_password: data.password,
-    //   p_first_name: data.firstName,
-    //   p_last_name: data.lastName,
-    //   p_phone: data.phone || null
-    // });
-
-    // Show success message and refresh data
+    await createSchoolAdmin({
+      firstName: data.firstName,
+      lastName: data.lastName,
+      email: data.email,
+      phone: data.phone,
+      schoolId: data.schoolId,
+      password: data.password,
+      mustChangePassword: data.mustChangePassword,
+      sendWelcomeEmail: data.sendWelcomeEmail,
+    });
   };
 
   return (
