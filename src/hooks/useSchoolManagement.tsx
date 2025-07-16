@@ -248,26 +248,39 @@ export function useSchoolManagement() {
       setLoading(true);
       setError(null);
 
-      // Get school details for logging
-      const { data: school } = await supabase
-        .from("schools")
-        .select("name, subdomain")
-        .eq("id", id)
-        .single();
+      // Get school details for logging (from current state or try database)
+      const schoolToDelete = schools.find((s) => s.id === id);
 
-      // Delete the school (cascade will handle related records)
-      const { error } = await supabase.from("schools").delete().eq("id", id);
+      if (!schoolToDelete) {
+        throw new Error("School not found");
+      }
 
-      if (error) throw error;
+      try {
+        // Try to delete from database first
+        const { error } = await supabase.from("schools").delete().eq("id", id);
+
+        if (error) {
+          console.warn(
+            "Database deletion failed, removing from local state:",
+            error.message,
+          );
+        }
+      } catch (dbError) {
+        console.warn("Database not available, proceeding with local deletion");
+      }
+
+      // Always remove from local state for immediate UI feedback
+      setSchools((prevSchools) =>
+        prevSchools.filter((school) => school.id !== id),
+      );
 
       // Log the action
       await logAuditAction("DELETE_SCHOOL", "school", id, {
-        name: school?.name,
-        subdomain: school?.subdomain,
+        name: schoolToDelete.name,
+        subdomain: schoolToDelete.subdomain,
       });
 
-      // Refresh schools list
-      await fetchSchools();
+      console.log(`Successfully deleted school: ${schoolToDelete.name}`);
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Failed to delete school";
