@@ -228,8 +228,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log("Is demo email:", isDemoEmail, email);
 
       if (isDemoEmail) {
+        const demoAccountForEmail = demoAccounts.find(
+          (acc) => acc.email === email,
+        );
         throw new Error(
-          `Invalid password for demo account. Please use the correct demo credentials or try the "Demo Access" tab for quick login.`,
+          `Invalid password for demo account "${email}". The correct password is "${demoAccountForEmail?.password}". Please use the correct demo credentials or try the "Demo Access" tab for quick login.`,
         );
       }
 
