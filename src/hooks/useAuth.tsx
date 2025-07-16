@@ -240,7 +240,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Check if credentials might be for a demo account with wrong password
       const isDemoEmail = demoAccounts.some(
-        (acc) => acc.email === trimmedEmail,
+        (acc) => acc.email.toLowerCase() === trimmedEmail,
       );
 
       if (isDemoEmail) {
