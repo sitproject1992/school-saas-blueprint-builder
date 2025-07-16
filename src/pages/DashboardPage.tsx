@@ -1,37 +1,6 @@
-import { useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useAuth } from "@/hooks/useAuth";
-import { useNavigate } from "react-router-dom";
-import {
-  Users,
-  GraduationCap,
-  School,
-  User,
-  Settings,
-  Calendar,
-  BookOpen,
-  TrendingUp,
-  DollarSign,
-  Clock,
-  Bell,
-  MessageSquare,
-  FileText,
-  BarChart3,
-} from "lucide-react";
+import { RoleBasedDashboard } from "@/components/dashboard/RoleBasedDashboard";
 
 export default function DashboardPage() {
-  const { user } = useAuth();
-  const navigate = useNavigate();
-
   // Mock data for overview
   const overviewStats = [
     {
