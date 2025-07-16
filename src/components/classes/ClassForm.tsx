@@ -49,7 +49,7 @@ export function ClassForm({ classItem, onSuccess }: ClassFormProps) {
   const queryClient = useQueryClient();
   const { schoolId } = useSchool();
   const [selectedTeacherId, setSelectedTeacherId] = useState<string>(
-    classItem?.id || "",
+    classItem?.id || "none",
   );
 
   const { data: teachers } = useQuery({
@@ -159,7 +159,7 @@ export function ClassForm({ classItem, onSuccess }: ClassFormProps) {
                   <SelectValue placeholder="Select a teacher" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">No teacher assigned</SelectItem>
+                  <SelectItem value="none">No teacher assigned</SelectItem>
                   {teachers?.map((teacher) => (
                     <SelectItem key={teacher.id} value={teacher.id}>
                       {teacher.profile.first_name} {teacher.profile.last_name}
