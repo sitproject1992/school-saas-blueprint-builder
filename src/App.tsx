@@ -27,18 +27,14 @@ import AdminSetup from "./pages/AdminSetup";
 import TeacherRegistration from "./pages/TeacherRegistration";
 import StudentRegistration from "./pages/StudentRegistration";
 import RegistrationComplete from "./pages/RegistrationComplete";
-<<<<<<< HEAD
 import Exams from "./pages/Exams";
 import Announcements from "./pages/Announcements";
 import Statistics from "./pages/Statistics";
 import Schools from "./pages/Schools";
 import Users from "./pages/Users";
 import Settings from "./pages/Settings";
-=======
-import SettingsPage from "./pages/Settings";
-import SchoolsPage from "./pages/Schools";
-import UsersPage from "./pages/Users";
->>>>>>> origin/main
+import { SchoolProvider } from "@/hooks/useSchool";
+import { ProtectedRoutes } from "./ProtectedRoutes";
 
 const queryClient = new QueryClient();
 
@@ -60,9 +56,6 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-import { SchoolProvider } from "@/hooks/useSchool";
-import { ProtectedRoutes } from "./ProtectedRoutes";
-
 export function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
@@ -80,273 +73,15 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
-<<<<<<< HEAD
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/auth" element={<AuthPage />} />
-            <Route
-              path="/school-registration"
-              element={<SchoolRegistration />}
-            />
-            <Route path="/setup-admin" element={<AdminSetup />} />
-            <Route
-              path="/teacher-registration"
-              element={<TeacherRegistration />}
-            />
-            <Route
-              path="/student-registration"
-              element={<StudentRegistration />}
-            />
-            <Route
-              path="/registration-complete"
-              element={<RegistrationComplete />}
-            />
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <DashboardPage />
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/students"
-              element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <StudentsPage />
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/teachers"
-              element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <TeachersPage />
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/classes"
-              element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <ClassesPage />
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/subjects"
-              element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <SubjectsPage />
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/attendance"
-              element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <AttendancePage />
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/syllabus"
-              element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <Syllabus />
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/lesson-plans"
-              element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <LessonPlans />
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/exams"
-              element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <Exams />
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/fees"
-              element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <FeeStructures />
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/invoices"
-              element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <Invoices />
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payments"
-              element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <div>Payments Module - Coming Soon</div>
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/inventory"
-              element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <Inventory />
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/announcements"
-              element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <Announcements />
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/reports"
-              element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <div>Reports Module - Coming Soon</div>
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/statistics"
-              element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <Statistics />
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/schools"
-              element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <Schools />
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/users"
-              element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <Users />
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/parent-portal"
-              element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <ParentPortal />
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/messages"
-              element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <div>Messages Module - Coming Soon</div>
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/settings"
-              element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <Settings />
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-=======
       <SchoolProvider>
         <TooltipProvider>
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/auth" element={<AuthPage />} />
-              <Route path="/school-registration" element={<SchoolRegistration />} />
-              <Route path="/setup-admin" element={<AdminSetup />} />
-              <Route path="/teacher-registration" element={<TeacherRegistration />} />
-              <Route path="/student-registration" element={<StudentRegistration />} />
-              <Route path="/registration-complete" element={<RegistrationComplete />} />
-              <Route
-                path="/*"
-                element={
-                  <ProtectedRoute>
-                    <ProtectedRoutes />
-                  </ProtectedRoute>
-                }
-              />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <ProtectedRoutes />
           </BrowserRouter>
         </TooltipProvider>
       </SchoolProvider>
->>>>>>> origin/main
     </AuthProvider>
   </QueryClientProvider>
 );
