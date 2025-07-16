@@ -214,6 +214,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
+      // Check if credentials might be for a demo account with wrong password
+      const isDemoEmail = demoAccounts.some((acc) => acc.email === email);
+      if (isDemoEmail) {
+        throw new Error(
+          `Invalid password for demo account. Please use the correct demo credentials or try the "Demo Access" tab for quick login.`,
+        );
+      }
+
       // Regular Supabase auth for non-demo accounts
       const { error } = await supabase.auth.signInWithPassword({
         email,
@@ -221,6 +229,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
 
       if (error) {
+        // Provide more helpful error messages
+        if (error.message === "Invalid login credentials") {
+          const availableDemoEmails = demoAccounts
+            .map((acc) => acc.email)
+            .join(", ");
+          throw new Error(
+            `Login failed. Please check your credentials or try one of the demo accounts:\n\n${availableDemoEmails}\n\nUse the "Demo Access" tab for quick access to demo accounts.`,
+          );
+        }
         throw error;
       }
     } catch (error: any) {
