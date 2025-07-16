@@ -1,493 +1,550 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useTeacherDashboardData } from "@/hooks/useDashboardData";
+import { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 import {
   Users,
   BookOpen,
-  TrendingUp,
   Calendar,
-  AlertTriangle,
   Clock,
   CheckCircle,
   XCircle,
   FileText,
-  GraduationCap,
-  Bell,
-  User,
-  ArrowRight,
-  Eye,
-  Plus,
+  BarChart3,
   MessageSquare,
   Award,
+  ClipboardList,
+  TrendingUp,
+  AlertCircle,
+  GraduationCap,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Link } from "react-router-dom";
 
 export function TeacherDashboard() {
-  const { data, isLoading, error } = useTeacherDashboardData();
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
-  // Demo data for teacher dashboard
-  const demoData = {
-    totalClasses: 4,
-    totalStudents: 128,
-    attendanceRate: 92.5,
-    upcomingExams: 3,
-    pendingLessonPlans: 2,
-    averageGrade: "B+",
-    teacherName: "Ms. Sarah Johnson",
-    subject: "Mathematics",
-  };
-
-  if (isLoading) {
-    return (
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {[...Array(4)].map((_, i) => (
-          <Card key={i} className="animate-pulse">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <div className="h-4 w-24 bg-gray-300 rounded"></div>
-            </CardHeader>
-            <CardContent>
-              <div className="h-8 w-16 bg-gray-300 rounded mb-2"></div>
-              <div className="h-3 w-32 bg-gray-300 rounded"></div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <div className="text-center">
-          <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold mb-2">
-            Error Loading Dashboard
-          </h3>
-          <p className="text-muted-foreground">
-            Please refresh the page or try again later.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  const myClasses = [
+  // Teacher-specific stats
+  const teacherStats = [
     {
-      name: "Grade 8A - Mathematics",
-      students: 32,
-      time: "9:00 AM - 10:00 AM",
-      attendance: 94,
+      title: "My Classes",
+      value: "6",
+      subtitle: "Active classes",
+      icon: BookOpen,
+      color: "text-blue-600",
+      bgColor: "bg-blue-50",
     },
     {
-      name: "Grade 9B - Mathematics",
-      students: 28,
-      time: "11:00 AM - 12:00 PM",
-      attendance: 88,
+      title: "Total Students",
+      value: "187",
+      subtitle: "Across all classes",
+      icon: Users,
+      color: "text-green-600",
+      bgColor: "bg-green-50",
     },
     {
-      name: "Grade 8B - Mathematics",
-      students: 35,
-      time: "2:00 PM - 3:00 PM",
-      attendance: 96,
+      title: "Today's Classes",
+      value: "4",
+      subtitle: "Scheduled for today",
+      icon: Calendar,
+      color: "text-purple-600",
+      bgColor: "bg-purple-50",
     },
     {
-      name: "Grade 9A - Mathematics",
-      students: 33,
-      time: "3:00 PM - 4:00 PM",
-      attendance: 91,
+      title: "Pending Grades",
+      value: "23",
+      subtitle: "Assignments to grade",
+      icon: FileText,
+      color: "text-yellow-600",
+      bgColor: "bg-yellow-50",
     },
   ];
 
-  const todaySchedule = [
+  const todaysClasses = [
     {
-      class: "Grade 8A",
-      subject: "Algebra",
-      time: "9:00 AM",
+      subject: "Mathematics",
+      class: "Grade 10A",
+      time: "09:00 - 09:45",
+      room: "Room 201",
+      students: 32,
       status: "completed",
     },
     {
-      class: "Grade 9B",
-      subject: "Geometry",
-      time: "11:00 AM",
-      status: "ongoing",
+      subject: "Mathematics",
+      class: "Grade 10B",
+      time: "10:00 - 10:45",
+      room: "Room 201",
+      students: 28,
+      status: "current",
     },
     {
-      class: "Grade 8B",
-      subject: "Statistics",
-      time: "2:00 PM",
+      subject: "Advanced Math",
+      class: "Grade 11A",
+      time: "14:30 - 15:15",
+      room: "Room 201",
+      students: 25,
       status: "upcoming",
     },
     {
-      class: "Grade 9A",
-      subject: "Trigonometry",
-      time: "3:00 PM",
+      subject: "Calculus",
+      class: "Grade 12",
+      time: "15:30 - 16:15",
+      room: "Room 201",
+      students: 22,
       status: "upcoming",
     },
   ];
 
-  const recentActivities = [
+  const recentAssignments = [
     {
-      action: "Graded Grade 8A quiz on Algebra",
-      time: "2 hours ago",
-      type: "success",
+      title: "Quadratic Equations Quiz",
+      class: "Grade 10A",
+      dueDate: "Tomorrow",
+      submitted: 28,
+      total: 32,
+      status: "active",
     },
     {
-      action: "Updated lesson plan for Geometry",
-      time: "4 hours ago",
-      type: "info",
+      title: "Calculus Problem Set",
+      class: "Grade 12",
+      dueDate: "Next Week",
+      submitted: 20,
+      total: 22,
+      status: "active",
     },
     {
-      action: "Marked attendance for Grade 9B",
-      time: "6 hours ago",
-      type: "success",
-    },
-    {
-      action: "Sent progress report to parents",
-      time: "1 day ago",
-      type: "info",
+      title: "Geometry Test",
+      class: "Grade 10B",
+      dueDate: "Completed",
+      submitted: 28,
+      total: 28,
+      status: "completed",
     },
   ];
 
-  const upcomingExams = [
+  const pendingTasks = [
     {
-      class: "Grade 8A",
-      subject: "Algebra Test",
-      date: "Dec 15",
-      status: "pending",
+      title: "Grade Quiz Papers",
+      description: "Grade 10A Mathematics Quiz - 23 papers pending",
+      priority: "high",
+      dueDate: "Today",
+      type: "grading",
     },
     {
-      class: "Grade 9B",
-      subject: "Geometry Quiz",
-      date: "Dec 18",
-      status: "pending",
+      title: "Prepare Lesson Plan",
+      description: "Advanced Calculus - Chapter 5 lesson plan",
+      priority: "medium",
+      dueDate: "Tomorrow",
+      type: "planning",
     },
     {
-      class: "Grade 8B",
-      subject: "Monthly Assessment",
-      date: "Dec 22",
-      status: "draft",
+      title: "Parent Meeting",
+      description: "Discussion about Sarah's performance",
+      priority: "medium",
+      dueDate: "Friday",
+      type: "meeting",
+    },
+    {
+      title: "Submit Grades",
+      description: "Monthly grade submission deadline",
+      priority: "high",
+      dueDate: "This Week",
+      type: "administrative",
     },
   ];
+
+  const studentPerformance = [
+    {
+      metric: "Class Average",
+      value: "78.5%",
+      change: "+2.3%",
+      trend: "up",
+    },
+    {
+      metric: "Attendance Rate",
+      value: "92.1%",
+      change: "+1.1%",
+      trend: "up",
+    },
+    {
+      metric: "Assignment Completion",
+      value: "87.3%",
+      change: "-0.8%",
+      trend: "down",
+    },
+    {
+      metric: "Parent Engagement",
+      value: "73.2%",
+      change: "+4.2%",
+      trend: "up",
+    },
+  ];
+
+  const quickActions = [
+    {
+      title: "Take Attendance",
+      description: "Mark attendance for current class",
+      icon: CheckCircle,
+      route: "/attendance",
+      color: "bg-green-500",
+    },
+    {
+      title: "Grade Assignments",
+      description: "Review and grade student submissions",
+      icon: FileText,
+      route: "/tests",
+      color: "bg-blue-500",
+    },
+    {
+      title: "Create Assignment",
+      description: "Create new assignments and tests",
+      icon: ClipboardList,
+      route: "/assignments",
+      color: "bg-purple-500",
+    },
+    {
+      title: "View Students",
+      description: "Check student profiles and progress",
+      icon: Users,
+      route: "/students",
+      color: "bg-indigo-500",
+    },
+    {
+      title: "Lesson Plans",
+      description: "Create and manage lesson plans",
+      icon: BookOpen,
+      route: "/lesson-plans",
+      color: "bg-yellow-500",
+    },
+    {
+      title: "Send Messages",
+      description: "Communicate with students and parents",
+      icon: MessageSquare,
+      route: "/messages",
+      color: "bg-pink-500",
+    },
+  ];
+
+  const getClassStatusBadge = (status: string) => {
+    switch (status) {
+      case "completed":
+        return (
+          <Badge variant="secondary" className="bg-green-100 text-green-800">
+            Completed
+          </Badge>
+        );
+      case "current":
+        return (
+          <Badge variant="default" className="bg-blue-100 text-blue-800">
+            Current
+          </Badge>
+        );
+      case "upcoming":
+        return <Badge variant="outline">Upcoming</Badge>;
+      default:
+        return <Badge variant="outline">{status}</Badge>;
+    }
+  };
+
+  const getPriorityBadge = (priority: string) => {
+    const variants = {
+      high: "destructive",
+      medium: "default",
+      low: "secondary",
+    };
+    return variants[priority as keyof typeof variants] || "secondary";
+  };
+
+  const handleQuickAction = (route: string) => {
+    navigate(route);
+  };
 
   return (
-    <div className="space-y-6">
+    <div className="container mx-auto p-6 space-y-6">
       {/* Header */}
-      <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
+      <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-bold text-gray-900">
             Teacher Dashboard
           </h1>
-          <p className="text-muted-foreground mt-1">
-            Welcome back, {demoData.teacherName}! Here's your teaching overview.
+          <p className="text-gray-600 mt-2">
+            Welcome back, {user?.profile?.first_name || "Teacher"}! Ready for
+            another great day of teaching?
           </p>
         </div>
-        <div className="flex items-center space-x-3">
-          <Badge variant="outline" className="text-blue-600 border-blue-600">
-            <BookOpen className="w-3 h-3 mr-1" />
-            {demoData.subject} Teacher
-          </Badge>
-          <Button variant="outline" size="sm">
-            <Bell className="w-4 h-4 mr-2" />
-            Notifications
-            <Badge className="ml-2 px-1.5 py-0.5 text-xs bg-red-500">2</Badge>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => navigate("/attendance")}>
+            <CheckCircle className="h-4 w-4 mr-2" />
+            Take Attendance
+          </Button>
+          <Button onClick={() => navigate("/lesson-plans")}>
+            <BookOpen className="h-4 w-4 mr-2" />
+            Lesson Plans
           </Button>
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">My Classes</CardTitle>
-            <div className="p-2 bg-blue-50 rounded-full">
-              <BookOpen className="h-4 w-4 text-blue-600" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {data?.totalClasses || demoData.totalClasses}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Active classes this semester
-            </p>
-          </CardContent>
-        </Card>
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">My Students</CardTitle>
-            <div className="p-2 bg-green-50 rounded-full">
-              <Users className="h-4 w-4 text-green-600" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {data?.totalStudents || demoData.totalStudents}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Students across all classes
-            </p>
-          </CardContent>
-        </Card>
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Attendance Rate
-            </CardTitle>
-            <div className="p-2 bg-purple-50 rounded-full">
-              <TrendingUp className="h-4 w-4 text-purple-600" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {data?.attendanceRate?.toFixed(1) || demoData.attendanceRate}%
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Average class attendance
-            </p>
-          </CardContent>
-        </Card>
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Average Grade</CardTitle>
-            <div className="p-2 bg-orange-50 rounded-full">
-              <Award className="h-4 w-4 text-orange-600" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{demoData.averageGrade}</div>
-            <p className="text-xs text-muted-foreground">
-              Class performance average
-            </p>
-          </CardContent>
-        </Card>
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {teacherStats.map((stat, index) => (
+          <Card key={index} className="hover:shadow-md transition-shadow">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">
+                    {stat.title}
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {stat.value}
+                  </p>
+                  <p className="text-xs text-gray-500">{stat.subtitle}</p>
+                </div>
+                <div className={`p-3 rounded-lg ${stat.bgColor}`}>
+                  <stat.icon className={`h-6 w-6 ${stat.color}`} />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {/* Today's Schedule */}
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold flex items-center gap-2">
-              <Clock className="w-5 h-5 text-blue-500" />
-              Today's Schedule
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {todaySchedule.map((item, index) => (
-                <div
-                  key={index}
-                  className={`flex items-center justify-between p-3 rounded-lg border ${
-                    item.status === "completed"
-                      ? "bg-green-50 border-green-200"
-                      : item.status === "ongoing"
-                        ? "bg-blue-50 border-blue-200"
-                        : "bg-gray-50 border-gray-200"
-                  }`}
-                >
-                  <div>
-                    <p className="font-medium">{item.class}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {item.subject}
-                    </p>
-                    <p className="text-xs text-muted-foreground">{item.time}</p>
-                  </div>
-                  <Badge
-                    variant={
-                      item.status === "completed"
-                        ? "default"
-                        : item.status === "ongoing"
-                          ? "secondary"
-                          : "outline"
-                    }
-                  >
-                    {item.status === "completed"
-                      ? "Done"
-                      : item.status === "ongoing"
-                        ? "Live"
-                        : "Upcoming"}
-                  </Badge>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+      {/* Main Content */}
+      <Tabs defaultValue="today" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="today">Today</TabsTrigger>
+          <TabsTrigger value="classes">My Classes</TabsTrigger>
+          <TabsTrigger value="assignments">Assignments</TabsTrigger>
+          <TabsTrigger value="performance">Performance</TabsTrigger>
+          <TabsTrigger value="tasks">Tasks</TabsTrigger>
+        </TabsList>
 
-        {/* My Classes Overview */}
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold flex items-center gap-2">
-              <GraduationCap className="w-5 h-5 text-purple-500" />
-              My Classes
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {myClasses.map((cls, index) => (
-                <div
-                  key={index}
-                  className="space-y-2 p-3 bg-muted/30 rounded-lg"
-                >
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <p className="font-medium text-sm">{cls.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {cls.students} students • {cls.time}
+        <TabsContent value="today" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Today's Schedule</CardTitle>
+                <CardDescription>Your classes for today</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {todaysClasses.map((classItem, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-4 border rounded-lg"
+                    >
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="font-medium">{classItem.subject}</h3>
+                          {getClassStatusBadge(classItem.status)}
+                        </div>
+                        <p className="text-sm text-gray-600">
+                          {classItem.class} • {classItem.room}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          {classItem.time} • {classItem.students} students
+                        </p>
+                      </div>
+                      <Button size="sm" variant="outline">
+                        View Class
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Quick Actions</CardTitle>
+                <CardDescription>
+                  Frequently used teaching tools
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-3">
+                  {quickActions.slice(0, 4).map((action, index) => (
+                    <Button
+                      key={index}
+                      variant="outline"
+                      onClick={() => handleQuickAction(action.route)}
+                      className="h-20 flex flex-col items-center justify-center gap-2"
+                    >
+                      <div
+                        className={`p-2 rounded-lg ${action.color} text-white`}
+                      >
+                        <action.icon className="h-4 w-4" />
+                      </div>
+                      <span className="text-xs font-medium">
+                        {action.title}
+                      </span>
+                    </Button>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="classes" className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {quickActions.map((action, index) => (
+              <div
+                key={index}
+                onClick={() => handleQuickAction(action.route)}
+                className="p-6 border rounded-lg hover:shadow-md transition-shadow cursor-pointer group"
+              >
+                <div className="flex items-center gap-4 mb-3">
+                  <div
+                    className={`p-3 rounded-lg ${action.color} text-white group-hover:scale-110 transition-transform`}
+                  >
+                    <action.icon className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">{action.title}</h3>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-600">{action.description}</p>
+                <Button className="w-full mt-4" variant="outline">
+                  Access Tool
+                </Button>
+              </div>
+            ))}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="assignments" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Assignments</CardTitle>
+              <CardDescription>
+                Track assignment submissions and progress
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {recentAssignments.map((assignment, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-4 border rounded-lg"
+                  >
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-medium">{assignment.title}</h3>
+                        <Badge
+                          variant={
+                            assignment.status === "completed"
+                              ? "secondary"
+                              : "default"
+                          }
+                        >
+                          {assignment.status}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-gray-600">
+                        {assignment.class} • Due: {assignment.dueDate}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        Submissions: {assignment.submitted}/{assignment.total}(
+                        {Math.round(
+                          (assignment.submitted / assignment.total) * 100,
+                        )}
+                        %)
                       </p>
                     </div>
+                    <Button size="sm" variant="outline">
+                      Review
+                    </Button>
                   </div>
-                  <div className="space-y-1">
-                    <div className="flex justify-between text-xs">
-                      <span>Attendance</span>
-                      <span>{cls.attendance}%</span>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="performance" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Student Performance Metrics</CardTitle>
+              <CardDescription>
+                Overview of your students' performance
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {studentPerformance.map((metric, index) => (
+                  <div key={index} className="p-4 border rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-medium">{metric.metric}</h3>
+                      <div className="flex items-center gap-1">
+                        {metric.trend === "up" ? (
+                          <TrendingUp className="h-4 w-4 text-green-600" />
+                        ) : (
+                          <TrendingUp className="h-4 w-4 text-red-600 transform rotate-180" />
+                        )}
+                        <span
+                          className={`text-sm ${
+                            metric.trend === "up"
+                              ? "text-green-600"
+                              : "text-red-600"
+                          }`}
+                        >
+                          {metric.change}
+                        </span>
+                      </div>
                     </div>
-                    <Progress value={cls.attendance} className="h-2" />
+                    <p className="text-2xl font-bold">{metric.value}</p>
                   </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-        {/* Quick Actions */}
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold">
-              Quick Actions
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <Button
-                className="w-full justify-start h-12"
-                variant="outline"
-                asChild
-              >
-                <Link to="/attendance">
-                  <CheckCircle className="mr-3 h-4 w-4 text-green-600" />
-                  Mark Attendance
-                  <ArrowRight className="ml-auto h-4 w-4" />
-                </Link>
-              </Button>
-              <Button
-                className="w-full justify-start h-12"
-                variant="outline"
-                asChild
-              >
-                <Link to="/lesson-plans">
-                  <FileText className="mr-3 h-4 w-4 text-blue-600" />
-                  Create Lesson Plan
-                  <ArrowRight className="ml-auto h-4 w-4" />
-                </Link>
-              </Button>
-              <Button
-                className="w-full justify-start h-12"
-                variant="outline"
-                asChild
-              >
-                <Link to="/grades">
-                  <Award className="mr-3 h-4 w-4 text-purple-600" />
-                  Enter Grades
-                  <ArrowRight className="ml-auto h-4 w-4" />
-                </Link>
-              </Button>
-              <Button
-                className="w-full justify-start h-12"
-                variant="outline"
-                asChild
-              >
-                <Link to="/messages">
-                  <MessageSquare className="mr-3 h-4 w-4 text-orange-600" />
-                  Message Parents
-                  <ArrowRight className="ml-auto h-4 w-4" />
-                </Link>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Bottom Section */}
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* Upcoming Exams */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-red-500" />
-              Upcoming Exams
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {upcomingExams.map((exam, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-                >
-                  <div>
-                    <p className="font-medium">{exam.class}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {exam.subject}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-medium">{exam.date}</p>
-                    <Badge
-                      variant={
-                        exam.status === "pending" ? "destructive" : "secondary"
-                      }
-                      className="text-xs"
-                    >
-                      {exam.status}
-                    </Badge>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <Button className="w-full mt-4" variant="outline" size="sm">
-              <Plus className="w-4 h-4 mr-2" />
-              Schedule New Exam
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* Recent Activities */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold">
-              Recent Activities
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {recentActivities.map((activity, index) => (
-                <div
-                  key={index}
-                  className="flex items-start space-x-3 p-2 rounded-lg hover:bg-muted/50 transition-colors"
-                >
+        <TabsContent value="tasks" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Pending Tasks</CardTitle>
+              <CardDescription>Tasks requiring your attention</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {pendingTasks.map((task, index) => (
                   <div
-                    className={`w-2 h-2 rounded-full mt-2 ${
-                      activity.type === "success"
-                        ? "bg-green-500"
-                        : "bg-blue-500"
-                    }`}
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium">{activity.action}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {activity.time}
-                    </p>
+                    key={index}
+                    className="flex items-center justify-between p-4 border rounded-lg"
+                  >
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-medium">{task.title}</h3>
+                        <Badge variant={getPriorityBadge(task.priority) as any}>
+                          {task.priority}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-gray-600">
+                        {task.description}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Due: {task.dueDate}
+                      </p>
+                    </div>
+                    <Button size="sm" variant="outline">
+                      Complete
+                    </Button>
                   </div>
-                </div>
-              ))}
-              <Button variant="ghost" size="sm" className="w-full mt-2">
-                View All Activities
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
