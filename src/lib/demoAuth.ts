@@ -80,29 +80,34 @@ export async function ensureDemoDataExists() {
 
     // Check if demo profiles exist
     for (const account of demoAccounts) {
-      const { data: profile } = await supabase
+      const { data: profile, error: profileFetchError } = await supabase
         .from("profiles")
         .select("*")
         .eq("email", account.email)
         .single();
 
-      if (!profile) {
+      if (!profile && !profileFetchError?.code?.includes("PGRST116")) {
         console.log(`Creating demo profile for ${account.email}`);
         // Note: In a real system, you'd create proper auth users
         // For demo purposes, we'll create profiles with mock user_ids
         const mockUserId = `demo-${account.role}-${Date.now()}`;
 
-        const { error: profileError } = await supabase.from("profiles").insert({
-          user_id: mockUserId,
-          email: account.email,
-          first_name: account.first_name,
-          last_name: account.last_name,
-          role: account.role,
-          school_id: school?.id,
-          phone: `+1-555-010${demoAccounts.indexOf(account) + 1}`,
-        });
+        const { error: profileError } = await supabase.from("profiles").upsert(
+          {
+            user_id: mockUserId,
+            email: account.email,
+            first_name: account.first_name,
+            last_name: account.last_name,
+            role: account.role,
+            school_id: school?.id,
+            phone: `+1-555-010${demoAccounts.indexOf(account) + 1}`,
+          },
+          {
+            onConflict: "email",
+          },
+        );
 
-        if (profileError) {
+        if (profileError && !profileError.message.includes("duplicate")) {
           console.error("Error creating demo profile:", profileError);
         }
       }
