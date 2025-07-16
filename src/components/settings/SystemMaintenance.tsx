@@ -66,8 +66,13 @@ interface MaintenanceTask {
   progress?: number;
 }
 
+interface MaintenanceSettingsData {
+  maintenanceMode: boolean;
+  maintenanceMessage: string;
+}
+
 interface SystemMaintenanceProps {
-  onSave?: (data: any) => Promise<void>;
+  onSave?: (data: MaintenanceSettingsData) => Promise<void>;
 }
 
 export function SystemMaintenance({ onSave }: SystemMaintenanceProps) {
