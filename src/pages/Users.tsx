@@ -769,7 +769,7 @@ export default function Users() {
                         "Download Reports",
                       ],
                       color: "bg-purple-100 text-purple-600",
-                      icon: Users,
+                      icon: UsersIcon,
                     },
                   ].map((role, index) => (
                     <div key={index} className="p-4 border rounded-lg">
