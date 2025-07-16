@@ -143,7 +143,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       ) {
         // Handle super admin login - create a mock session with persistence
         const sessionData = {
-          email: email,
+          email: trimmedEmail,
           loginTime: Date.now(),
           expiresAt: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
         };
@@ -155,14 +155,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         const mockUser = {
           id: "00000000-0000-0000-0000-000000000000",
-          email: email,
+          email: trimmedEmail,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
           profile: {
             role: "super_admin",
             first_name: "Super",
             last_name: "Admin",
-            email: email,
+            email: trimmedEmail,
             school_id: null,
           },
           roles: ["super_admin"],
