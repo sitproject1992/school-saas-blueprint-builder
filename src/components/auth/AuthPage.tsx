@@ -199,6 +199,30 @@ export function AuthPage() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-6">
+                    {error && (
+                      <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                        <div className="flex items-start gap-2">
+                          <div className="text-red-600 text-sm">
+                            <strong>Authentication Error:</strong>
+                          </div>
+                        </div>
+                        <p className="text-red-700 text-sm mt-1 whitespace-pre-line">
+                          {error}
+                        </p>
+                        {error.includes("demo accounts") && (
+                          <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded">
+                            <p className="text-blue-800 text-sm font-medium mb-2">
+                              Quick Demo Access:
+                            </p>
+                            <p className="text-blue-700 text-xs">
+                              Switch to the "Demo Access" tab above for
+                              one-click login to all demo accounts.
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
                     <form onSubmit={handleSubmit} className="space-y-4">
                       <div className="space-y-2">
                         <Label htmlFor="email" className="text-sm font-medium">
