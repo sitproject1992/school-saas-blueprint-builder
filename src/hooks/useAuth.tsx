@@ -126,6 +126,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
+      console.log("Sign in attempt:", {
+        email,
+        passwordLength: password.length,
+      });
+
       // Check if it's the super admin account
       if (email === "sujan1nepal@gmail.com" && password === "precioussn") {
         // Handle super admin login - create a mock session with persistence
