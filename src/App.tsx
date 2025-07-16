@@ -8,6 +8,7 @@ import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { Header } from "@/components/layout/Header";
 import { AuthPage } from "@/components/auth/AuthPage.tsx";
+import { SuperAdminAuth } from "@/components/auth/SuperAdminAuth";
 import { SuperAdminPage } from "./pages/SuperAdminPage";
 import Index from "./pages/Index";
 import SchoolRegistration from "./pages/SchoolRegistration";
@@ -49,13 +50,16 @@ function SuperAdminRoute({ children }: { children: React.ReactNode }) {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        Loading...
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-2 text-gray-600">Loading...</p>
+        </div>
       </div>
     );
   }
 
   if (!user || user.profile?.role !== "super_admin") {
-    return <Navigate to="/auth" replace />;
+    return <SuperAdminAuth />;
   }
 
   return <>{children}</>;
