@@ -43,7 +43,8 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
-import { useSchoolAdmin, SchoolAdmin, School } from "@/hooks/useSchoolAdmin";
+import { useSchoolAdmin } from "@/hooks/useSchoolAdmin";
+import type { SchoolAdmin, School } from "@/hooks/useSchoolAdmin";
 import { toast } from "sonner";
 import { SchoolAdminForm } from "@/components/admin/SchoolAdminForm";
 
