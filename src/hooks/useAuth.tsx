@@ -208,7 +208,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
 
       const demoAccount = demoAccounts.find(
-        (acc) => acc.email === trimmedEmail && acc.password === trimmedPassword,
+        (acc) =>
+          acc.email.toLowerCase() === trimmedEmail &&
+          acc.password === trimmedPassword,
       );
 
       console.log("Found demo account:", demoAccount);
