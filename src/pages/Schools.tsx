@@ -1,6 +1,6 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { SchoolForm } from "@/components/schools/SchoolForm";
+import SchoolForm from "@/components/schools/SchoolForm";
 import { School } from "lucide-react";
 
 export default function Schools() {
