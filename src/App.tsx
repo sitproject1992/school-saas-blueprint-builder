@@ -78,7 +78,35 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <ProtectedRoutes />
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/auth" element={<AuthPage />} />
+              <Route
+                path="/school-registration"
+                element={<SchoolRegistration />}
+              />
+              <Route path="/admin-setup" element={<AdminSetup />} />
+              <Route
+                path="/teacher-registration"
+                element={<TeacherRegistration />}
+              />
+              <Route
+                path="/student-registration"
+                element={<StudentRegistration />}
+              />
+              <Route
+                path="/registration-complete"
+                element={<RegistrationComplete />}
+              />
+              <Route
+                path="/*"
+                element={
+                  <ProtectedRoute>
+                    <ProtectedRoutes />
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
           </BrowserRouter>
         </TooltipProvider>
       </SchoolProvider>
