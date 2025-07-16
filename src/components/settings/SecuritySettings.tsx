@@ -155,7 +155,7 @@ export function SecuritySettings({ onSave }: SecuritySettingsProps) {
 
   const updatePasswordPolicy = (
     key: keyof SecuritySettingsData["passwordPolicy"],
-    value: any,
+    value: string | number | boolean,
   ) => {
     setSettings((prev) => ({
       ...prev,
@@ -165,7 +165,7 @@ export function SecuritySettings({ onSave }: SecuritySettingsProps) {
 
   const updateLoginSecurity = (
     key: keyof SecuritySettingsData["loginSecurity"],
-    value: any,
+    value: string | number | boolean | string[],
   ) => {
     setSettings((prev) => ({
       ...prev,
@@ -175,7 +175,7 @@ export function SecuritySettings({ onSave }: SecuritySettingsProps) {
 
   const updateDataProtection = (
     key: keyof SecuritySettingsData["dataProtection"],
-    value: any,
+    value: string | number | boolean,
   ) => {
     setSettings((prev) => ({
       ...prev,
@@ -185,7 +185,7 @@ export function SecuritySettings({ onSave }: SecuritySettingsProps) {
 
   const updateSystemSecurity = (
     key: keyof SecuritySettingsData["systemSecurity"],
-    value: any,
+    value: string | number | boolean,
   ) => {
     setSettings((prev) => ({
       ...prev,
