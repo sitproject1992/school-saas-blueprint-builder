@@ -130,12 +130,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const trimmedEmail = email.trim().toLowerCase();
       const trimmedPassword = password.trim();
 
-      console.log("Sign in attempt:", {
-        originalEmail: email,
-        trimmedEmail,
-        passwordLength: trimmedPassword.length,
-      });
-
       // Check if it's the super admin account
       if (
         trimmedEmail === "sujan1nepal@gmail.com" &&
