@@ -317,9 +317,9 @@ export default function Users() {
       case "student":
         return <GraduationCap className="h-4 w-4 text-green-600" />;
       case "parent":
-        return <Users className="h-4 w-4 text-purple-600" />;
+        return <UsersIcon className="h-4 w-4 text-purple-600" />;
       default:
-        return <Users className="h-4 w-4 text-gray-600" />;
+        return <UsersIcon className="h-4 w-4 text-gray-600" />;
     }
   };
 
