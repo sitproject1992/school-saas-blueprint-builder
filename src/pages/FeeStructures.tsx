@@ -1,6 +1,6 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FeeStructureForm } from "@/components/fees/FeeStructureForm";
+import FeeStructureForm from "@/components/fees/FeeStructureForm";
 import { DollarSign } from "lucide-react";
 
 export default function FeeStructures() {
