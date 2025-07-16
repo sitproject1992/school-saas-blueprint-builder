@@ -44,6 +44,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const bootstrapAuth = async () => {
       try {
+        // Check if super admin is logged in via localStorage
+        const superAdminSession = localStorage.getItem("super_admin_session");
+        if (superAdminSession) {
+          try {
+            const adminData = JSON.parse(superAdminSession);
+            if (
+              adminData.email === "sujan1nepal@gmail.com" &&
+              adminData.expiresAt > Date.now()
+            ) {
+              const mockUser = {
+                id: "00000000-0000-0000-0000-000000000000",
+                email: adminData.email,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+                profile: {
+                  role: "super_admin",
+                  first_name: "Super",
+                  last_name: "Admin",
+                  email: adminData.email,
+                  school_id: null,
+                },
+                roles: ["super_admin"],
+              } as AppUser;
+
+              setUser(mockUser);
+              setLoading(false);
+              return;
+            } else {
+              // Session expired, remove it
+              localStorage.removeItem("super_admin_session");
+            }
+          } catch (e) {
+            localStorage.removeItem("super_admin_session");
+          }
+        }
+
         const {
           data: { session },
         } = await supabase.auth.getSession();
@@ -92,7 +128,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       // Check if it's the super admin account
       if (email === "sujan1nepal@gmail.com" && password === "precioussn") {
-        // Handle super admin login - create a mock session
+        // Handle super admin login - create a mock session with persistence
+        const sessionData = {
+          email: email,
+          loginTime: Date.now(),
+          expiresAt: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
+        };
+
+        localStorage.setItem(
+          "super_admin_session",
+          JSON.stringify(sessionData),
+        );
+
         const mockUser = {
           id: "00000000-0000-0000-0000-000000000000",
           email: email,
@@ -197,8 +244,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     try {
+      // Clear super admin session if exists
+      localStorage.removeItem("super_admin_session");
+
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
+
+      // Reset user state
+      setUser(null);
     } catch (error: any) {
       console.error("Sign out error:", error);
       throw error;
