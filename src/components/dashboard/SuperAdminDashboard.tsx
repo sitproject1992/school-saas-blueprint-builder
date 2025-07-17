@@ -58,6 +58,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/useAuth";
 import { useSchoolAdmin } from "@/hooks/useSchoolAdmin";
 import { useSchoolManagement } from "@/hooks/useSchoolManagement";
@@ -71,6 +72,7 @@ import { SecuritySettings } from "@/components/settings/SecuritySettings";
 import { UserManagementSettings } from "@/components/settings/UserManagementSettings";
 import { SystemMaintenance } from "@/components/settings/SystemMaintenance";
 import { AccountSettings } from "@/components/settings/AccountSettings";
+import { BulkStudentImport } from "@/components/admin/BulkStudentImport";
 import { useNavigate } from "react-router-dom";
 
 interface SchoolAdminFormData {
@@ -267,7 +269,7 @@ export function SuperAdminDashboard() {
     }
   };
 
-  const handleSchoolFormSubmit = async (data: SchoolFormData) => {
+  const handleSchoolFormSubmit = async (data: any) => {
     if (editingSchool) {
       await updateSchool(editingSchool.id, {
         name: data.name,
@@ -481,10 +483,11 @@ export function SuperAdminDashboard() {
           onValueChange={setSelectedTab}
           className="space-y-6"
         >
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="schools">Schools</TabsTrigger>
             <TabsTrigger value="admins">School Admins</TabsTrigger>
+            <TabsTrigger value="import">Bulk Import</TabsTrigger>
             <TabsTrigger value="audit">Audit Logs</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
@@ -816,6 +819,45 @@ export function SuperAdminDashboard() {
                     ))}
                   </TableBody>
                 </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="import" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Bulk Student Import</CardTitle>
+                <CardDescription>
+                  Import students in bulk for any school using CSV files
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  <div>
+                    <Label htmlFor="school-select">Select School</Label>
+                    <select
+                      id="school-select"
+                      className="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                      defaultValue=""
+                    >
+                      <option value="" disabled>Choose a school...</option>
+                      {schools.map((school) => (
+                        <option key={school.id} value={school.id}>
+                          {school.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  {schools.length > 0 && (
+                    <BulkStudentImport 
+                      schoolId={
+                        (document.getElementById('school-select') as HTMLSelectElement)?.value || 
+                        schools[0]?.id || ''
+                      } 
+                    />
+                  )}
+                </div>
               </CardContent>
             </Card>
           </TabsContent>

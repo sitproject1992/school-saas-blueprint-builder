@@ -201,6 +201,66 @@ export type Database = {
           },
         ]
       }
+      bulk_import_logs: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          error_details: Json | null
+          failed_imports: number
+          file_name: string
+          id: string
+          import_details: Json | null
+          imported_by: string
+          school_id: string
+          status: string
+          successful_imports: number
+          total_records: number
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          error_details?: Json | null
+          failed_imports?: number
+          file_name: string
+          id?: string
+          import_details?: Json | null
+          imported_by: string
+          school_id: string
+          status?: string
+          successful_imports?: number
+          total_records?: number
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          error_details?: Json | null
+          failed_imports?: number
+          file_name?: string
+          id?: string
+          import_details?: Json | null
+          imported_by?: string
+          school_id?: string
+          status?: string
+          successful_imports?: number
+          total_records?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bulk_import_logs_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "school_dashboard_data"
+            referencedColumns: ["school_id"]
+          },
+          {
+            foreignKeyName: "bulk_import_logs_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       classes: {
         Row: {
           capacity: number | null
@@ -963,6 +1023,7 @@ export type Database = {
           student_id: string | null
           updated_at: string
           user_id: string
+          user_role: Database["public"]["Enums"]["user_role"] | null
         }
         Insert: {
           address?: string | null
@@ -980,6 +1041,7 @@ export type Database = {
           student_id?: string | null
           updated_at?: string
           user_id: string
+          user_role?: Database["public"]["Enums"]["user_role"] | null
         }
         Update: {
           address?: string | null
@@ -997,6 +1059,7 @@ export type Database = {
           student_id?: string | null
           updated_at?: string
           user_id?: string
+          user_role?: Database["public"]["Enums"]["user_role"] | null
         }
         Relationships: [
           {
@@ -1035,6 +1098,75 @@ export type Database = {
           name?: string
         }
         Relationships: []
+      }
+      school_admin_accounts: {
+        Row: {
+          created_at: string
+          email: string
+          first_name: string
+          id: string
+          is_active: boolean
+          last_login: string | null
+          last_name: string
+          locked_until: string | null
+          login_attempts: number
+          must_change_password: boolean
+          password_changed_at: string
+          password_hash: string
+          phone: string | null
+          school_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          first_name: string
+          id?: string
+          is_active?: boolean
+          last_login?: string | null
+          last_name: string
+          locked_until?: string | null
+          login_attempts?: number
+          must_change_password?: boolean
+          password_changed_at?: string
+          password_hash: string
+          phone?: string | null
+          school_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          first_name?: string
+          id?: string
+          is_active?: boolean
+          last_login?: string | null
+          last_name?: string
+          locked_until?: string | null
+          login_attempts?: number
+          must_change_password?: boolean
+          password_changed_at?: string
+          password_hash?: string
+          phone?: string | null
+          school_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "school_admin_accounts_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "school_dashboard_data"
+            referencedColumns: ["school_id"]
+          },
+          {
+            foreignKeyName: "school_admin_accounts_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       school_admins: {
         Row: {
@@ -1289,6 +1421,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      super_admin_audit_log: {
+        Row: {
+          action: string
+          created_at: string
+          details: Json | null
+          id: string
+          ip_address: unknown | null
+          super_admin_id: string
+          target_id: string
+          target_type: string
+          user_agent: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          ip_address?: unknown | null
+          super_admin_id: string
+          target_id: string
+          target_type: string
+          user_agent?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          ip_address?: unknown | null
+          super_admin_id?: string
+          target_id?: string
+          target_type?: string
+          user_agent?: string | null
+        }
+        Relationships: []
       }
       syllabus: {
         Row: {
@@ -1588,6 +1756,17 @@ export type Database = {
         Args: { school_id: string }
         Returns: undefined
       }
+      create_school_admin_account: {
+        Args: {
+          p_school_id: string
+          p_email: string
+          p_password: string
+          p_first_name: string
+          p_last_name: string
+          p_phone?: string
+        }
+        Returns: string
+      }
       get_user_role: {
         Args: Record<PropertyKey, never>
         Returns: Database["public"]["Enums"]["user_role"]
@@ -1595,6 +1774,10 @@ export type Database = {
       get_user_school_id: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      update_school_admin_password: {
+        Args: { p_account_id: string; p_new_password: string }
+        Returns: undefined
       }
     }
     Enums: {

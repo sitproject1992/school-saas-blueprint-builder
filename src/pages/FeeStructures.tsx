@@ -16,7 +16,7 @@ export default function FeeStructures() {
           <CardTitle>Manage Fee Structures</CardTitle>
         </CardHeader>
         <CardContent>
-          <FeeStructureForm />
+          <FeeStructureForm onSuccess={() => console.log("Fee structure created successfully")} />
         </CardContent>
       </Card>
     </div>
