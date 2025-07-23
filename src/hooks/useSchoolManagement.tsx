@@ -203,7 +203,10 @@ export function useSchoolManagement() {
 
       if (error) {
         console.error("Database error creating school:", error);
-        throw new Error(`Failed to create school in database: ${error.message}`);
+        // Extract detailed error information
+        const errorMessage = error.message || error.details || error.hint || JSON.stringify(error);
+        const errorCode = error.code || 'Unknown';
+        throw new Error(`Failed to create school in database (${errorCode}): ${errorMessage}`);
       }
 
       if (!dbSchool) {
@@ -227,8 +230,15 @@ export function useSchoolManagement() {
       console.log(`Successfully created school: ${data.name}`);
       return newSchool.id;
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Failed to create school";
+      console.error("School creation error:", err);
+      let message;
+      if (err instanceof Error) {
+        message = err.message;
+      } else if (typeof err === 'object' && err !== null) {
+        message = JSON.stringify(err);
+      } else {
+        message = String(err) || "Failed to create school";
+      }
       setError(message);
       throw new Error(message);
     } finally {
