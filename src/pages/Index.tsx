@@ -24,6 +24,8 @@ import {
   Smartphone,
   Globe,
   Heart,
+  Building,
+  Eye,
 } from "lucide-react";
 
 const Index = () => {
