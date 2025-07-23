@@ -270,60 +270,98 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      // First priority: Check if it's a school admin account created through proper system
+      // First priority: Check if it's a school admin account using the authentication function
+      try {
+        const { data: authResult, error: authError } = await supabase.rpc(
+          "authenticate_school_admin",
+          {
+            p_email: trimmedEmail,
+            p_password: trimmedPassword,
+          }
+        );
 
-      const { data: schoolAdminData, error: schoolAdminError } = await supabase
-        .from("school_admin_accounts")
-        .select(
-          `
-          *,
-          schools!inner(
-            id,
-            name,
-            subdomain
-          )
-        `,
-        )
-        .eq("email", trimmedEmail)
-        .eq("is_active", true)
-        .single();
-
-      if (schoolAdminError) {
-        // Continue to next authentication method if table query fails
-      } else if (schoolAdminData) {
-        // Simple password check for now (in production, this should be properly hashed)
-        if (schoolAdminData.password_hash === trimmedPassword) {
+        if (!authError && authResult?.success) {
+          const userData = authResult.user;
           // Create a proper user session for the school admin
           const mockUser = {
-            id: schoolAdminData.id,
-            email: trimmedEmail,
-            created_at: schoolAdminData.created_at,
-            updated_at: schoolAdminData.updated_at,
+            id: userData.id,
+            email: userData.email,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
             profile: {
               role: "school_admin",
-              first_name: schoolAdminData.first_name,
-              last_name: schoolAdminData.last_name,
-              email: trimmedEmail,
-              phone: schoolAdminData.phone,
-              school_id: schoolAdminData.school_id,
-              school_name: schoolAdminData.schools?.name,
+              first_name: userData.first_name,
+              last_name: userData.last_name,
+              email: userData.email,
+              phone: userData.phone,
+              school_id: userData.school_id,
+              school_name: userData.school_name,
             },
             roles: ["school_admin"],
           } as AppUser;
 
           setUser(mockUser);
-
-          // Update last login
-          await supabase
-            .from("school_admin_accounts")
-            .update({ last_login: new Date().toISOString() })
-            .eq("id", schoolAdminData.id);
-
           return;
-        } else {
+        } else if (authResult && !authResult.success) {
+          // The function returned an error message
           throw new Error(
-            `Invalid password for school admin account "${trimmedEmail}". Please check your password or contact your super administrator if you need assistance.`,
+            `Authentication failed: ${authResult.message}. Please check your credentials or contact your administrator.`
           );
+        }
+      } catch (rpcError: any) {
+        console.warn("School admin RPC authentication failed, trying direct query:", rpcError.message);
+
+        // Fallback to direct query if RPC function doesn't exist
+        const { data: schoolAdminData, error: schoolAdminError } = await supabase
+          .from("school_admin_accounts")
+          .select(
+            `
+            *,
+            schools!inner(
+              id,
+              name,
+              subdomain
+            )
+          `,
+          )
+          .eq("email", trimmedEmail)
+          .eq("is_active", true)
+          .single();
+
+        if (!schoolAdminError && schoolAdminData) {
+          // Simple password check for fallback
+          if (schoolAdminData.password_hash === trimmedPassword) {
+            const mockUser = {
+              id: schoolAdminData.id,
+              email: trimmedEmail,
+              created_at: schoolAdminData.created_at,
+              updated_at: schoolAdminData.updated_at,
+              profile: {
+                role: "school_admin",
+                first_name: schoolAdminData.first_name,
+                last_name: schoolAdminData.last_name,
+                email: trimmedEmail,
+                phone: schoolAdminData.phone,
+                school_id: schoolAdminData.school_id,
+                school_name: schoolAdminData.schools?.name,
+              },
+              roles: ["school_admin"],
+            } as AppUser;
+
+            setUser(mockUser);
+
+            // Update last login
+            await supabase
+              .from("school_admin_accounts")
+              .update({ last_login: new Date().toISOString() })
+              .eq("id", schoolAdminData.id);
+
+            return;
+          } else {
+            throw new Error(
+              `Invalid password for school admin account "${trimmedEmail}". Please check your password or contact your super administrator.`
+            );
+          }
         }
       }
 
