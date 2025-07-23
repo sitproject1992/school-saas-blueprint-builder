@@ -207,10 +207,12 @@ CREATE TABLE public.teachers (
 
 -- Step 4: Insert essential data
 
--- Insert the super admin record
+-- Insert the super admin records (both email variants)
 INSERT INTO public.super_admins (email, is_active, created_at, updated_at)
-VALUES ('sujan1nepal@gmail.com', true, now(), now())
-ON CONFLICT (email) DO UPDATE SET 
+VALUES
+    ('sujan1nepal@gmail.com', true, now(), now()),
+    ('sujan01nepal@gmail.com', true, now(), now())
+ON CONFLICT (email) DO UPDATE SET
     is_active = true,
     updated_at = now();
 
