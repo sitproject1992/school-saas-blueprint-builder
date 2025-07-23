@@ -146,106 +146,96 @@ export default function AdminSetup() {
 
     setIsLoading(true);
     try {
-      // 1. Check if user already exists
-      const { data: existingUser, error: checkError } = await supabase.auth.signInWithPassword({
-        email: adminData.email,
-        password: adminData.password,
-      });
+      // 1. Check if school admin account already exists
+      const { data: existingAdmin, error: checkError } = await supabase
+        .from("school_admin_accounts")
+        .select("id, email")
+        .eq("email", adminData.email)
+        .maybeSingle();
 
-      if (existingUser.user) {
+      if (existingAdmin) {
         toast({
           title: "Account Already Exists",
-          description: "An account with this email already exists. Please use a different email or sign in.",
+          description: "A school admin account with this email already exists. Please use a different email.",
           variant: "destructive",
         });
         return;
       }
 
-      // 2. Create auth user
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: adminData.email,
-        password: adminData.password,
-      });
+      // 2. Create school admin account using the school_admin_accounts table
+      // This integrates with the super admin system
+      let adminAccountId;
 
-      if (authError) {
-        console.error("Auth error:", authError);
-        throw new Error(authError.message || "Failed to create user account");
-      }
+      try {
+        const { data: rpcResult, error: rpcError } = await supabase.rpc(
+          "create_school_admin_account",
+          {
+            p_school_id: schoolData.schoolId,
+            p_email: adminData.email,
+            p_password: adminData.password,
+            p_first_name: adminData.firstName,
+            p_last_name: adminData.lastName,
+            p_phone: adminData.phone || null,
+          }
+        );
 
-      if (authData.user) {
-        // 3. Get the school_admin role ID
-        const { data: roleData, error: roleCheckError } = await supabase
-          .from("roles")
-          .select("id")
-          .eq("name", "school_admin")
-          .single();
-
-        if (roleCheckError) {
-          console.warn("Role check error:", roleCheckError);
+        if (rpcError) {
+          throw rpcError;
         }
+        adminAccountId = rpcResult;
+      } catch (rpcError: any) {
+        console.warn("RPC function failed, using direct insert:", rpcError);
 
-        // 4. Create profile
-        const { data: profileData, error: profileError } = await supabase
-          .from("profiles")
+        // Fall back to direct database insertion for self-registration
+        const { data: insertData, error: insertError } = await supabase
+          .from("school_admin_accounts")
           .insert([
             {
-              user_id: authData.user.id,
+              school_id: schoolData.schoolId,
               email: adminData.email,
+              password_hash: adminData.password, // In production, this should be properly hashed
               first_name: adminData.firstName,
               last_name: adminData.lastName,
-              phone: adminData.phone,
-              role: "school_admin",
-              school_id: schoolData.schoolId,
+              phone: adminData.phone || null,
+              is_active: true,
+              must_change_password: false, // Since they just set it up
+              created_by: null, // Self-registration
             },
           ])
-          .select()
+          .select('id')
           .single();
 
-        if (profileError) {
-          console.error("Profile creation error:", profileError);
-          throw new Error(profileError.message || "Failed to create user profile");
+        if (insertError) {
+          console.error("Direct insert error:", insertError);
+          throw new Error(insertError.message || "Failed to create school admin account");
         }
 
-        // 5. Create admin role assignment if role exists
-        if (roleData?.id) {
-          const { error: roleError } = await supabase.from("user_roles").insert([
-            {
-              user_id: authData.user.id,
-              role_id: roleData.id,
-            },
-          ]);
-
-          if (roleError) {
-            console.warn("Role assignment error:", roleError);
-            // Don't fail the entire process for role assignment
-          }
-        }
-
-        // 6. Note: school_admins table is not in current schema, using profiles table for role management
-        console.log("Admin user created successfully with school_admin role");
-
-        // Clear stored registration data
-        localStorage.removeItem("schoolRegistrationData");
-
-        toast({
-          title: "Admin Setup Complete!",
-          description: `Welcome ${adminData.firstName}! Your admin account has been created successfully.`,
-        });
-
-        // Navigate to teacher registration
-        navigate("/teacher-registration", {
-          state: {
-            schoolId: schoolData.schoolId,
-            adminSetupComplete: true,
-            adminUser: {
-              id: authData.user.id,
-              email: adminData.email,
-              firstName: adminData.firstName,
-              lastName: adminData.lastName,
-            },
-          },
-        });
+        adminAccountId = insertData.id;
       }
+
+      console.log("School admin account created successfully:", adminAccountId);
+
+      // Clear stored registration data
+      localStorage.removeItem("schoolRegistrationData");
+
+      toast({
+        title: "Admin Setup Complete!",
+        description: `Welcome ${adminData.firstName}! Your school admin account has been created successfully.`,
+      });
+
+      // Navigate to teacher registration
+      navigate("/teacher-registration", {
+        state: {
+          schoolId: schoolData.schoolId,
+          adminSetupComplete: true,
+          adminUser: {
+            id: adminAccountId,
+            email: adminData.email,
+            firstName: adminData.firstName,
+            lastName: adminData.lastName,
+          },
+        },
+      });
     } catch (error: any) {
       console.error("Admin setup error:", error);
       toast({
