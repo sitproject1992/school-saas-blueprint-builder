@@ -21,7 +21,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Key, Eye, EyeOff } from "lucide-react";
-import { useSchoolAdminPassword } from "@/hooks/useSchoolAdmin";
+import { useSchoolAdminPassword } from "@/hooks/useSchoolAdminPassword";
 
 const passwordSchema = z
   .object({
