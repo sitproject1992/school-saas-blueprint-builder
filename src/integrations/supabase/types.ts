@@ -1887,5 +1887,5 @@ export type Database = {
     CompositeTypes: {
       [_ in never]: never
     }
-  },
-} as const
+  }
+}
