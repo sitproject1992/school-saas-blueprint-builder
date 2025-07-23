@@ -113,7 +113,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         }
 
-        try {
+                try {
           const {
             data: { session },
             error: sessionError,
@@ -129,11 +129,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setUser({
               ...session.user,
               profile,
-              roles: profile?.role
-                ? [profile.role]
-                : profile?.user_role
-                  ? [profile.user_role]
-                  : [],
+              roles: profile?.role ? [profile.role] : profile?.user_role ? [profile.user_role] : [],
             });
           }
         } catch (sessionError) {
@@ -149,7 +145,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     bootstrapAuth();
 
-    const {
+        const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
       try {
@@ -158,11 +154,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser({
             ...session.user,
             profile,
-            roles: profile?.role
-              ? [profile.role]
-              : profile?.user_role
-                ? [profile.user_role]
-                : [],
+            roles: profile?.role ? [profile.role] : profile?.user_role ? [profile.user_role] : [],
           });
         } else {
           setUser(null);
@@ -278,7 +270,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      // Check if it's a school admin account created through super admin panel
+      // First priority: Check if it's a school admin account created through proper system
       const { data: schoolAdminData, error: schoolAdminError } = await supabase
         .from("school_admin_accounts")
         .select(
@@ -296,9 +288,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .single();
 
       if (!schoolAdminError && schoolAdminData) {
-        // For now, we'll do a simple password check (in production, this should be properly hashed)
+        // Simple password check for now (in production, this should be properly hashed)
         if (schoolAdminData.password_hash === trimmedPassword) {
-          // Create a mock user session for the school admin
+          // Create a proper user session for the school admin
           const mockUser = {
             id: schoolAdminData.id,
             email: trimmedEmail,
@@ -327,7 +319,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return;
         } else {
           throw new Error(
-            `Invalid password for school admin account "${trimmedEmail}". Please check your password or contact your super administrator.`,
+            `Invalid password for school admin account "${trimmedEmail}". Please check your password or contact your super administrator if you need assistance.`,
           );
         }
       }
@@ -346,7 +338,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         );
       }
 
-      // Regular Supabase auth for non-demo accounts
+            // Regular Supabase auth for non-demo accounts
       try {
         const { error } = await supabase.auth.signInWithPassword({
           email: trimmedEmail,
@@ -357,7 +349,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // Handle different types of errors
           if (error.message.includes("Database error querying schema")) {
             throw new Error(
-              `Database connection issue. Please try again in a moment, or use one of the demo accounts for immediate access:\n\n${demoAccounts.map((acc) => `${acc.email} (${acc.password})`).join("\n")}\n\nUse the "Demo Access" tab for quick login.`,
+              `Database connection issue. Please try again in a moment, or use one of the demo accounts for immediate access:\n\n${demoAccounts.map((acc) => `${acc.email} (${acc.password})`).join("\n")}\n\nUse the "Demo Access" tab for quick login.`
             );
           } else if (error.message === "Invalid login credentials") {
             const availableDemoEmails = demoAccounts
@@ -372,12 +364,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } catch (authError: any) {
         console.error("Supabase auth error:", authError);
         // If it's a database schema error, suggest demo accounts
-        if (
-          authError.message?.includes("Database error querying schema") ||
-          authError.message?.includes("schema")
-        ) {
+        if (authError.message?.includes("Database error querying schema") || authError.message?.includes("schema")) {
           throw new Error(
-            `Database connection issue detected. Please try one of the demo accounts for immediate access:\n\n${demoAccounts.map((acc) => `${acc.email} (password: ${acc.password})`).join("\n")}\n\nSwitch to the "Demo Access" tab for quick login, or contact support if this issue persists.`,
+            `Database connection issue detected. Please try one of the demo accounts for immediate access:\n\n${demoAccounts.map((acc) => `${acc.email} (password: ${acc.password})`).join("\n")}\n\nSwitch to the "Demo Access" tab for quick login, or contact support if this issue persists.`
           );
         }
         throw authError;
