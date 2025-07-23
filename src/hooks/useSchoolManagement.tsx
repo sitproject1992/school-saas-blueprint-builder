@@ -651,6 +651,7 @@ export function useSchoolManagement() {
     fetchSchools,
     fetchAuditLogs,
     getSchoolStatistics,
+    testDatabaseConnection,
     isAuthorized,
   };
 }
