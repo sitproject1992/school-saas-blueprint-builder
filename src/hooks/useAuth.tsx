@@ -360,10 +360,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       } catch (authError: any) {
         console.error("Supabase auth error:", authError);
-        // If it's a database schema error, suggest demo accounts
+        // If it's a database schema error, provide helpful guidance
         if (authError.message?.includes("Database error querying schema") || authError.message?.includes("schema")) {
           throw new Error(
-            `Database connection issue detected. Please try one of the demo accounts for immediate access:\n\n${demoAccounts.map((acc) => `${acc.email} (password: ${acc.password})`).join("\n")}\n\nSwitch to the "Demo Access" tab for quick login, or contact support if this issue persists.`
+            `Database connection issue detected. Please try again later.\n\nFor demo access, use the "Demo Access" tab.\n\nIf you're a registered school user, contact your school administrator.\n\nIf this issue persists, please contact our support team.`
           );
         }
         throw authError;
