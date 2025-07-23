@@ -103,16 +103,55 @@ const Index = () => {
             aspect of your school with confidence.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Button asChild size="lg" className="px-8 py-3 text-lg">
-              <Link to="/school-registration">
-                Register Your School
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
-            </Button>
-            <Button variant="outline" size="lg" className="px-8 py-3 text-lg">
-              <Link to="/auth">View Demo</Link>
-            </Button>
+          {/* User Pathways */}
+          <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-12">
+            <Card className="p-6 hover:shadow-lg transition-shadow border-2 hover:border-blue-200">
+              <div className="text-center space-y-4">
+                <div className="p-3 bg-blue-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto">
+                  <School className="h-8 w-8 text-blue-600" />
+                </div>
+                <h3 className="text-xl font-bold">New Schools</h3>
+                <p className="text-muted-foreground text-sm">
+                  Register your educational institution and start your digital transformation journey
+                </p>
+                <Button asChild className="w-full">
+                  <Link to="/school-registration">
+                    Register Your School
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
+            </Card>
+
+            <Card className="p-6 hover:shadow-lg transition-shadow border-2 hover:border-green-200">
+              <div className="text-center space-y-4">
+                <div className="p-3 bg-green-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto">
+                  <Users className="h-8 w-8 text-green-600" />
+                </div>
+                <h3 className="text-xl font-bold">School Users</h3>
+                <p className="text-muted-foreground text-sm">
+                  Administrators, teachers, students, and parents - access your school portal
+                </p>
+                <Button asChild variant="outline" className="w-full">
+                  <Link to="/auth">Sign In to Your School</Link>
+                </Button>
+              </div>
+            </Card>
+
+            <Card className="p-6 hover:shadow-lg transition-shadow border-2 hover:border-purple-200">
+              <div className="text-center space-y-4">
+                <div className="p-3 bg-purple-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto">
+                  <GraduationCap className="h-8 w-8 text-purple-600" />
+                </div>
+                <h3 className="text-xl font-bold">Try Demo</h3>
+                <p className="text-muted-foreground text-sm">
+                  Explore all features with pre-configured demo accounts and sample data
+                </p>
+                <Button asChild variant="secondary" className="w-full">
+                  <Link to="/auth">Explore Demo</Link>
+                </Button>
+              </div>
+            </Card>
           </div>
 
           {/* Trust Indicators */}
