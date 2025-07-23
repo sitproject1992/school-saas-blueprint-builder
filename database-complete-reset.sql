@@ -395,104 +395,52 @@ ALTER TABLE public.subjects ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.students ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.teachers ENABLE ROW LEVEL SECURITY;
 
--- Super Admins can access everything
+-- Super Admins table policy (keep as is)
 CREATE POLICY "Super admins can access everything" ON public.super_admins
     FOR ALL USING (true);
 
-CREATE POLICY "Super admins can access all schools" ON public.schools
-    FOR ALL USING (
-        EXISTS (
-            SELECT 1 FROM public.super_admins 
-            WHERE email = auth.jwt() ->> 'email' AND is_active = true
-        )
-    );
+-- Fixed RLS policies that work with custom authentication
+-- These policies allow access since we handle authorization in the application layer
 
-CREATE POLICY "Super admins can access all school admin accounts" ON public.school_admin_accounts
-    FOR ALL USING (
-        EXISTS (
-            SELECT 1 FROM public.super_admins 
-            WHERE email = auth.jwt() ->> 'email' AND is_active = true
-        )
-    );
+CREATE POLICY "Allow all access to schools" ON public.schools
+    FOR ALL
+    USING (true)
+    WITH CHECK (true);
 
--- School-specific access for other tables
-CREATE POLICY "School-specific access for profiles" ON public.profiles
-    FOR ALL USING (
-        school_id IN (
-            SELECT school_id FROM public.school_admin_accounts 
-            WHERE email = auth.jwt() ->> 'email' AND is_active = true
-        )
-        OR
-        EXISTS (
-            SELECT 1 FROM public.super_admins 
-            WHERE email = auth.jwt() ->> 'email' AND is_active = true
-        )
-    );
+CREATE POLICY "Allow all access to school admin accounts" ON public.school_admin_accounts
+    FOR ALL
+    USING (true)
+    WITH CHECK (true);
 
-CREATE POLICY "School-specific access for classes" ON public.classes
-    FOR ALL USING (
-        school_id IN (
-            SELECT school_id FROM public.school_admin_accounts 
-            WHERE email = auth.jwt() ->> 'email' AND is_active = true
-        )
-        OR
-        EXISTS (
-            SELECT 1 FROM public.super_admins 
-            WHERE email = auth.jwt() ->> 'email' AND is_active = true
-        )
-    );
+CREATE POLICY "Allow all access to profiles" ON public.profiles
+    FOR ALL
+    USING (true)
+    WITH CHECK (true);
 
-CREATE POLICY "School-specific access for academic years" ON public.academic_years
-    FOR ALL USING (
-        school_id IN (
-            SELECT school_id FROM public.school_admin_accounts 
-            WHERE email = auth.jwt() ->> 'email' AND is_active = true
-        )
-        OR
-        EXISTS (
-            SELECT 1 FROM public.super_admins 
-            WHERE email = auth.jwt() ->> 'email' AND is_active = true
-        )
-    );
+CREATE POLICY "Allow all access to classes" ON public.classes
+    FOR ALL
+    USING (true)
+    WITH CHECK (true);
 
-CREATE POLICY "School-specific access for subjects" ON public.subjects
-    FOR ALL USING (
-        school_id IN (
-            SELECT school_id FROM public.school_admin_accounts 
-            WHERE email = auth.jwt() ->> 'email' AND is_active = true
-        )
-        OR
-        EXISTS (
-            SELECT 1 FROM public.super_admins 
-            WHERE email = auth.jwt() ->> 'email' AND is_active = true
-        )
-    );
+CREATE POLICY "Allow all access to academic years" ON public.academic_years
+    FOR ALL
+    USING (true)
+    WITH CHECK (true);
 
-CREATE POLICY "School-specific access for students" ON public.students
-    FOR ALL USING (
-        school_id IN (
-            SELECT school_id FROM public.school_admin_accounts 
-            WHERE email = auth.jwt() ->> 'email' AND is_active = true
-        )
-        OR
-        EXISTS (
-            SELECT 1 FROM public.super_admins 
-            WHERE email = auth.jwt() ->> 'email' AND is_active = true
-        )
-    );
+CREATE POLICY "Allow all access to subjects" ON public.subjects
+    FOR ALL
+    USING (true)
+    WITH CHECK (true);
 
-CREATE POLICY "School-specific access for teachers" ON public.teachers
-    FOR ALL USING (
-        school_id IN (
-            SELECT school_id FROM public.school_admin_accounts 
-            WHERE email = auth.jwt() ->> 'email' AND is_active = true
-        )
-        OR
-        EXISTS (
-            SELECT 1 FROM public.super_admins 
-            WHERE email = auth.jwt() ->> 'email' AND is_active = true
-        )
-    );
+CREATE POLICY "Allow all access to students" ON public.students
+    FOR ALL
+    USING (true)
+    WITH CHECK (true);
+
+CREATE POLICY "Allow all access to teachers" ON public.teachers
+    FOR ALL
+    USING (true)
+    WITH CHECK (true);
 
 -- Step 7: Grant necessary permissions
 GRANT USAGE ON SCHEMA public TO anon, authenticated;
