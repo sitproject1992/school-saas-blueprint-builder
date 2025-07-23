@@ -250,7 +250,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           acc.password === trimmedPassword,
       );
 
+      console.log("Demo account search result:", demoAccount ? "Found" : "Not found");
+
       if (demoAccount) {
+        console.log("Demo login successful for:", demoAccount.role);
         // Handle demo login - create a mock session
         const mockUser = {
           id: demoAccount.user_id,
