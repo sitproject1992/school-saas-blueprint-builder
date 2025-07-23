@@ -83,7 +83,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           try {
             const adminData = JSON.parse(superAdminSession);
             if (
-              adminData.email === "sujan1nepal@gmail.com" &&
+              (adminData.email === "sujan1nepal@gmail.com" || adminData.email === "sujan01nepal@gmail.com") &&
               adminData.expiresAt > Date.now()
             ) {
               const mockUser = {
@@ -177,9 +177,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const trimmedEmail = email.trim().toLowerCase();
       const trimmedPassword = password.trim();
 
-      // Check if it's the super admin account
+      // Check if it's the super admin account (accept both email variants)
       if (
-        trimmedEmail === "sujan1nepal@gmail.com" &&
+        (trimmedEmail === "sujan1nepal@gmail.com" || trimmedEmail === "sujan01nepal@gmail.com") &&
         trimmedPassword === "precioussn"
       ) {
         // Handle super admin login - create a mock session with persistence
@@ -385,7 +385,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       throw new Error(
         `No authentication method found for "${trimmedEmail}".\n\n` +
         `Available options:\n` +
-        `🔧 Super Admin: sujan1nepal@gmail.com\n` +
+        `🔧 Super Admin: sujan1nepal@gmail.com or sujan01nepal@gmail.com\n` +
         `🎭 Demo Accounts: Use "Demo Access" tab or:\n` +
         `   • admin@skooler.com (admin123)\n` +
         `   • teacher@skooler.com (teacher123)\n` +

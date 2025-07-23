@@ -70,6 +70,24 @@ export function useSchoolManagement() {
 
   const isAuthorized = user?.profile?.role === "super_admin";
 
+  // Test database connectivity
+  const testDatabaseConnection = async () => {
+    try {
+      console.log("Testing database connection...");
+      const { data, error } = await supabase.from("schools").select("count").limit(1);
+      console.log("Database test result:", { data, error });
+      if (error) {
+        console.error("Database connection test failed:", error);
+        return false;
+      }
+      console.log("Database connection successful");
+      return true;
+    } catch (err) {
+      console.error("Database connection test error:", err);
+      return false;
+    }
+  };
+
   // Fetch all schools with computed statistics
   const fetchSchools = async () => {
     if (!isAuthorized) return;
@@ -153,6 +171,12 @@ export function useSchoolManagement() {
       setLoading(true);
       setError(null);
 
+      // Test database connection first
+      const connectionOk = await testDatabaseConnection();
+      if (!connectionOk) {
+        throw new Error("Database connection failed. Please check your database configuration.");
+      }
+
       // Check if subdomain already exists in current schools
       const existingSchool = schools.find(
         (s) => s.subdomain === data.subdomain,
@@ -161,7 +185,8 @@ export function useSchoolManagement() {
         throw new Error("Subdomain already exists");
       }
 
-      const newSchoolId = `school-${Date.now()}`;
+      // Generate a proper UUID for the school
+      const newSchoolId = crypto.randomUUID();
 
       // Create new school object
       const newSchool: School = {
@@ -183,39 +208,46 @@ export function useSchoolManagement() {
         teacherCount: 0,
       };
 
-      try {
-        // Try to create in database
-        const { data: dbSchool, error } = await supabase
-          .from("schools")
-          .insert({
-            name: data.name,
-            subdomain: data.subdomain,
-            email: data.email || null,
-            phone: data.phone || null,
-            address: data.address || null,
-            website: data.website || null,
-            subscription_status: data.subscriptionStatus as "active" | "inactive" | "suspended" | "cancelled",
-            subscription_expires_at: data.subscriptionExpiresAt || null,
-            theme_color: data.themeColor || "#3b82f6",
-          })
-          .select()
-          .single();
+      // Prepare insert data
+      const insertData = {
+        name: data.name,
+        subdomain: data.subdomain,
+        email: data.email || null,
+        phone: data.phone || null,
+        address: data.address || null,
+        website: data.website || null,
+        subscription_status: data.subscriptionStatus as "active" | "inactive" | "suspended" | "cancelled",
+        subscription_expires_at: data.subscriptionExpiresAt || null,
+        theme_color: data.themeColor || "#3b82f6",
+      };
 
-        if (!error && dbSchool) {
-          // Use database ID if successful
-          newSchool.id = dbSchool.id;
-        } else {
-          console.warn(
-            "Database creation failed, using mock creation:",
-            error?.message,
-          );
-        }
-      } catch (dbError) {
-        console.warn("Database not available, proceeding with mock creation");
+      console.log("Creating school with data:", insertData);
+
+      // Create in database first - this is required, not optional
+      const { data: dbSchool, error } = await supabase
+        .from("schools")
+        .insert(insertData)
+        .select()
+        .single();
+
+      console.log("Database response:", { dbSchool, error });
+
+      if (error) {
+        console.error("Database error creating school:", error);
+        // Extract detailed error information
+        const errorMessage = error.message || error.details || error.hint || JSON.stringify(error);
+        const errorCode = error.code || 'Unknown';
+        throw new Error(`Failed to create school in database (${errorCode}): ${errorMessage}`);
       }
 
-      // Always add to local state for immediate UI feedback
-      setSchools((prevSchools) => [newSchool, ...prevSchools]);
+      if (!dbSchool) {
+        throw new Error("School creation failed: No data returned from database");
+      }
+
+      // Use the actual database ID and data
+      newSchool.id = dbSchool.id;
+      newSchool.createdAt = dbSchool.created_at;
+      newSchool.updatedAt = dbSchool.updated_at;
 
       // Log the action
       await logAuditAction("CREATE_SCHOOL", "school", newSchool.id, {
@@ -223,11 +255,21 @@ export function useSchoolManagement() {
         subdomain: data.subdomain,
       });
 
+      // Refresh the schools list to get updated data from database
+      await fetchSchools();
+
       console.log(`Successfully created school: ${data.name}`);
       return newSchool.id;
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Failed to create school";
+      console.error("School creation error:", err);
+      let message;
+      if (err instanceof Error) {
+        message = err.message;
+      } else if (typeof err === 'object' && err !== null) {
+        message = JSON.stringify(err);
+      } else {
+        message = String(err) || "Failed to create school";
+      }
       setError(message);
       throw new Error(message);
     } finally {
@@ -609,6 +651,7 @@ export function useSchoolManagement() {
     fetchSchools,
     fetchAuditLogs,
     getSchoolStatistics,
+    testDatabaseConnection,
     isAuthorized,
   };
 }

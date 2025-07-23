@@ -93,19 +93,15 @@ export function useSchoolAdmin() {
 
     try {
       setLoading(true);
+      setError(null);
+
       const { data, error } = await supabase
         .from("schools")
         .select("*")
         .order("name");
 
       if (error) {
-        console.warn(
-          "Schools table not found, using mock data:",
-          error.message,
-        );
-        const mockSchools = createMockSchools();
-        setSchools(mockSchools);
-        return;
+        throw new Error(`Failed to fetch schools: ${error.message}`);
       }
 
       const formattedSchools: School[] = (data || []).map((school: any) => ({
@@ -123,11 +119,8 @@ export function useSchoolAdmin() {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);
       console.error("Failed to fetch schools:", errorMessage);
-
-      // Fallback to mock data
-      const mockSchools = createMockSchools();
-      setSchools(mockSchools);
-      setError(null); // Clear error since we have fallback data
+      setError(errorMessage);
+      setSchools([]); // Clear schools on error
     } finally {
       setLoading(false);
     }
@@ -179,6 +172,8 @@ export function useSchoolAdmin() {
 
     try {
       setLoading(true);
+      setError(null);
+
       const { data, error } = await supabase
         .from("school_admin_accounts")
         .select(
@@ -193,13 +188,7 @@ export function useSchoolAdmin() {
         .order("created_at", { ascending: false });
 
       if (error) {
-        console.warn(
-          "School admin accounts table not found, using mock data:",
-          error.message,
-        );
-        const mockAdmins = createMockSchoolAdmins();
-        setSchoolAdmins(mockAdmins);
-        return;
+        throw new Error(`Failed to fetch school admins: ${error.message}`);
       }
 
       const formattedData: SchoolAdmin[] = (data || []).map((item: any) => ({
@@ -224,11 +213,8 @@ export function useSchoolAdmin() {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);
       console.error("Failed to fetch school admins:", errorMessage);
-
-      // Fallback to mock data
-      const mockAdmins = createMockSchoolAdmins();
-      setSchoolAdmins(mockAdmins);
-      setError(null); // Clear error since we have fallback data
+      setError(errorMessage);
+      setSchoolAdmins([]); // Clear admins on error
     } finally {
       setLoading(false);
     }
@@ -246,24 +232,31 @@ export function useSchoolAdmin() {
       setLoading(true);
       setError(null);
 
-      // Use the proper RPC function for creating school admin accounts
-      const { data: result, error } = await supabase.rpc(
-        "create_school_admin_account",
-        {
-          p_school_id: data.schoolId,
-          p_email: data.email,
-          p_password: data.password,
-          p_first_name: data.firstName,
-          p_last_name: data.lastName,
-          p_phone: data.phone || null,
-        },
-      );
+      // First try the RPC function for creating school admin accounts
+      let result, error;
 
-      if (error) {
-        console.warn(
-          "RPC function failed, attempting direct database insert:",
-          error.message,
+      try {
+        const rpcResult = await supabase.rpc(
+          "create_school_admin_account",
+          {
+            p_school_id: data.schoolId,
+            p_email: data.email,
+            p_password: data.password,
+            p_first_name: data.firstName,
+            p_last_name: data.lastName,
+            p_phone: data.phone || null,
+          },
         );
+
+        result = rpcResult.data;
+        error = rpcResult.error;
+      } catch (rpcError) {
+        console.warn("RPC function failed, attempting direct database insert:", rpcError);
+        error = rpcError;
+      }
+
+      if (error || !result || !result.success) {
+        console.warn("RPC function failed, attempting direct database insert:", error?.message);
 
         // Fallback: Create the school admin account directly in the database
         const { data: insertData, error: insertError } = await supabase
@@ -278,9 +271,6 @@ export function useSchoolAdmin() {
             is_active: true,
             must_change_password: data.mustChangePassword !== false,
             login_attempts: 0,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-            password_changed_at: new Date().toISOString(),
           })
           .select('id')
           .single();
@@ -288,37 +278,13 @@ export function useSchoolAdmin() {
         if (insertError) {
           console.error("Database insert failed:", insertError.message);
           throw new Error(
-            `Failed to create school admin account: ${insertError.message}. Please check the database schema and permissions.`
+            `Failed to create school admin account: ${insertError.message}. Please ensure the school exists and check database permissions.`
           );
-
-          // Create mock admin and add to state
-          const mockAdmin: SchoolAdmin = {
-            id: `admin-${Date.now()}`,
-            email: data.email,
-            firstName: data.firstName,
-            lastName: data.lastName,
-            phone: data.phone,
-            schoolId: data.schoolId,
-            schoolName:
-              schools.find((s) => s.id === data.schoolId)?.name ||
-              "Unknown School",
-            isActive: true,
-            lastLogin: null,
-            mustChangePassword: data.mustChangePassword || true,
-            loginAttempts: 0,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            passwordChangedAt: new Date().toISOString(),
-            lockedUntil: null,
-          };
-
-          setSchoolAdmins((prev) => [mockAdmin, ...prev]);
-
-          if (data.sendWelcomeEmail) {
-            console.log("Mock: Sending welcome email to:", data.email);
-          }
-          return;
         }
+
+        console.log("School admin created successfully via direct insert:", insertData.id);
+      } else {
+        console.log("School admin created successfully via RPC:", result.admin_id);
       }
 
       // Refresh the list
@@ -515,4 +481,3 @@ export function useSchoolAdmin() {
     isAuthorized,
   };
 }
-

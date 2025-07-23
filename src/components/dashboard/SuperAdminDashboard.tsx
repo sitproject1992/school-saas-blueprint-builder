@@ -127,6 +127,7 @@ export function SuperAdminDashboard() {
     deleteSchool,
     toggleSchoolStatus,
     getSchoolStatistics,
+    testDatabaseConnection,
   } = useSchoolManagement();
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -215,23 +216,31 @@ export function SuperAdminDashboard() {
   };
 
   const handleAdminFormSubmit = async (data: SchoolAdminFormData) => {
-    if (editingAdmin) {
-      await updateSchoolAdmin(editingAdmin.id, {
-        firstName: data.firstName,
-        lastName: data.lastName,
-        phone: data.phone,
-      });
-    } else {
-      await createSchoolAdmin({
-        firstName: data.firstName,
-        lastName: data.lastName,
-        email: data.email,
-        phone: data.phone,
-        schoolId: data.schoolId,
-        password: data.password,
-        mustChangePassword: data.mustChangePassword,
-        sendWelcomeEmail: data.sendWelcomeEmail,
-      });
+    try {
+      if (editingAdmin) {
+        await updateSchoolAdmin(editingAdmin.id, {
+          firstName: data.firstName,
+          lastName: data.lastName,
+          phone: data.phone,
+        });
+        toast.success("School admin updated successfully");
+      } else {
+        await createSchoolAdmin({
+          firstName: data.firstName,
+          lastName: data.lastName,
+          email: data.email,
+          phone: data.phone,
+          schoolId: data.schoolId,
+          password: data.password,
+          mustChangePassword: data.mustChangePassword,
+          sendWelcomeEmail: data.sendWelcomeEmail,
+        });
+        toast.success("School admin created successfully");
+      }
+      setShowAdminForm(false);
+      setEditingAdmin(null);
+    } catch (error: any) {
+      toast.error(error.message || "Failed to save school admin");
     }
   };
 
@@ -270,19 +279,27 @@ export function SuperAdminDashboard() {
   };
 
   const handleSchoolFormSubmit = async (data: any) => {
-    if (editingSchool) {
-      await updateSchool(editingSchool.id, {
-        name: data.name,
-        email: data.email,
-        phone: data.phone,
-        address: data.address,
-        website: data.website,
-        subscriptionStatus: data.subscriptionStatus,
-        subscriptionExpiresAt: data.subscriptionExpiresAt,
-        themeColor: data.themeColor,
-      });
-    } else {
-      await createSchool(data);
+    try {
+      if (editingSchool) {
+        await updateSchool(editingSchool.id, {
+          name: data.name,
+          email: data.email,
+          phone: data.phone,
+          address: data.address,
+          website: data.website,
+          subscriptionStatus: data.subscriptionStatus,
+          subscriptionExpiresAt: data.subscriptionExpiresAt,
+          themeColor: data.themeColor,
+        });
+        toast.success("School updated successfully");
+      } else {
+        await createSchool(data);
+        toast.success("School created successfully");
+      }
+      setShowSchoolForm(false);
+      setEditingSchool(null);
+    } catch (error: any) {
+      toast.error(error.message || "Failed to save school");
     }
   };
 
@@ -302,6 +319,20 @@ export function SuperAdminDashboard() {
       toast.error(`Failed to delete ${deleteDialog.type}`);
     } finally {
       setDeleteDialog(null);
+    }
+  };
+
+  // Database test function
+  const handleTestDatabase = async () => {
+    try {
+      const isConnected = await testDatabaseConnection();
+      if (isConnected) {
+        toast.success("Database connection successful!");
+      } else {
+        toast.error("Database connection failed. Check console for details.");
+      }
+    } catch (error) {
+      toast.error("Database test failed. Check console for details.");
     }
   };
 
@@ -392,6 +423,10 @@ export function SuperAdminDashboard() {
             <Button variant="outline" onClick={handleAddSchool}>
               <Building className="h-4 w-4 mr-2" />
               Add School
+            </Button>
+            <Button variant="outline" onClick={handleTestDatabase}>
+              <Activity className="h-4 w-4 mr-2" />
+              Test Database
             </Button>
             <Button variant="outline" onClick={() => setShowPasswordForm(true)}>
               <Key className="h-4 w-4 mr-2" />
