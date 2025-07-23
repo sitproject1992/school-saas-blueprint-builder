@@ -349,14 +349,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // Handle different types of errors
           if (error.message.includes("Database error querying schema")) {
             throw new Error(
-              `Database connection issue. Please try again in a moment, or use one of the demo accounts for immediate access:\n\n${demoAccounts.map((acc) => `${acc.email} (${acc.password})`).join("\n")}\n\nUse the "Demo Access" tab for quick login.`
+              `Database connection issue. Please try again in a moment.\n\nIf you're evaluating the system, try the demo accounts using the "Demo Access" tab.\n\nFor registered schools, contact your school administrator or our support team.`
             );
           } else if (error.message === "Invalid login credentials") {
-            const availableDemoEmails = demoAccounts
-              .map((acc) => acc.email)
-              .join(", ");
             throw new Error(
-              `Login failed. Please check your credentials or try one of the demo accounts:\n\n${availableDemoEmails}\n\nUse the "Demo Access" tab for quick access to demo accounts.`,
+              `Login failed. Please check your email and password.\n\nIf you're a school administrator, ensure you're using the credentials provided during school setup.\n\nFor demo access, use the "Demo Access" tab.\n\nNeed help? Contact support or your school's IT administrator.`,
             );
           }
           throw error;
