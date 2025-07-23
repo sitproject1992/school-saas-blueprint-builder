@@ -278,7 +278,7 @@ export default function SchoolRegistration() {
       });
 
       // Navigate to admin setup
-      navigate("/setup-admin", {
+      navigate("/admin-setup", {
         state: { schoolData: registrationData },
       });
     } catch (error: any) {
