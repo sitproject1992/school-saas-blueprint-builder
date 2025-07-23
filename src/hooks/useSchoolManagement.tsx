@@ -184,38 +184,38 @@ export function useSchoolManagement() {
         teacherCount: 0,
       };
 
-      try {
-        // Try to create in database
-        const { data: dbSchool, error } = await supabase
-          .from("schools")
-          .insert({
-            name: data.name,
-            subdomain: data.subdomain,
-            email: data.email || null,
-            phone: data.phone || null,
-            address: data.address || null,
-            website: data.website || null,
-            subscription_status: data.subscriptionStatus as "active" | "inactive" | "suspended" | "cancelled",
-            subscription_expires_at: data.subscriptionExpiresAt || null,
-            theme_color: data.themeColor || "#3b82f6",
-          })
-          .select()
-          .single();
+      // Create in database first - this is required, not optional
+      const { data: dbSchool, error } = await supabase
+        .from("schools")
+        .insert({
+          name: data.name,
+          subdomain: data.subdomain,
+          email: data.email || null,
+          phone: data.phone || null,
+          address: data.address || null,
+          website: data.website || null,
+          subscription_status: data.subscriptionStatus as "active" | "inactive" | "suspended" | "cancelled",
+          subscription_expires_at: data.subscriptionExpiresAt || null,
+          theme_color: data.themeColor || "#3b82f6",
+        })
+        .select()
+        .single();
 
-        if (!error && dbSchool) {
-          // Use database ID if successful
-          newSchool.id = dbSchool.id;
-        } else {
-          console.warn(
-            "Database creation failed, using mock creation:",
-            error?.message,
-          );
-        }
-      } catch (dbError) {
-        console.warn("Database not available, proceeding with mock creation");
+      if (error) {
+        console.error("Database error creating school:", error);
+        throw new Error(`Failed to create school in database: ${error.message}`);
       }
 
-      // Always add to local state for immediate UI feedback
+      if (!dbSchool) {
+        throw new Error("School creation failed: No data returned from database");
+      }
+
+      // Use the actual database ID and data
+      newSchool.id = dbSchool.id;
+      newSchool.createdAt = dbSchool.created_at;
+      newSchool.updatedAt = dbSchool.updated_at;
+
+      // Add to local state for immediate UI feedback
       setSchools((prevSchools) => [newSchool, ...prevSchools]);
 
       // Log the action
