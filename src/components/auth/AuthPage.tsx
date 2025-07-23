@@ -220,6 +220,19 @@ export function AuthPage() {
                             </p>
                           </div>
                         )}
+
+                        {error.includes("Login failed") && (
+                          <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded">
+                            <p className="text-amber-800 text-sm font-medium mb-2">
+                              Available Login Options:
+                            </p>
+                            <div className="text-amber-700 text-xs space-y-1">
+                              <div><strong>Super Admin:</strong> sujan1nepal@gmail.com</div>
+                              <div><strong>Demo Accounts:</strong> Use "Demo Access" tab above</div>
+                              <div><strong>School Admins:</strong> Use credentials from school registration</div>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
 

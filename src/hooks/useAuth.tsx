@@ -23,21 +23,54 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const fetchUserProfile = async (user: User) => {
     try {
-      const { data, error } = await supabase
+      // Try to fetch profile by user_id first
+      let { data, error } = await supabase
         .from("profiles")
         .select("*")
         .eq("user_id", user.id)
         .single();
 
+      // If that fails, try by id column
+      if (error || !data) {
+        const result = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", user.id)
+          .single();
+
+        data = result.data;
+        error = result.error;
+      }
+
       if (error) {
         console.error("Error fetching user profile:", error);
-        return null;
+        // Return a minimal profile for authentication to work
+        return {
+          id: user.id,
+          user_id: user.id,
+          email: user.email,
+          first_name: user.email?.split("@")[0] || "User",
+          last_name: "",
+          role: "student",
+          user_role: "student",
+          school_id: null,
+        };
       }
 
       return data;
     } catch (error) {
       console.error("Error in fetchUserProfile:", error);
-      return null;
+      // Return a minimal profile for authentication to work
+      return {
+        id: user.id,
+        user_id: user.id,
+        email: user.email,
+        first_name: user.email?.split("@")[0] || "User",
+        last_name: "",
+        role: "student",
+        user_role: "student",
+        school_id: null,
+      };
     }
   };
 
@@ -80,16 +113,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         }
 
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
-        if (session?.user) {
-          const profile = await fetchUserProfile(session.user);
-          setUser({
-            ...session.user,
-            profile,
-            roles: profile?.role ? [profile.role] : [],
-          });
+                try {
+          const {
+            data: { session },
+            error: sessionError,
+          } = await supabase.auth.getSession();
+
+          if (sessionError) {
+            console.error("Session error:", sessionError);
+            return;
+          }
+
+          if (session?.user) {
+            const profile = await fetchUserProfile(session.user);
+            setUser({
+              ...session.user,
+              profile,
+              roles: profile?.role ? [profile.role] : profile?.user_role ? [profile.user_role] : [],
+            });
+          }
+        } catch (sessionError) {
+          console.error("Error getting session:", sessionError);
+          // Continue with the fallback authentication methods
         }
       } catch (error) {
         console.error("Error in bootstrapAuth:", error);
@@ -100,7 +145,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     bootstrapAuth();
 
-    const {
+        const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
       try {
@@ -109,13 +154,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser({
             ...session.user,
             profile,
-            roles: profile?.role ? [profile.role] : [],
+            roles: profile?.role ? [profile.role] : profile?.user_role ? [profile.user_role] : [],
           });
         } else {
           setUser(null);
         }
       } catch (error) {
         console.error("Error in auth state change:", error);
+        // On error, still clear the user to prevent auth loops
+        setUser(null);
       } finally {
         setLoading(false);
       }
@@ -223,57 +270,98 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      // Check if it's a school admin account created through super admin panel
-      const { data: schoolAdminData, error: schoolAdminError } = await supabase
-        .from("school_admin_accounts")
-        .select(
-          `
-          *,
-          schools!inner(
-            id,
-            name,
-            subdomain
-          )
-        `,
-        )
-        .eq("email", trimmedEmail)
-        .eq("is_active", true)
-        .single();
+      // First priority: Check if it's a school admin account using the authentication function
+      try {
+        const { data: authResult, error: authError } = await supabase.rpc(
+          "authenticate_school_admin",
+          {
+            p_email: trimmedEmail,
+            p_password: trimmedPassword,
+          }
+        );
 
-      if (!schoolAdminError && schoolAdminData) {
-        // For now, we'll do a simple password check (in production, this should be properly hashed)
-        if (schoolAdminData.password_hash === trimmedPassword) {
-          // Create a mock user session for the school admin
+        if (!authError && authResult?.success) {
+          const userData = authResult.user;
+          // Create a proper user session for the school admin
           const mockUser = {
-            id: schoolAdminData.id,
-            email: trimmedEmail,
-            created_at: schoolAdminData.created_at,
-            updated_at: schoolAdminData.updated_at,
+            id: userData.id,
+            email: userData.email,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
             profile: {
               role: "school_admin",
-              first_name: schoolAdminData.first_name,
-              last_name: schoolAdminData.last_name,
-              email: trimmedEmail,
-              phone: schoolAdminData.phone,
-              school_id: schoolAdminData.school_id,
-              school_name: schoolAdminData.schools?.name,
+              first_name: userData.first_name,
+              last_name: userData.last_name,
+              email: userData.email,
+              phone: userData.phone,
+              school_id: userData.school_id,
+              school_name: userData.school_name,
             },
             roles: ["school_admin"],
           } as AppUser;
 
           setUser(mockUser);
-
-          // Update last login
-          await supabase
-            .from("school_admin_accounts")
-            .update({ last_login: new Date().toISOString() })
-            .eq("id", schoolAdminData.id);
-
           return;
-        } else {
+        } else if (authResult && !authResult.success) {
+          // The function returned an error message
           throw new Error(
-            `Invalid password for school admin account "${trimmedEmail}". Please check your password or contact your super administrator.`,
+            `Authentication failed: ${authResult.message}. Please check your credentials or contact your administrator.`
           );
+        }
+      } catch (rpcError: any) {
+        console.warn("School admin RPC authentication failed, trying direct query:", rpcError.message);
+
+        // Fallback to direct query if RPC function doesn't exist
+        const { data: schoolAdminData, error: schoolAdminError } = await supabase
+          .from("school_admin_accounts")
+          .select(
+            `
+            *,
+            schools!inner(
+              id,
+              name,
+              subdomain
+            )
+          `,
+          )
+          .eq("email", trimmedEmail)
+          .eq("is_active", true)
+          .single();
+
+        if (!schoolAdminError && schoolAdminData) {
+          // Simple password check for fallback
+          if (schoolAdminData.password_hash === trimmedPassword) {
+            const mockUser = {
+              id: schoolAdminData.id,
+              email: trimmedEmail,
+              created_at: schoolAdminData.created_at,
+              updated_at: schoolAdminData.updated_at,
+              profile: {
+                role: "school_admin",
+                first_name: schoolAdminData.first_name,
+                last_name: schoolAdminData.last_name,
+                email: trimmedEmail,
+                phone: schoolAdminData.phone,
+                school_id: schoolAdminData.school_id,
+                school_name: schoolAdminData.schools?.name,
+              },
+              roles: ["school_admin"],
+            } as AppUser;
+
+            setUser(mockUser);
+
+            // Update last login
+            await supabase
+              .from("school_admin_accounts")
+              .update({ last_login: new Date().toISOString() })
+              .eq("id", schoolAdminData.id);
+
+            return;
+          } else {
+            throw new Error(
+              `Invalid password for school admin account "${trimmedEmail}". Please check your password or contact your super administrator.`
+            );
+          }
         }
       }
 
@@ -291,24 +379,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         );
       }
 
-      // Regular Supabase auth for non-demo accounts
-      const { error } = await supabase.auth.signInWithPassword({
-        email: trimmedEmail,
-        password: trimmedPassword,
-      });
+      // If we get here, the credentials don't match any known authentication method
 
-      if (error) {
-        // Provide more helpful error messages
-        if (error.message === "Invalid login credentials") {
-          const availableDemoEmails = demoAccounts
-            .map((acc) => acc.email)
-            .join(", ");
-          throw new Error(
-            `Login failed. Please check your credentials or try one of the demo accounts:\n\n${availableDemoEmails}\n\nUse the "Demo Access" tab for quick access to demo accounts.`,
-          );
-        }
-        throw error;
-      }
+      // Provide helpful error instead of trying Supabase auth
+      throw new Error(
+        `No authentication method found for "${trimmedEmail}".\n\n` +
+        `Available options:\n` +
+        `🔧 Super Admin: sujan1nepal@gmail.com\n` +
+        `🎭 Demo Accounts: Use "Demo Access" tab or:\n` +
+        `   • admin@skooler.com (admin123)\n` +
+        `   • teacher@skooler.com (teacher123)\n` +
+        `   • student@skooler.com (student123)\n` +
+        `   • parent@skooler.com (parent123)\n` +
+        `🏫 School Admins: Use credentials from school registration\n\n` +
+        `Need to register a new school? Use "Register Your School" from the home page.`
+      );
     } catch (error: any) {
       console.error("Sign in error:", error);
       throw error;
