@@ -371,37 +371,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         );
       }
 
-            // Regular Supabase auth for non-demo accounts
-      console.log("Falling back to regular Supabase auth for:", trimmedEmail);
-      try {
-        const { error } = await supabase.auth.signInWithPassword({
-          email: trimmedEmail,
-          password: trimmedPassword,
-        });
+      // If we get here, the credentials don't match any known authentication method
+      console.log("No matching authentication method found for:", trimmedEmail);
+      console.log("Available authentication methods:");
+      console.log("1. Super Admin: sujan1nepal@gmail.com");
+      console.log("2. Demo Accounts:", demoAccounts.map(acc => acc.email).join(", "));
+      console.log("3. School Admin Accounts: From school registration process");
 
-        if (error) {
-          // Handle different types of errors
-          if (error.message.includes("Database error querying schema")) {
-            throw new Error(
-              `Database connection issue. Please try again in a moment.\n\nIf you're evaluating the system, try the demo accounts using the "Demo Access" tab.\n\nFor registered schools, contact your school administrator or our support team.`
-            );
-          } else if (error.message === "Invalid login credentials") {
-            throw new Error(
-              `Login failed for "${trimmedEmail}". Please check your credentials.\n\n✅ For Super Admin: Use sujan1nepal@gmail.com\n✅ For School Admins: Use credentials from school registration\n✅ For Demo Access: Use the "Demo Access" tab\n✅ Available demo accounts: admin@skooler.com, teacher@skooler.com, student@skooler.com, parent@skooler.com\n\nNeed help? Contact your school administrator or our support team.`,
-            );
-          }
-          throw error;
-        }
-      } catch (authError: any) {
-        console.error("Supabase auth error:", authError);
-        // If it's a database schema error, provide helpful guidance
-        if (authError.message?.includes("Database error querying schema") || authError.message?.includes("schema")) {
-          throw new Error(
-            `Database connection issue detected. Please try again later.\n\nFor demo access, use the "Demo Access" tab.\n\nIf you're a registered school user, contact your school administrator.\n\nIf this issue persists, please contact our support team.`
-          );
-        }
-        throw authError;
-      }
+      // Provide helpful error instead of trying Supabase auth
+      throw new Error(
+        `No authentication method found for "${trimmedEmail}".\n\n` +
+        `Available options:\n` +
+        `🔧 Super Admin: sujan1nepal@gmail.com\n` +
+        `🎭 Demo Accounts: Use "Demo Access" tab or:\n` +
+        `   • admin@skooler.com (admin123)\n` +
+        `   • teacher@skooler.com (teacher123)\n` +
+        `   • student@skooler.com (student123)\n` +
+        `   • parent@skooler.com (parent123)\n` +
+        `🏫 School Admins: Use credentials from school registration\n\n` +
+        `Need to register a new school? Use "Register Your School" from the home page.`
+      );
     } catch (error: any) {
       console.error("Sign in error:", error);
       throw error;
