@@ -288,13 +288,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .eq("is_active", true)
         .single();
 
-      console.log("School admin query result:", { schoolAdminData, schoolAdminError });
-
       if (schoolAdminError) {
-        console.warn("School admin table query failed:", schoolAdminError.message);
-        // Continue to next authentication method
+        // Continue to next authentication method if table query fails
       } else if (schoolAdminData) {
-        console.log("School admin account found, checking password");
         // Simple password check for now (in production, this should be properly hashed)
         if (schoolAdminData.password_hash === trimmedPassword) {
           // Create a proper user session for the school admin
