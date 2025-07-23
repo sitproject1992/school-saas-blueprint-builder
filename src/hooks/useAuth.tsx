@@ -177,11 +177,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const trimmedEmail = email.trim().toLowerCase();
       const trimmedPassword = password.trim();
 
+      console.log("Attempting login for:", trimmedEmail);
+
       // Check if it's the super admin account
       if (
         trimmedEmail === "sujan1nepal@gmail.com" &&
         trimmedPassword === "precioussn"
       ) {
+        console.log("Super admin login detected");
         // Handle super admin login - create a mock session with persistence
         const sessionData = {
           email: trimmedEmail,
