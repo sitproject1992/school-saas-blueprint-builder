@@ -127,6 +127,7 @@ export function SuperAdminDashboard() {
     deleteSchool,
     toggleSchoolStatus,
     getSchoolStatistics,
+    testDatabaseConnection,
   } = useSchoolManagement();
 
   const [searchTerm, setSearchTerm] = useState("");
