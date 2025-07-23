@@ -215,14 +215,14 @@ export function useSchoolManagement() {
       newSchool.createdAt = dbSchool.created_at;
       newSchool.updatedAt = dbSchool.updated_at;
 
-      // Add to local state for immediate UI feedback
-      setSchools((prevSchools) => [newSchool, ...prevSchools]);
-
       // Log the action
       await logAuditAction("CREATE_SCHOOL", "school", newSchool.id, {
         name: data.name,
         subdomain: data.subdomain,
       });
+
+      // Refresh the schools list to get updated data from database
+      await fetchSchools();
 
       console.log(`Successfully created school: ${data.name}`);
       return newSchool.id;
