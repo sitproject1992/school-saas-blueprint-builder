@@ -117,7 +117,25 @@ export function useSchoolManagement() {
         }),
       );
 
-      setSchools(schoolsWithCounts);
+      const formattedSchools: School[] = schoolsWithCounts.map((school: any) => ({
+        id: school.id,
+        name: school.name,
+        subdomain: school.subdomain,
+        email: school.email,
+        phone: school.phone,
+        address: school.address,
+        website: school.website,
+        subscriptionStatus: school.subscription_status,
+        subscriptionExpiresAt: school.subscription_expires_at,
+        themeColor: school.theme_color,
+        logoUrl: school.logo_url,
+        createdAt: school.created_at,
+        updatedAt: school.updated_at,
+        adminCount: school.adminCount,
+        studentCount: school.studentCount,
+        teacherCount: school.teacherCount,
+      }));
+      setSchools(formattedSchools);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to fetch schools");
     } finally {
@@ -176,7 +194,7 @@ export function useSchoolManagement() {
             phone: data.phone || null,
             address: data.address || null,
             website: data.website || null,
-            subscription_status: data.subscriptionStatus,
+            subscription_status: data.subscriptionStatus as "active" | "inactive" | "suspended" | "cancelled",
             subscription_expires_at: data.subscriptionExpiresAt || null,
             theme_color: data.themeColor || "#3b82f6",
           })
@@ -364,7 +382,7 @@ export function useSchoolManagement() {
 
       const { error } = await supabase
         .from("schools")
-        .update({ subscription_status: status })
+        .update({ subscription_status: status as "active" | "inactive" | "suspended" | "cancelled" })
         .eq("id", id);
 
       if (error) throw error;

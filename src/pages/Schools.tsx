@@ -4,6 +4,11 @@ import SchoolForm from "@/components/schools/SchoolForm";
 import { School } from "lucide-react";
 
 export default function Schools() {
+  const handleSuccess = () => {
+    // Handle success - could show a toast or redirect
+    console.log("School operation successful");
+  };
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center space-x-2">
@@ -16,7 +21,7 @@ export default function Schools() {
           <CardTitle>School Management</CardTitle>
         </CardHeader>
         <CardContent>
-          <SchoolForm />
+          <SchoolForm onSuccess={handleSuccess} />
         </CardContent>
       </Card>
     </div>

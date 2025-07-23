@@ -108,7 +108,18 @@ export function useSchoolAdmin() {
         return;
       }
 
-      setSchools(data || []);
+      const formattedSchools: School[] = (data || []).map((school: any) => ({
+        id: school.id,
+        name: school.name,
+        subdomain: school.subdomain,
+        email: school.email,
+        phone: school.phone,
+        address: school.address,
+        subscriptionStatus: school.subscription_status,
+        subscriptionExpiresAt: school.subscription_expires_at,
+        createdAt: school.created_at,
+      }));
+      setSchools(formattedSchools);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);
       console.error("Failed to fetch schools:", errorMessage);
@@ -505,69 +516,3 @@ export function useSchoolAdmin() {
   };
 }
 
-// Hook specifically for school admin password management
-export function useSchoolAdminPassword() {
-  const { user } = useAuth();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const changePassword = async (
-    currentPassword: string,
-    newPassword: string,
-  ): Promise<void> => {
-    if (!user || user.profile?.role !== "school_admin") {
-      throw new Error("Unauthorized: School admin privileges required");
-    }
-
-    try {
-      setLoading(true);
-      setError(null);
-
-      // First authenticate the school admin with current credentials
-      const { data: authResult } = await supabase.rpc(
-        "authenticate_school_admin",
-        {
-          p_email: user.email!,
-          p_password: currentPassword,
-        },
-      );
-
-      if (!authResult?.success) {
-        throw new Error("Current password is incorrect");
-      }
-
-      // Get the school admin account ID
-      const { data: adminAccount, error: fetchError } = await supabase
-        .from("school_admin_accounts")
-        .select("id")
-        .eq("email", user.email!)
-        .single();
-
-      if (fetchError || !adminAccount) {
-        throw new Error("School admin account not found");
-      }
-
-      // Update the password
-      const { error } = await supabase.rpc("update_school_admin_password", {
-        p_account_id: adminAccount.id,
-        p_new_password: newPassword,
-        p_old_password: currentPassword,
-      });
-
-      if (error) throw error;
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Failed to change password";
-      setError(message);
-      throw new Error(message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return {
-    changePassword,
-    loading,
-    error,
-  };
-}

@@ -16,7 +16,7 @@ export default function Announcements() {
           <CardTitle>Create Announcement</CardTitle>
         </CardHeader>
         <CardContent>
-          <AnnouncementForm />
+          <AnnouncementForm onSuccess={() => console.log("Announcement created successfully")} />
         </CardContent>
       </Card>
     </div>
