@@ -244,13 +244,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         },
       ];
 
+      console.log("Demo accounts available:", demoAccounts.map(acc => ({ email: acc.email, password: acc.password })));
+      console.log("Searching for:", { email: trimmedEmail, password: trimmedPassword });
+
       const demoAccount = demoAccounts.find(
         (acc) =>
           acc.email.toLowerCase() === trimmedEmail &&
           acc.password === trimmedPassword,
       );
 
-      console.log("Demo account search result:", demoAccount ? "Found" : "Not found");
+      console.log("Demo account search result:", demoAccount ? `Found: ${demoAccount.role}` : "Not found");
 
       if (demoAccount) {
         console.log("Demo login successful for:", demoAccount.role);
