@@ -277,6 +277,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       // First priority: Check if it's a school admin account created through proper system
+      console.log("Checking school admin accounts for:", trimmedEmail);
       const { data: schoolAdminData, error: schoolAdminError } = await supabase
         .from("school_admin_accounts")
         .select(
@@ -293,7 +294,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .eq("is_active", true)
         .single();
 
+      console.log("School admin query result:", { schoolAdminData, schoolAdminError });
+
       if (!schoolAdminError && schoolAdminData) {
+        console.log("School admin account found, checking password");
         // Simple password check for now (in production, this should be properly hashed)
         if (schoolAdminData.password_hash === trimmedPassword) {
           // Create a proper user session for the school admin
