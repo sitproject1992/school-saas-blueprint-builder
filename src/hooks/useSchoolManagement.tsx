@@ -161,7 +161,8 @@ export function useSchoolManagement() {
         throw new Error("Subdomain already exists");
       }
 
-      const newSchoolId = `school-${Date.now()}`;
+      // Generate a proper UUID for the school
+      const newSchoolId = crypto.randomUUID();
 
       // Create new school object
       const newSchool: School = {
