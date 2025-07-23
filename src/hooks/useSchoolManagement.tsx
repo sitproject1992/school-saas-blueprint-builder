@@ -184,22 +184,29 @@ export function useSchoolManagement() {
         teacherCount: 0,
       };
 
+      // Prepare insert data
+      const insertData = {
+        name: data.name,
+        subdomain: data.subdomain,
+        email: data.email || null,
+        phone: data.phone || null,
+        address: data.address || null,
+        website: data.website || null,
+        subscription_status: data.subscriptionStatus as "active" | "inactive" | "suspended" | "cancelled",
+        subscription_expires_at: data.subscriptionExpiresAt || null,
+        theme_color: data.themeColor || "#3b82f6",
+      };
+
+      console.log("Creating school with data:", insertData);
+
       // Create in database first - this is required, not optional
       const { data: dbSchool, error } = await supabase
         .from("schools")
-        .insert({
-          name: data.name,
-          subdomain: data.subdomain,
-          email: data.email || null,
-          phone: data.phone || null,
-          address: data.address || null,
-          website: data.website || null,
-          subscription_status: data.subscriptionStatus as "active" | "inactive" | "suspended" | "cancelled",
-          subscription_expires_at: data.subscriptionExpiresAt || null,
-          theme_color: data.themeColor || "#3b82f6",
-        })
+        .insert(insertData)
         .select()
         .single();
+
+      console.log("Database response:", { dbSchool, error });
 
       if (error) {
         console.error("Database error creating school:", error);
