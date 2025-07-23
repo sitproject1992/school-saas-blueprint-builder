@@ -70,6 +70,24 @@ export function useSchoolManagement() {
 
   const isAuthorized = user?.profile?.role === "super_admin";
 
+  // Test database connectivity
+  const testDatabaseConnection = async () => {
+    try {
+      console.log("Testing database connection...");
+      const { data, error } = await supabase.from("schools").select("count").limit(1);
+      console.log("Database test result:", { data, error });
+      if (error) {
+        console.error("Database connection test failed:", error);
+        return false;
+      }
+      console.log("Database connection successful");
+      return true;
+    } catch (err) {
+      console.error("Database connection test error:", err);
+      return false;
+    }
+  };
+
   // Fetch all schools with computed statistics
   const fetchSchools = async () => {
     if (!isAuthorized) return;
