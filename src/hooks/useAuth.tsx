@@ -342,11 +342,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       // If we get here, the credentials don't match any known authentication method
-      console.log("No matching authentication method found for:", trimmedEmail);
-      console.log("Available authentication methods:");
-      console.log("1. Super Admin: sujan1nepal@gmail.com");
-      console.log("2. Demo Accounts:", demoAccounts.map(acc => acc.email).join(", "));
-      console.log("3. School Admin Accounts: From school registration process");
 
       // Provide helpful error instead of trying Supabase auth
       throw new Error(
