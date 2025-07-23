@@ -364,7 +364,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             );
           } else if (error.message === "Invalid login credentials") {
             throw new Error(
-              `Login failed. Please check your email and password.\n\nIf you're a school administrator, ensure you're using the credentials provided during school setup.\n\nFor demo access, use the "Demo Access" tab.\n\nNeed help? Contact support or your school's IT administrator.`,
+              `Login failed for "${trimmedEmail}". Please check your credentials.\n\n✅ For Super Admin: Use sujan1nepal@gmail.com\n✅ For School Admins: Use credentials from school registration\n✅ For Demo Access: Use the "Demo Access" tab\n✅ Available demo accounts: admin@skooler.com, teacher@skooler.com, student@skooler.com, parent@skooler.com\n\nNeed help? Contact your school administrator or our support team.`,
             );
           }
           throw error;
