@@ -349,6 +349,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
             // Regular Supabase auth for non-demo accounts
+      console.log("Falling back to regular Supabase auth for:", trimmedEmail);
       try {
         const { error } = await supabase.auth.signInWithPassword({
           email: trimmedEmail,
