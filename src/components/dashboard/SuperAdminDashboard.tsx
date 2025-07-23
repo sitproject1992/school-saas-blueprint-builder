@@ -424,6 +424,10 @@ export function SuperAdminDashboard() {
               <Building className="h-4 w-4 mr-2" />
               Add School
             </Button>
+            <Button variant="outline" onClick={handleTestDatabase}>
+              <Activity className="h-4 w-4 mr-2" />
+              Test Database
+            </Button>
             <Button variant="outline" onClick={() => setShowPasswordForm(true)}>
               <Key className="h-4 w-4 mr-2" />
               Change Password
