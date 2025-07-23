@@ -271,23 +271,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       // First priority: Check if it's a school admin account created through proper system
-      console.log("Checking school admin accounts for:", trimmedEmail);
-
-      // Test database connectivity first
-      try {
-        const { data: testData, error: testError } = await supabase
-          .from("school_admin_accounts")
-          .select("id")
-          .limit(1);
-
-        if (testError) {
-          console.error("Database connectivity test failed:", testError);
-        } else {
-          console.log("Database connectivity test passed, found", testData?.length || 0, "records");
-        }
-      } catch (connError) {
-        console.error("Database connection error:", connError);
-      }
 
       const { data: schoolAdminData, error: schoolAdminError } = await supabase
         .from("school_admin_accounts")
