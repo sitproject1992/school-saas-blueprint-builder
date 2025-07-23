@@ -322,6 +322,20 @@ export function SuperAdminDashboard() {
     }
   };
 
+  // Database test function
+  const handleTestDatabase = async () => {
+    try {
+      const isConnected = await testDatabaseConnection();
+      if (isConnected) {
+        toast.success("Database connection successful!");
+      } else {
+        toast.error("Database connection failed. Check console for details.");
+      }
+    } catch (error) {
+      toast.error("Database test failed. Check console for details.");
+    }
+  };
+
   // Logout function
   const handleLogout = async () => {
     try {
