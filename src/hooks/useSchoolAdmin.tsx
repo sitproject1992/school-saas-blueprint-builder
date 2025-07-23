@@ -235,7 +235,7 @@ export function useSchoolAdmin() {
       setLoading(true);
       setError(null);
 
-      // Try to use the RPC function if available
+      // Use the proper RPC function for creating school admin accounts
       const { data: result, error } = await supabase.rpc(
         "create_school_admin_account",
         {
@@ -250,32 +250,34 @@ export function useSchoolAdmin() {
 
       if (error) {
         console.warn(
-          "RPC function not available, creating direct database records:",
+          "RPC function failed, attempting direct database insert:",
           error.message,
         );
 
-        // Create the school admin account directly in the database
-        const { error: insertError } = await supabase
+        // Fallback: Create the school admin account directly in the database
+        const { data: insertData, error: insertError } = await supabase
           .from("school_admin_accounts")
           .insert({
             school_id: data.schoolId,
             email: data.email.toLowerCase(),
-            password_hash: data.password, // In real implementation, this should be hashed
+            password_hash: data.password, // Should be hashed in production
             first_name: data.firstName,
             last_name: data.lastName,
             phone: data.phone,
             is_active: true,
-            must_change_password: data.mustChangePassword || true,
+            must_change_password: data.mustChangePassword !== false,
             login_attempts: 0,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
             password_changed_at: new Date().toISOString(),
-          });
+          })
+          .select('id')
+          .single();
 
         if (insertError) {
-          console.warn(
-            "Direct insert failed, creating mock admin:",
-            insertError.message,
+          console.error("Database insert failed:", insertError.message);
+          throw new Error(
+            `Failed to create school admin account: ${insertError.message}. Please check the database schema and permissions.`
           );
 
           // Create mock admin and add to state
