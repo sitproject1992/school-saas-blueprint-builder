@@ -171,6 +171,12 @@ export function useSchoolManagement() {
       setLoading(true);
       setError(null);
 
+      // Test database connection first
+      const connectionOk = await testDatabaseConnection();
+      if (!connectionOk) {
+        throw new Error("Database connection failed. Please check your database configuration.");
+      }
+
       // Check if subdomain already exists in current schools
       const existingSchool = schools.find(
         (s) => s.subdomain === data.subdomain,
