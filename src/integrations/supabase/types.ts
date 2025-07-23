@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 export type Json =
   | string
   | number
@@ -109,13 +107,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "announcements_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "announcements_school_id_fkey"
             columns: ["school_id"]
             isOneToOne: false
@@ -127,6 +118,13 @@ export type Database = {
             columns: ["school_id"]
             isOneToOne: false
             referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "announcements_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -408,13 +406,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "exams_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "exams_school_id_fkey"
             columns: ["school_id"]
             isOneToOne: false
@@ -426,6 +417,13 @@ export type Database = {
             columns: ["school_id"]
             isOneToOne: false
             referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exams_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -481,13 +479,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "fee_payments_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "fee_payments_fee_structure_id_fkey"
             columns: ["fee_structure_id"]
             isOneToOne: false
@@ -513,6 +504,13 @@ export type Database = {
             columns: ["student_id"]
             isOneToOne: false
             referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_payments_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -762,17 +760,17 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "inventory_movements_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "inventory_movements_item_id_fkey"
             columns: ["item_id"]
             isOneToOne: false
             referencedRelation: "inventory_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_movements_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -951,6 +949,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "notification_settings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "notification_settings_school_id_fkey"
             columns: ["school_id"]
             isOneToOne: false
@@ -1008,6 +1013,35 @@ export type Database = {
           },
         ]
       }
+      password_history: {
+        Row: {
+          created_at: string
+          id: string
+          password_hash: string
+          school_admin_account_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          password_hash: string
+          school_admin_account_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          password_hash?: string
+          school_admin_account_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "password_history_school_admin_account_id_fkey"
+            columns: ["school_admin_account_id"]
+            isOneToOne: false
+            referencedRelation: "school_admin_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           address: string | null
@@ -1024,7 +1058,7 @@ export type Database = {
           school_id: string | null
           student_id: string | null
           updated_at: string
-          user_id: string
+          user_id: string | null
           user_role: Database["public"]["Enums"]["user_role"] | null
         }
         Insert: {
@@ -1042,7 +1076,7 @@ export type Database = {
           school_id?: string | null
           student_id?: string | null
           updated_at?: string
-          user_id: string
+          user_id?: string | null
           user_role?: Database["public"]["Enums"]["user_role"] | null
         }
         Update: {
@@ -1060,10 +1094,17 @@ export type Database = {
           school_id?: string | null
           student_id?: string | null
           updated_at?: string
-          user_id?: string
+          user_id?: string | null
           user_role?: Database["public"]["Enums"]["user_role"] | null
         }
         Relationships: [
+          {
+            foreignKeyName: "profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "profiles_school_id_fkey"
             columns: ["school_id"]
@@ -1213,6 +1254,13 @@ export type Database = {
             referencedRelation: "schools"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "school_admins_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
         ]
       }
       schools: {
@@ -1226,9 +1274,7 @@ export type Database = {
           phone: string | null
           subdomain: string
           subscription_expires_at: string | null
-          subscription_status:
-            | Database["public"]["Enums"]["subscription_status"]
-            | null
+          subscription_status: Database["public"]["Enums"]["subscription_status"] | null
           theme_color: string | null
           updated_at: string
           website: string | null
@@ -1243,9 +1289,7 @@ export type Database = {
           phone?: string | null
           subdomain: string
           subscription_expires_at?: string | null
-          subscription_status?:
-            | Database["public"]["Enums"]["subscription_status"]
-            | null
+          subscription_status?: Database["public"]["Enums"]["subscription_status"] | null
           theme_color?: string | null
           updated_at?: string
           website?: string | null
@@ -1260,9 +1304,7 @@ export type Database = {
           phone?: string | null
           subdomain?: string
           subscription_expires_at?: string | null
-          subscription_status?:
-            | Database["public"]["Enums"]["subscription_status"]
-            | null
+          subscription_status?: Database["public"]["Enums"]["subscription_status"] | null
           theme_color?: string | null
           updated_at?: string
           website?: string | null
@@ -1350,13 +1392,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "students_class_id_fkey"
-            columns: ["class_id"]
-            isOneToOne: false
-            referencedRelation: "classes"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "students_profile_id_fkey"
             columns: ["profile_id"]
             isOneToOne: false
@@ -1375,6 +1410,13 @@ export type Database = {
             columns: ["school_id"]
             isOneToOne: false
             referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "students_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
             referencedColumns: ["id"]
           },
         ]
@@ -1460,6 +1502,41 @@ export type Database = {
         }
         Relationships: []
       }
+      super_admins: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          is_active: boolean | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          is_active?: boolean | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          is_active?: boolean | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "super_admins_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       syllabus: {
         Row: {
           academic_year: string | null
@@ -1502,20 +1579,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "syllabus_class_id_fkey"
-            columns: ["class_id"]
-            isOneToOne: false
-            referencedRelation: "classes"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "syllabus_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "syllabus_school_id_fkey"
             columns: ["school_id"]
             isOneToOne: false
@@ -1534,6 +1597,20 @@ export type Database = {
             columns: ["subject_id"]
             isOneToOne: false
             referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "syllabus_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "syllabus_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -1574,17 +1651,17 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "teacher_attendance_marked_by_fkey"
-            columns: ["marked_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "teacher_attendance_teacher_id_fkey"
             columns: ["teacher_id"]
             isOneToOne: false
             referencedRelation: "teachers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teacher_attendance_marked_by_fkey"
+            columns: ["marked_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -1613,10 +1690,10 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "teacher_subjects_class_id_fkey"
-            columns: ["class_id"]
+            foreignKeyName: "teacher_subjects_teacher_id_fkey"
+            columns: ["teacher_id"]
             isOneToOne: false
-            referencedRelation: "classes"
+            referencedRelation: "teachers"
             referencedColumns: ["id"]
           },
           {
@@ -1627,10 +1704,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "teacher_subjects_teacher_id_fkey"
-            columns: ["teacher_id"]
+            foreignKeyName: "teacher_subjects_class_id_fkey"
+            columns: ["class_id"]
             isOneToOne: false
-            referencedRelation: "teachers"
+            referencedRelation: "classes"
             referencedColumns: ["id"]
           },
         ]
@@ -1677,13 +1754,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "teachers_class_id_fkey"
-            columns: ["class_id"]
-            isOneToOne: false
-            referencedRelation: "classes"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "teachers_profile_id_fkey"
             columns: ["profile_id"]
             isOneToOne: false
@@ -1702,6 +1772,13 @@ export type Database = {
             columns: ["school_id"]
             isOneToOne: false
             referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teachers_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
             referencedColumns: ["id"]
           },
         ]
@@ -1739,23 +1816,29 @@ export type Database = {
     Views: {
       school_dashboard_data: {
         Row: {
-          absent_today: number | null
-          active_fee_structures: number | null
-          pending_payments: number | null
-          present_today: number | null
+          admin_count: number | null
+          parent_count: number | null
           school_id: string | null
           school_name: string | null
-          total_classes: number | null
-          total_students: number | null
-          total_subjects: number | null
-          total_teachers: number | null
+          student_count: number | null
+          subscription_status: Database["public"]["Enums"]["subscription_status"] | null
+          teacher_count: number | null
         }
         Relationships: []
       }
     }
     Functions: {
+      authenticate_school_admin: {
+        Args: {
+          p_email: string
+          p_password: string
+        }
+        Returns: Json
+      }
       create_default_school_data: {
-        Args: { school_id: string }
+        Args: {
+          p_school_id: string
+        }
         Returns: undefined
       }
       create_school_admin_account: {
@@ -1769,30 +1852,29 @@ export type Database = {
         }
         Returns: string
       }
-      get_user_role: {
-        Args: Record<PropertyKey, never>
-        Returns: Database["public"]["Enums"]["user_role"]
-      }
-      get_user_school_id: {
-        Args: Record<PropertyKey, never>
+      hash_password: {
+        Args: {
+          password: string
+        }
         Returns: string
       }
-      update_school_admin_password: {
-        Args: { p_account_id: string; p_new_password: string }
-        Returns: undefined
+      is_super_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      verify_password: {
+        Args: {
+          password: string
+          hash: string
+        }
+        Returns: boolean
       }
     }
     Enums: {
       attendance_status: "present" | "absent" | "late" | "excused"
-      exam_type:
-        | "pre_test"
-        | "post_test"
-        | "weekly"
-        | "monthly"
-        | "major"
-        | "final"
+      exam_type: "monthly" | "quarterly" | "half_yearly" | "annual" | "mock"
       fee_status: "pending" | "paid" | "overdue" | "cancelled"
-      subscription_status: "active" | "inactive" | "suspended" | "cancelled"
+      subscription_status: "active" | "inactive" | "trial" | "past_due"
       user_role:
         | "super_admin"
         | "school_admin"
@@ -1805,150 +1887,5 @@ export type Database = {
     CompositeTypes: {
       [_ in never]: never
     }
-  }
-}
-
-type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
-
-type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
-
-export type Tables<
-  DefaultSchemaTableNameOrOptions extends
-    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
-      Row: infer R
-    }
-    ? R
-    : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
-        Row: infer R
-      }
-      ? R
-      : never
-    : never
-
-export type TablesInsert<
-  DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I
-    }
-    ? I
-    : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Insert: infer I
-      }
-      ? I
-      : never
-    : never
-
-export type TablesUpdate<
-  DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U
-    }
-    ? U
-    : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Update: infer U
-      }
-      ? U
-      : never
-    : never
-
-export type Enums<
-  DefaultSchemaEnumNameOrOptions extends
-    | keyof DefaultSchema["Enums"]
-    | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
-> = DefaultSchemaEnumNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
-    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-    : never
-
-export type CompositeTypes<
-  PublicCompositeTypeNameOrOptions extends
-    | keyof DefaultSchema["CompositeTypes"]
-    | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
-> = PublicCompositeTypeNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never
-
-export const Constants = {
-  public: {
-    Enums: {
-      attendance_status: ["present", "absent", "late", "excused"],
-      exam_type: [
-        "pre_test",
-        "post_test",
-        "weekly",
-        "monthly",
-        "major",
-        "final",
-      ],
-      fee_status: ["pending", "paid", "overdue", "cancelled"],
-      subscription_status: ["active", "inactive", "suspended", "cancelled"],
-      user_role: [
-        "super_admin",
-        "school_admin",
-        "teacher",
-        "student",
-        "parent",
-        "accountant",
-        "inventory_manager",
-      ],
-    },
   },
 } as const
->>>>>>> origin/main
