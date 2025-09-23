@@ -47,14 +47,13 @@ export function TeacherForm({ teacher, onSubmit, onCancel, isLoading }: TeacherF
     e.preventDefault();
     
     const submitData = {
-      profile: {
-        first_name: formData.first_name,
-        last_name: formData.last_name,
-        email: formData.email,
-        phone: formData.phone,
-        address: formData.address,
-        date_of_birth: formData.date_of_birth,
-      },
+      // Flatten the structure for useTeachers hook
+      first_name: formData.first_name,
+      last_name: formData.last_name,
+      email: formData.email,
+      phone: formData.phone,
+      address: formData.address,
+      date_of_birth: formData.date_of_birth,
       qualification: formData.qualification,
       experience_years: formData.experience_years,
       joining_date: formData.joining_date,
