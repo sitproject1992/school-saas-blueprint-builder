@@ -12,26 +12,57 @@ export interface Subject {
   description: string | null;
   created_at: string;
   updated_at: string;
+  class_id?: string;
+  teacher_id?: string;
+  class_name?: string;
+  teacher_name?: string;
+}
+
+interface SubjectMutation extends Omit<Subject, "id" | "created_at" | "updated_at"> {
+  class_id: string;
+  teacher_id: string;
 }
 
 async function getSubjects(): Promise<Subject[]> {
   const { data, error } = await supabase
     .from("subjects")
-    .select("*")
+    .select(`
+      *,
+      teacher_subjects (
+        class_id,
+        teacher_id,
+        classes ( name ),
+        teachers ( first_name, last_name )
+      )
+    `)
     .order("name", { ascending: true });
 
   if (error) throw new Error(error.message);
-  return data || [];
+
+  return data?.map(s => {
+    const assignment = s.teacher_subjects && s.teacher_subjects.length > 0 ? s.teacher_subjects[0] : null;
+    return {
+      ...s,
+      class_id: assignment?.class_id,
+      teacher_id: assignment?.teacher_id,
+      class_name: assignment?.classes?.name,
+      teacher_name: `${assignment?.teachers?.first_name || ''} ${assignment?.teachers?.last_name || ''}`.trim(),
+    }
+  }) || [];
 }
 
 async function createSubject(
-  subject: Omit<Subject, "id" | "created_at" | "updated_at">,
+  subject: SubjectMutation,
 ): Promise<Subject> {
   const { data, error } = await supabase
-    .from("subjects")
-    .insert(subject)
-    .select()
-    .single();
+    .rpc('create_subject_and_assign_teacher', {
+      p_name: subject.name,
+      p_code: subject.code,
+      p_description: subject.description,
+      p_school_id: subject.school_id,
+      p_class_id: subject.class_id,
+      p_teacher_id: subject.teacher_id,
+    });
 
   if (error) throw new Error(error.message);
   return data;
@@ -42,16 +73,31 @@ async function updateSubject({
   updates,
 }: {
   id: string;
-  updates: Partial<Subject>;
+  updates: Partial<SubjectMutation>;
 }): Promise<Subject> {
+  const { name, code, description, class_id, teacher_id } = updates;
+
   const { data, error } = await supabase
     .from("subjects")
-    .update(updates)
+    .update({ name, code, description })
     .eq("id", id)
     .select()
     .single();
 
   if (error) throw new Error(error.message);
+
+  // Only update assignment if class or teacher has changed
+  if (class_id || teacher_id) {
+    const { error: assignmentError } = await supabase
+      .rpc('update_subject_assignment', {
+        p_subject_id: id,
+        p_class_id: class_id,
+        p_teacher_id: teacher_id,
+      });
+
+    if (assignmentError) throw new Error(assignmentError.message);
+  }
+
   return data;
 }
 
