@@ -1,8 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { supabase } from '../../integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -13,53 +12,78 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { useToast } from '@/components/ui/use-toast';
-import { useSchool } from '@/hooks/useSchool';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
+import { useClasses } from '@/hooks/useClasses';
+import { useFeeStructures, FeeStructure } from '@/hooks/useFeeStructures';
 
 const formSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   amount: z.coerce.number().min(0, 'Amount must be a positive number'),
   frequency: z.string().min(1, 'Frequency is required'),
   class_id: z.string().optional(),
+  description: z.string().optional(),
+  due_day: z.coerce.number().min(1).max(31).optional(),
 });
 
 interface FeeStructureFormProps {
-  feeStructure?: any;
+  feeStructure?: FeeStructure;
   onSuccess: () => void;
+  onCancel?: () => void;
 }
 
-const FeeStructureForm: React.FC<FeeStructureFormProps> = ({ feeStructure, onSuccess }) => {
+const FeeStructureForm: React.FC<FeeStructureFormProps> = ({ 
+  feeStructure, 
+  onSuccess, 
+  onCancel 
+}) => {
   const { toast } = useToast();
-  const { school } = useSchool();
+  const { createFeeStructure, updateFeeStructure, isCreating, isUpdating } = useFeeStructures();
+  const classesResult = useClasses();
+  const classes = classesResult.data || [];
+
   const form = useForm({
     resolver: zodResolver(formSchema),
-    defaultValues: feeStructure || {
-      name: '',
-      amount: 0,
-      frequency: '',
-      class_id: '',
+    defaultValues: {
+      name: feeStructure?.name || '',
+      amount: feeStructure?.amount || 0,
+      frequency: feeStructure?.frequency || '',
+      class_id: feeStructure?.class_id || '',
+      description: feeStructure?.description || '',
+      due_day: feeStructure?.due_day || 1,
     },
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       if (feeStructure) {
-        const { error } = await supabase
-          .from('fee_structures')
-          .update(values)
-          .eq('id', feeStructure.id);
-        if (error) throw error;
-        toast({ title: 'Fee structure updated successfully' });
+        updateFeeStructure({ 
+          id: feeStructure.id, 
+          updates: {
+            name: values.name,
+            amount: values.amount,
+            frequency: values.frequency,
+            class_id: values.class_id,
+            description: values.description,
+            due_day: values.due_day,
+          }
+        });
       } else {
-        const { error } = await supabase.from('fee_structures').insert({
+        createFeeStructure({
           name: values.name,
           amount: values.amount,
           frequency: values.frequency,
           class_id: values.class_id,
-          school_id: school?.id,
+          description: values.description,
+          due_day: values.due_day,
         });
-        if (error) throw error;
-        toast({ title: 'Fee structure created successfully' });
       }
       onSuccess();
     } catch (error: any) {
@@ -71,51 +95,141 @@ const FeeStructureForm: React.FC<FeeStructureFormProps> = ({ feeStructure, onSuc
     }
   };
 
+  const isLoading = isCreating || isUpdating;
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Fee Name *</FormLabel>
+                <FormControl>
+                  <Input placeholder="e.g., Tuition Fee, Library Fee" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="amount"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Amount *</FormLabel>
+                <FormControl>
+                  <Input type="number" step="0.01" placeholder="0.00" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="frequency"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Frequency *</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select frequency" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="one-time">One Time</SelectItem>
+                    <SelectItem value="monthly">Monthly</SelectItem>
+                    <SelectItem value="quarterly">Quarterly</SelectItem>
+                    <SelectItem value="half-yearly">Half Yearly</SelectItem>
+                    <SelectItem value="yearly">Yearly</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="due_day"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Due Day (1-31)</FormLabel>
+                <FormControl>
+                  <Input 
+                    type="number" 
+                    min="1" 
+                    max="31" 
+                    placeholder="1" 
+                    {...field} 
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
         <FormField
           control={form.control}
-          name="name"
+          name="class_id"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Name</FormLabel>
+              <FormLabel>Applicable Class (Optional)</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select class or leave empty for all" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="">All Classes</SelectItem>
+                  {classes.map((cls) => (
+                    <SelectItem key={cls.id} value={cls.id}>
+                      {cls.name} {cls.section && `- ${cls.section}`}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Description (Optional)</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Textarea 
+                  placeholder="Additional details about this fee structure"
+                  {...field} 
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="amount"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Amount</FormLabel>
-              <FormControl>
-                <Input type="number" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+
+        <div className="flex gap-2">
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? 'Saving...' : feeStructure ? 'Update Fee Structure' : 'Create Fee Structure'}
+          </Button>
+          {onCancel && (
+            <Button type="button" variant="outline" onClick={onCancel}>
+              Cancel
+            </Button>
           )}
-        />
-        <FormField
-          control={form.control}
-          name="frequency"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Frequency</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button type="submit">
-          {feeStructure ? 'Update' : 'Create'}
-        </Button>
+        </div>
       </form>
     </Form>
   );
