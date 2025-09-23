@@ -166,7 +166,7 @@ BEGIN
     v_password_hash := hash_password(p_password);
 
     -- Get account details with school information
-    SELECT saa.*, s.name INTO v_account, v_school_name
+    SELECT saa, s.name INTO v_account, v_school_name
     FROM school_admin_accounts saa
     JOIN schools s ON s.id = saa.school_id
     WHERE saa.email = LOWER(p_email)
