@@ -216,7 +216,7 @@ export function useSchoolManagement() {
         phone: data.phone || null,
         address: data.address || null,
         website: data.website || null,
-        subscription_status: data.subscriptionStatus as "active" | "inactive" | "suspended" | "cancelled",
+        subscription_status: data.subscriptionStatus as "active" | "inactive" | "trial" | "past_due",
         subscription_expires_at: data.subscriptionExpiresAt || null,
         theme_color: data.themeColor || "#3b82f6",
       };
@@ -424,7 +424,7 @@ export function useSchoolManagement() {
 
       const { error } = await supabase
         .from("schools")
-        .update({ subscription_status: status as "active" | "inactive" | "suspended" | "cancelled" })
+        .update({ subscription_status: status as "active" | "inactive" | "trial" | "past_due" })
         .eq("id", id);
 
       if (error) throw error;

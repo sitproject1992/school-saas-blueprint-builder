@@ -10,7 +10,6 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useTeachers } from '@/hooks/useTeachers';
 import { TeacherForm } from '@/components/teachers/TeacherForm';
 import TeacherEvaluation from '@/components/teachers/TeacherEvaluation';
-import { Tables } from '@/integrations/supabase/types';
 
 import { Teacher } from '@/hooks/useTeachers';
 

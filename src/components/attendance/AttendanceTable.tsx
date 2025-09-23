@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Tables } from "@/integrations/supabase/types";
+import { format } from "date-fns";
 import {
   Table,
   TableBody,
@@ -15,8 +15,12 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useState, useEffect } from "react";
 
-type Student = Tables<'students'> & {
-  profile: Tables<'profiles'>;
+type Student = {
+  id: string;
+  profile: {
+    first_name: string;
+    last_name: string;
+  };
 };
 
 interface AttendanceTableProps {

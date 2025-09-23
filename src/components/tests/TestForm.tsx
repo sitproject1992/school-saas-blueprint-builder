@@ -22,7 +22,7 @@ import { useSubjects } from '@/hooks/useSubjects';
 
 const formSchema = z.object({
   name: z.string().min(1, 'Name is required'),
-  type: z.enum(['pre_test', 'post_test', 'weekly', 'monthly', 'major', 'final']),
+  type: z.enum(['monthly', 'quarterly', 'half_yearly', 'annual', 'mock']),
   start_date: z.string().min(1, 'Start date is required'),
   end_date: z.string().min(1, 'End date is required'),
 });
@@ -108,12 +108,11 @@ const TestForm: React.FC<TestFormProps> = ({ test, onSuccess }) => {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="pre_test">Pre Test</SelectItem>
-                  <SelectItem value="post_test">Post Test</SelectItem>
-                  <SelectItem value="weekly">Weekly</SelectItem>
                   <SelectItem value="monthly">Monthly</SelectItem>
-                  <SelectItem value="major">Major</SelectItem>
-                  <SelectItem value="final">Final</SelectItem>
+                  <SelectItem value="quarterly">Quarterly</SelectItem>
+                  <SelectItem value="half_yearly">Half Yearly</SelectItem>
+                  <SelectItem value="annual">Annual</SelectItem>
+                  <SelectItem value="mock">Mock</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />

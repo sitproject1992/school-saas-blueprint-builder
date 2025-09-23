@@ -7,7 +7,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useClasses } from '@/hooks/useClasses';
-import { Tables } from '@/integrations/supabase/types';
 
 import { Teacher } from '@/hooks/useTeachers';
 

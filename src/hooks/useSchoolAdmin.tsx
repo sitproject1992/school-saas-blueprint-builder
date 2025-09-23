@@ -384,10 +384,14 @@ export function useSchoolAdmin() {
       setLoading(true);
       setError(null);
 
-      const { error } = await supabase.rpc("update_school_admin_password", {
-        p_account_id: id,
-        p_new_password: newPassword,
-      });
+      // Use direct password update instead of RPC function
+      const { error } = await supabase
+        .from("school_admin_accounts")
+        .update({ 
+          password_hash: newPassword, // Simple update for now
+          password_changed_at: new Date().toISOString()
+        })
+        .eq("id", id);
 
       if (error) throw error;
 

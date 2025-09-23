@@ -281,8 +281,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         );
 
-        if (!authError && authResult?.success) {
-          const userData = (authResult as any).user;
+        const result = authResult as any;
+        if (!authError && result?.success) {
+          const userData = result.user;
           // Create a proper user session for the school admin
           const mockUser = {
             id: userData.id,
@@ -304,10 +305,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
           setUser(mockUser);
           return;
-        } else if (authResult && !(authResult as any).success) {
+        } else if (result && !result.success) {
           // The function returned an error message
           throw new Error(
-            `Authentication failed: ${(authResult as any).message}. Please check your credentials or contact your administrator.`
+            `Authentication failed: ${result.message}. Please check your credentials or contact your administrator.`
           );
         }
       } catch (rpcError: any) {
