@@ -15,6 +15,8 @@ const subjectSchema = z.object({
   name: z.string().min(1, "Subject name is required"),
   code: z.string().optional(),
   description: z.string().optional(),
+  class_id: z.string().min(1, "Class is required"),
+  teacher_id: z.string().min(1, "Teacher is required"),
 });
 
 type SubjectFormValues = z.infer<typeof subjectSchema>;
@@ -26,7 +28,7 @@ interface SubjectFormProps {
 
 export function SubjectForm({ subject, onSuccess }: SubjectFormProps) {
   const { data: classes } = useClasses();
-  const { teachers } = useTeachers();
+  const { data: teachers } = useTeachers();
   const { schoolId } = useSchool();
   const createSubject = useCreateSubject();
   const updateSubject = useUpdateSubject();
@@ -43,7 +45,15 @@ export function SubjectForm({ subject, onSuccess }: SubjectFormProps) {
       name: subject.name || "",
       code: subject.code || "",
       description: subject.description || "",
-    } : {},
+      class_id: subject.class_id || "",
+      teacher_id: subject.teacher_id || "",
+    } : {
+      name: "",
+      code: "",
+      description: "",
+      class_id: "",
+      teacher_id: "",
+    },
   });
 
   const onSubmit = async (data: SubjectFormValues) => {
@@ -55,6 +65,8 @@ export function SubjectForm({ subject, onSuccess }: SubjectFormProps) {
             name: data.name,
             code: data.code || null,
             description: data.description || null,
+            class_id: data.class_id,
+            teacher_id: data.teacher_id,
           }
         });
       } else {
@@ -64,6 +76,8 @@ export function SubjectForm({ subject, onSuccess }: SubjectFormProps) {
           code: data.code || null,
           description: data.description || null,
           school_id: schoolId,
+          class_id: data.class_id,
+          teacher_id: data.teacher_id,
         });
       }
       onSuccess();
@@ -95,6 +109,41 @@ export function SubjectForm({ subject, onSuccess }: SubjectFormProps) {
             <Label htmlFor="description">Description</Label>
             <Input id="description" {...register("description")} />
             {errors.description && <p className="text-red-500 text-sm">{errors.description.message}</p>}
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="class_id">Class</Label>
+              <Select onValueChange={(value) => setValue("class_id", value)} defaultValue={watch("class_id")}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a class" />
+                </SelectTrigger>
+                <SelectContent>
+                  {classes?.map((cls) => (
+                    <SelectItem key={cls.id} value={cls.id}>
+                      {cls.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.class_id && <p className="text-red-500 text-sm">{errors.class_id.message}</p>}
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="teacher_id">Teacher</Label>
+              <Select onValueChange={(value) => setValue("teacher_id", value)} defaultValue={watch("teacher_id")}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a teacher" />
+                </SelectTrigger>
+                <SelectContent>
+                  {teachers?.map((teacher) => (
+                    <SelectItem key={teacher.id} value={teacher.id}>
+                      {teacher.first_name} {teacher.last_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.teacher_id && <p className="text-red-500 text-sm">{errors.teacher_id.message}</p>}
+            </div>
           </div>
 
           <Button type="submit" className="w-full" disabled={createSubject.isPending || updateSubject.isPending}>
