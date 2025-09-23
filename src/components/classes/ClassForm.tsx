@@ -14,12 +14,15 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Tables } from "@/integrations/supabase/types";
 import { useState } from "react";
 import { useSchool } from "@/hooks/useSchool";
 
-type Teacher = Tables<"teachers"> & {
-  profile: Tables<"profiles">;
+type Teacher = {
+  id: string;
+  profile: {
+    first_name: string;
+    last_name: string;
+  };
 };
 
 const classSchema = z.object({
@@ -32,7 +35,7 @@ const classSchema = z.object({
 type ClassFormValues = z.infer<typeof classSchema>;
 
 interface ClassFormProps {
-  classItem?: Tables<"classes">;
+  classItem?: any;
   onSuccess: () => void;
 }
 

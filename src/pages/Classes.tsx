@@ -17,21 +17,28 @@ import {
 } from "@/components/ui/dialog";
 import { ClassForm } from "@/components/classes/ClassForm";
 import { useState } from "react";
-
-const fetchClasses = async () => {
-  const { data, error } = await supabase.from("classes").select("*");
-  if (error) throw new Error(error.message);
-  return data;
-};
+import { useSchool } from "@/hooks/useSchool";
 
 export default function ClassesPage() {
   const queryClient = useQueryClient();
+  const { schoolId } = useSchool();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedClass, setSelectedClass] = useState(null);
 
+  const fetchClasses = async () => {
+    if (!schoolId) return [];
+    const { data, error } = await supabase
+      .from("classes")
+      .select("*")
+      .eq("school_id", schoolId);
+    if (error) throw new Error(error.message);
+    return data;
+  };
+
   const { data: classes, isLoading, error } = useQuery({
-    queryKey: ["classes"],
+    queryKey: ["classes", schoolId],
     queryFn: fetchClasses,
+    enabled: !!schoolId,
   });
 
   const handleDelete = async (id: string) => {

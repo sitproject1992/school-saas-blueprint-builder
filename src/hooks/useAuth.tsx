@@ -5,6 +5,7 @@ import type { User } from "@supabase/supabase-js";
 interface AppUser extends User {
   profile: any; // Replace 'any' with a proper profile type
   roles?: string[]; // Add roles for compatibility
+  school_id?: string; // Add school_id for school admins
 }
 
 interface AuthContextType {
@@ -281,13 +282,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         );
 
         if (!authError && authResult?.success) {
-          const userData = authResult.user;
+          const userData = (authResult as any).user;
           // Create a proper user session for the school admin
           const mockUser = {
             id: userData.id,
             email: userData.email,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
+            school_id: userData.school_id, // Add school_id to user object
             profile: {
               role: "school_admin",
               first_name: userData.first_name,
@@ -302,10 +304,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
           setUser(mockUser);
           return;
-        } else if (authResult && !authResult.success) {
+        } else if (authResult && !(authResult as any).success) {
           // The function returned an error message
           throw new Error(
-            `Authentication failed: ${authResult.message}. Please check your credentials or contact your administrator.`
+            `Authentication failed: ${(authResult as any).message}. Please check your credentials or contact your administrator.`
           );
         }
       } catch (rpcError: any) {
@@ -336,6 +338,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               email: trimmedEmail,
               created_at: schoolAdminData.created_at,
               updated_at: schoolAdminData.updated_at,
+              school_id: schoolAdminData.school_id, // Add school_id to user object
               profile: {
                 role: "school_admin",
                 first_name: schoolAdminData.first_name,

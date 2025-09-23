@@ -22,12 +22,20 @@ export function SchoolProvider({ children }: { children: React.ReactNode }) {
     queryKey: ["user-schools", user?.id],
     queryFn: async () => {
       if (!user) return [];
-      const { data, error } = await supabase
-        .from("school_admins")
-        .select("schools(*)")
-        .eq("user_id", user.id);
-      if (error) throw new Error(error.message);
-      return data.map((item: any) => item.schools);
+      
+      // For school admins, get school from their account
+      if (user.profile?.school_id || user.school_id) {
+        const schoolId = user.profile?.school_id || user.school_id;
+        const { data, error } = await supabase
+          .from("schools")
+          .select("*")
+          .eq("id", schoolId);
+        if (error) throw new Error(error.message);
+        return data;
+      }
+      
+      // For regular users, check school_admins table (when it exists)
+      return [];
     },
     enabled: !!user,
   });
@@ -64,9 +72,23 @@ export function SchoolProvider({ children }: { children: React.ReactNode }) {
     queryClient.invalidateQueries();
   };
 
+  // For school admins, automatically set their school as active
+  useEffect(() => {
+    const schoolId = user?.profile?.school_id || user?.school_id;
+    if (schoolId && !activeSchoolId) {
+      setActiveSchoolId(schoolId);
+    }
+  }, [user?.profile?.school_id, user?.school_id, activeSchoolId]);
+
   return (
     <SchoolContext.Provider
-      value={{ school, schoolId: school?.id, schools, switchSchool, isLoading }}
+      value={{ 
+        school, 
+        schoolId: activeSchoolId || user?.profile?.school_id || user?.school_id || school?.id, 
+        schools, 
+        switchSchool, 
+        isLoading 
+      }}
     >
       {children}
     </SchoolContext.Provider>
