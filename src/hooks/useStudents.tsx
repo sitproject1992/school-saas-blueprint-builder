@@ -76,36 +76,17 @@ export function useCreateStudent() {
   return useMutation({
     mutationFn: async (studentData: Omit<Student, 'id' | 'created_at' | 'updated_at' | 'classes' | 'school_id'>) => {
       if (!schoolId) throw new Error('No active school selected');
+      if (!studentData.class_id) throw new Error('Class is required');
 
-      // First create a profile
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .insert({
-          first_name: studentData.first_name,
-          last_name: studentData.last_name,
-          email: studentData.email,
-          date_of_birth: studentData.date_of_birth,
-          role: 'student',
-          school_id: schoolId,
-          user_id: crypto.randomUUID(), // This should be a real user ID in production
-        })
-        .select()
-        .single();
-
-      if (profileError) throw profileError;
-
-      // Then create the student record
-      const { data, error } = await supabase
-        .from('students')
-        .insert({ 
-          admission_number: studentData.admission_number,
-          class_id: studentData.class_id,
-          medical_conditions: studentData.health_records,
-          school_id: schoolId,
-          profile_id: profile.id,
-        })
-        .select()
-        .single();
+      const { data, error } = await supabase.rpc('create_student_with_profile', {
+        p_school_id: schoolId,
+        p_class_id: studentData.class_id,
+        p_first_name: studentData.first_name,
+        p_last_name: studentData.last_name,
+        p_email: studentData.email,
+        p_date_of_birth: studentData.date_of_birth,
+        p_admission_number: studentData.admission_number,
+      });
 
       if (error) throw error;
       return data;
