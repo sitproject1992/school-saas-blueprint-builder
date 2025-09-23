@@ -165,12 +165,18 @@ BEGIN
     -- Hash the provided password
     v_password_hash := hash_password(p_password);
 
-    -- Get account details with school information
-    SELECT saa, s.name INTO v_account, v_school_name
-    FROM school_admin_accounts saa
-    JOIN schools s ON s.id = saa.school_id
-    WHERE saa.email = LOWER(p_email)
-    AND saa.is_active = TRUE;
+    -- Get account details
+    SELECT * INTO v_account
+    FROM school_admin_accounts
+    WHERE email = LOWER(p_email)
+    AND is_active = TRUE;
+
+    -- If account found, get school name
+    IF v_account.id IS NOT NULL THEN
+        SELECT name INTO v_school_name
+        FROM schools
+        WHERE id = v_account.school_id;
+    END IF;
 
     -- Check if account exists
     IF v_account.id IS NULL THEN
@@ -273,8 +279,7 @@ BEGIN
         (p_school_id, 'Transport Fee', 1500, 'monthly', 5, true, NOW(), NOW()),
         (p_school_id, 'Library Fee', 500, 'monthly', 5, true, NOW(), NOW()),
         (p_school_id, 'Sports Fee', 800, 'monthly', 5, true, NOW(), NOW()),
-        (p_school_id,.
- 'Lab Fee', 1200, 'monthly', 5, true, NOW(), NOW()),
+        (p_school_id, 'Lab Fee', 1200, 'monthly', 5, true, NOW(), NOW()),
         (p_school_id, 'Development Fee', 2000, 'annual', 15, true, NOW(), NOW())
     ON CONFLICT DO NOTHING;
 
