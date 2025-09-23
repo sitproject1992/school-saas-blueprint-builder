@@ -70,7 +70,7 @@ export const useTeachers = () => {
           email: teacherData.email,
           role: 'teacher',
           school_id: schoolId,
-          user_id: crypto.randomUUID(), // This should be a real user ID in production
+          // Don't set user_id for teachers created through admin panel
         })
         .select()
         .single();
