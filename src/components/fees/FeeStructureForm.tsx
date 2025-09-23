@@ -39,6 +39,8 @@ interface FeeStructureFormProps {
   onCancel?: () => void;
 }
 
+const ALL_CLASSES_VALUE = '__ALL_CLASSES__';
+
 const FeeStructureForm: React.FC<FeeStructureFormProps> = ({ 
   feeStructure, 
   onSuccess, 
@@ -55,7 +57,12 @@ const FeeStructureForm: React.FC<FeeStructureFormProps> = ({
       name: feeStructure?.name || '',
       amount: feeStructure?.amount || 0,
       frequency: feeStructure?.frequency || '',
-      class_id: feeStructure?.class_id || '',
+      // Use a sentinel non-empty value for "all classes" because Radix Select
+      // does not allow Select.Item with an empty string value.
+      class_id:
+        feeStructure && typeof feeStructure.class_id === 'string' && feeStructure.class_id !== ''
+          ? feeStructure.class_id
+          : ALL_CLASSES_VALUE,
       description: feeStructure?.description || '',
       due_day: feeStructure?.due_day || 1,
     },
@@ -63,6 +70,8 @@ const FeeStructureForm: React.FC<FeeStructureFormProps> = ({
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
+      const normalizedClassId = values.class_id === ALL_CLASSES_VALUE ? '' : values.class_id;
+
       if (feeStructure) {
         updateFeeStructure({ 
           id: feeStructure.id, 
@@ -70,7 +79,7 @@ const FeeStructureForm: React.FC<FeeStructureFormProps> = ({
             name: values.name,
             amount: values.amount,
             frequency: values.frequency,
-            class_id: values.class_id,
+            class_id: normalizedClassId,
             description: values.description,
             due_day: values.due_day,
           }
@@ -80,7 +89,7 @@ const FeeStructureForm: React.FC<FeeStructureFormProps> = ({
           name: values.name,
           amount: values.amount,
           frequency: values.frequency,
-          class_id: values.class_id,
+          class_id: normalizedClassId,
           description: values.description,
           due_day: values.due_day,
         });
@@ -190,7 +199,7 @@ const FeeStructureForm: React.FC<FeeStructureFormProps> = ({
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="">All Classes</SelectItem>
+                  <SelectItem value={ALL_CLASSES_VALUE}>All Classes</SelectItem>
                   {classes.map((cls) => (
                     <SelectItem key={cls.id} value={cls.id}>
                       {cls.name} {cls.section && `- ${cls.section}`}
