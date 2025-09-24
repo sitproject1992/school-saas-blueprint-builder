@@ -885,12 +885,7 @@ export function SuperAdminDashboard() {
                   </div>
                   
                   {schools.length > 0 && (
-                    <BulkStudentImport 
-                      schoolId={
-                        (document.getElementById('school-select') as HTMLSelectElement)?.value || 
-                        schools[0]?.id || ''
-                      } 
-                    />
+                    <BulkStudentImport />
                   )}
                 </div>
               </CardContent>

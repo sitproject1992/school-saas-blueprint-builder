@@ -2,7 +2,6 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { supabase } from '../../integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -14,9 +13,8 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/components/ui/use-toast';
-import { useAuth } from '@/hooks/useAuth';
-import { useSchool } from '@/hooks/useSchool';
+import { useToast } from '@/hooks/use-toast';
+import { useAnnouncements, Announcement } from '@/hooks/useAnnouncements';
 
 const formSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -25,14 +23,14 @@ const formSchema = z.object({
 });
 
 interface AnnouncementFormProps {
-  announcement?: any;
+  announcement?: Announcement;
   onSuccess: () => void;
 }
 
 const AnnouncementForm: React.FC<AnnouncementFormProps> = ({ announcement, onSuccess }) => {
-  const { user } = useAuth();
-  const { school } = useSchool();
   const { toast } = useToast();
+  const { createAnnouncement, updateAnnouncement, isCreating, isUpdating } = useAnnouncements();
+  
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: announcement || {
@@ -45,22 +43,20 @@ const AnnouncementForm: React.FC<AnnouncementFormProps> = ({ announcement, onSuc
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       if (announcement) {
-        const { error } = await supabase
-          .from('announcements')
-          .update(values)
-          .eq('id', announcement.id);
-        if (error) throw error;
-        toast({ title: 'Announcement updated successfully' });
+        updateAnnouncement({
+          id: announcement.id,
+          updates: {
+            title: values.title,
+            content: values.content,
+            published_at: values.published_at
+          }
+        });
       } else {
-        const { error } = await supabase.from('announcements').insert({
+        createAnnouncement({
           title: values.title,
           content: values.content,
-          published_at: values.published_at,
-          school_id: school?.id,
-          created_by: user?.id,
+          published_at: values.published_at
         });
-        if (error) throw error;
-        toast({ title: 'Announcement created successfully' });
       }
       onSuccess();
     } catch (error: any) {
@@ -101,8 +97,8 @@ const AnnouncementForm: React.FC<AnnouncementFormProps> = ({ announcement, onSuc
             </FormItem>
           )}
         />
-        <Button type="submit">
-          {announcement ? 'Update' : 'Create'}
+        <Button type="submit" disabled={isCreating || isUpdating}>
+          {isCreating || isUpdating ? 'Saving...' : announcement ? 'Update' : 'Create'}
         </Button>
       </form>
     </Form>

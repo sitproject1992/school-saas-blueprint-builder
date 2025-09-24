@@ -55,6 +55,75 @@ export type Database = {
           },
         ]
       }
+      announcements: {
+        Row: {
+          content: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          published_at: string | null
+          school_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          published_at?: string | null
+          school_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          published_at?: string | null
+          school_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      attendance: {
+        Row: {
+          attendance_date: string
+          class_id: string
+          created_at: string
+          id: string
+          remarks: string | null
+          school_id: string
+          status: string
+          student_id: string
+          updated_at: string
+        }
+        Insert: {
+          attendance_date: string
+          class_id: string
+          created_at?: string
+          id?: string
+          remarks?: string | null
+          school_id: string
+          status?: string
+          student_id: string
+          updated_at?: string
+        }
+        Update: {
+          attendance_date?: string
+          class_id?: string
+          created_at?: string
+          id?: string
+          remarks?: string | null
+          school_id?: string
+          status?: string
+          student_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       classes: {
         Row: {
           capacity: number | null
@@ -95,6 +164,126 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      events: {
+        Row: {
+          created_at: string
+          description: string | null
+          end_time: string | null
+          event_date: string
+          id: string
+          is_active: boolean
+          location: string | null
+          school_id: string
+          start_time: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          end_time?: string | null
+          event_date: string
+          id?: string
+          is_active?: boolean
+          location?: string | null
+          school_id: string
+          start_time?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          end_time?: string | null
+          event_date?: string
+          id?: string
+          is_active?: boolean
+          location?: string | null
+          school_id?: string
+          start_time?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      exam_results: {
+        Row: {
+          created_at: string
+          exam_id: string
+          grade: string | null
+          id: string
+          marks_obtained: number | null
+          remarks: string | null
+          student_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          exam_id: string
+          grade?: string | null
+          id?: string
+          marks_obtained?: number | null
+          remarks?: string | null
+          student_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          exam_id?: string
+          grade?: string | null
+          id?: string
+          marks_obtained?: number | null
+          remarks?: string | null
+          student_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      exams: {
+        Row: {
+          class_id: string
+          created_at: string
+          description: string | null
+          end_time: string | null
+          exam_date: string
+          id: string
+          school_id: string
+          start_time: string | null
+          subject_id: string
+          title: string
+          total_marks: number | null
+          updated_at: string
+        }
+        Insert: {
+          class_id: string
+          created_at?: string
+          description?: string | null
+          end_time?: string | null
+          exam_date: string
+          id?: string
+          school_id: string
+          start_time?: string | null
+          subject_id: string
+          title: string
+          total_marks?: number | null
+          updated_at?: string
+        }
+        Update: {
+          class_id?: string
+          created_at?: string
+          description?: string | null
+          end_time?: string | null
+          exam_date?: string
+          id?: string
+          school_id?: string
+          start_time?: string | null
+          subject_id?: string
+          title?: string
+          total_marks?: number | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       fee_payments: {
         Row: {
@@ -182,6 +371,188 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      inventory_categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          school_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          school_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          school_id?: string
+        }
+        Relationships: []
+      }
+      inventory_items: {
+        Row: {
+          category_id: string | null
+          created_at: string
+          description: string | null
+          id: string
+          location: string | null
+          name: string
+          quantity: number
+          school_id: string
+          total_value: number | null
+          unit_price: number | null
+          updated_at: string
+        }
+        Insert: {
+          category_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          location?: string | null
+          name: string
+          quantity?: number
+          school_id: string
+          total_value?: number | null
+          unit_price?: number | null
+          updated_at?: string
+        }
+        Update: {
+          category_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          location?: string | null
+          name?: string
+          quantity?: number
+          school_id?: string
+          total_value?: number | null
+          unit_price?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      lesson_plans: {
+        Row: {
+          class_id: string
+          content: string | null
+          created_at: string
+          id: string
+          objectives: string | null
+          planned_date: string
+          school_id: string
+          status: string | null
+          subject_id: string
+          syllabus_id: string | null
+          teacher_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          class_id: string
+          content?: string | null
+          created_at?: string
+          id?: string
+          objectives?: string | null
+          planned_date: string
+          school_id: string
+          status?: string | null
+          subject_id: string
+          syllabus_id?: string | null
+          teacher_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          class_id?: string
+          content?: string | null
+          created_at?: string
+          id?: string
+          objectives?: string | null
+          planned_date?: string
+          school_id?: string
+          status?: string | null
+          subject_id?: string
+          syllabus_id?: string | null
+          teacher_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          is_read: boolean | null
+          message_type: string | null
+          receiver_id: string | null
+          school_id: string
+          sender_id: string
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          is_read?: boolean | null
+          message_type?: string | null
+          receiver_id?: string | null
+          school_id: string
+          sender_id: string
+          subject: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          is_read?: boolean | null
+          message_type?: string | null
+          receiver_id?: string | null
+          school_id?: string
+          sender_id?: string
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      password_history: {
+        Row: {
+          created_at: string | null
+          id: string
+          password_hash: string
+          school_admin_account_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          password_hash: string
+          school_admin_account_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          password_hash?: string
+          school_admin_account_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "password_history_school_admin_account_id_fkey"
+            columns: ["school_admin_account_id"]
+            isOneToOne: false
+            referencedRelation: "school_admin_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -526,6 +897,66 @@ export type Database = {
         }
         Relationships: []
       }
+      syllabus: {
+        Row: {
+          academic_year_id: string | null
+          class_id: string
+          created_at: string
+          description: string | null
+          id: string
+          school_id: string
+          subject_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          academic_year_id?: string | null
+          class_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          school_id: string
+          subject_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          academic_year_id?: string | null
+          class_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          school_id?: string
+          subject_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      teacher_subjects: {
+        Row: {
+          class_id: string
+          created_at: string
+          id: string
+          subject_id: string
+          teacher_id: string
+        }
+        Insert: {
+          class_id: string
+          created_at?: string
+          id?: string
+          subject_id: string
+          teacher_id: string
+        }
+        Update: {
+          class_id?: string
+          created_at?: string
+          id?: string
+          subject_id?: string
+          teacher_id?: string
+        }
+        Relationships: []
+      }
       teachers: {
         Row: {
           class_id: string | null
@@ -599,6 +1030,10 @@ export type Database = {
         Args: { p_email: string; p_password: string }
         Returns: Json
       }
+      create_default_school_data: {
+        Args: { p_school_id: string }
+        Returns: undefined
+      }
       create_school_admin_account: {
         Args: {
           p_email: string
@@ -608,7 +1043,54 @@ export type Database = {
           p_phone?: string
           p_school_id: string
         }
-        Returns: Json
+        Returns: string
+      }
+      create_student_with_profile: {
+        Args: {
+          p_admission_number: string
+          p_class_id: string
+          p_date_of_birth: string
+          p_email: string
+          p_first_name: string
+          p_last_name: string
+          p_school_id: string
+        }
+        Returns: string
+      }
+      create_subject_and_assign_teacher: {
+        Args: {
+          p_class_id: string
+          p_code: string
+          p_description: string
+          p_name: string
+          p_school_id: string
+          p_teacher_id: string
+        }
+        Returns: {
+          code: string | null
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          school_id: string
+          updated_at: string
+        }
+      }
+      hash_password: {
+        Args: { password: string }
+        Returns: string
+      }
+      is_super_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      update_subject_assignment: {
+        Args: { p_class_id: string; p_subject_id: string; p_teacher_id: string }
+        Returns: undefined
+      }
+      verify_password: {
+        Args: { hash: string; password: string }
+        Returns: boolean
       }
     }
     Enums: {

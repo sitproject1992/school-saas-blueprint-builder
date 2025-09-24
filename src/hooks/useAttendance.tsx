@@ -1,50 +1,143 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { type Database } from "@/integrations/supabase/types";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { useSchool } from './useSchool';
 
-type Attendance = Database["public"]["Tables"]["attendance"]["Row"];
-type NewAttendance = Database["public"]["Tables"]["attendance"]["Insert"];
+export interface AttendanceRecord {
+  id: string;
+  school_id: string;
+  student_id: string;
+  class_id: string;
+  attendance_date: string;
+  status: string;
+  remarks: string | null;
+  created_at: string;
+  updated_at: string;
+}
 
-// Fetch attendance for a specific class on a specific date
-const getAttendance = async ({ class_id, date }: { class_id: string; date: string }) => {
-  const { data, error } = await supabase
-    .from("attendance")
-    .select("*, students(*, profiles(*))")
-    .eq("class_id", class_id)
-    .eq("date", date);
+export interface AttendanceInput {
+  student_id: string;
+  class_id: string;
+  attendance_date: string;
+  status: string;
+  remarks?: string;
+}
 
-  if (error) throw new Error(error.message);
-  return data;
-};
-
-// Add or update attendance records
-const upsertAttendance = async (records: NewAttendance[]) => {
-  const { data, error } = await supabase.from("attendance").upsert(records).select();
-
-  if (error) throw new Error(error.message);
-  return data;
-};
-
-export const useAttendance = (class_id: string, date: string) => {
+export const useAttendance = (classId?: string, date?: string) => {
+  const { schoolId } = useSchool();
+  const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: attendance, isLoading, error } = useQuery({
-    queryKey: ["attendance", class_id, date],
-    queryFn: () => getAttendance({ class_id, date }),
-    enabled: !!class_id && !!date,
+  const {
+    data: attendanceRecords = [],
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ['attendance', schoolId, classId, date],
+    queryFn: async () => {
+      if (!schoolId) return [];
+      
+      let query = supabase
+        .from('attendance')
+        .select('*')
+        .eq('school_id', schoolId);
+
+      if (classId) {
+        query = query.eq('class_id', classId);
+      }
+
+      if (date) {
+        query = query.eq('attendance_date', date);
+      }
+
+      const { data, error } = await query.order('attendance_date', { ascending: false });
+
+      if (error) throw error;
+      return data as AttendanceRecord[];
+    },
+    enabled: !!schoolId,
   });
 
-  const upsertAttendanceMutation = useMutation({
-    mutationFn: upsertAttendance,
+  const markAttendance = useMutation({
+    mutationFn: async (attendanceData: AttendanceInput[]) => {
+      if (!schoolId) throw new Error('No active school selected');
+
+      // Delete existing records for this class and date
+      if (attendanceData.length > 0) {
+        const { class_id, attendance_date } = attendanceData[0];
+        await supabase
+          .from('attendance')
+          .delete()
+          .eq('school_id', schoolId)
+          .eq('class_id', class_id)
+          .eq('attendance_date', attendance_date);
+
+        // Insert new records
+        const records = attendanceData.map(record => ({
+          ...record,
+          school_id: schoolId,
+        }));
+
+        const { data, error } = await supabase
+          .from('attendance')
+          .insert(records)
+          .select();
+
+        if (error) throw error;
+        return data;
+      }
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["attendance", class_id, date] });
+      queryClient.invalidateQueries({ queryKey: ['attendance'] });
+      toast({
+        title: 'Success',
+        description: 'Attendance marked successfully',
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to mark attendance',
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const updateAttendance = useMutation({
+    mutationFn: async ({ id, updates }: { id: string; updates: Partial<AttendanceInput> }) => {
+      const { data, error } = await supabase
+        .from('attendance')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['attendance'] });
+      toast({
+        title: 'Success',
+        description: 'Attendance updated successfully',
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to update attendance',
+        variant: 'destructive',
+      });
     },
   });
 
   return {
-    attendance,
+    attendanceRecords,
     isLoading,
     error,
-    upsertAttendance: upsertAttendanceMutation.mutate,
+    markAttendance: markAttendance.mutate,
+    updateAttendance: updateAttendance.mutate,
+    isMarking: markAttendance.isPending,
+    isUpdating: updateAttendance.isPending,
   };
 };

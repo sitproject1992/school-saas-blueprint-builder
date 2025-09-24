@@ -2,7 +2,6 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { supabase } from '../../integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -14,57 +13,62 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/components/ui/use-toast';
-import { useAuth } from '@/hooks/useAuth';
-import { useSchool } from '@/hooks/useSchool';
+import { useToast } from '@/hooks/use-toast';
+import { useEvents, Event } from '@/hooks/useEvents';
 
 const formSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   description: z.string().optional(),
-  start_time: z.string().min(1, 'Start time is required'),
-  end_time: z.string().min(1, 'End time is required'),
+  event_date: z.string().min(1, 'Event date is required'),
+  start_time: z.string().optional(),
+  end_time: z.string().optional(),
+  location: z.string().optional(),
 });
 
 interface EventFormProps {
-  event?: any;
+  event?: Event;
   onSuccess: () => void;
 }
 
 const EventForm: React.FC<EventFormProps> = ({ event, onSuccess }) => {
-  const { user } = useAuth();
-  const { school } = useSchool();
   const { toast } = useToast();
+  const { createEvent, updateEvent, isCreating, isUpdating } = useEvents();
+  
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: event || {
       title: '',
       description: '',
+      event_date: '',
       start_time: '',
       end_time: '',
+      location: '',
     },
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       if (event) {
-        const { error } = await supabase
-          .from('announcements')
-          .update({
+        updateEvent({
+          id: event.id,
+          updates: {
             title: values.title,
-            content: values.description || '',
-          })
-          .eq('id', event.id);
-        if (error) throw error;
-        toast({ title: 'Event updated successfully' });
-      } else {
-        const { error } = await supabase.from('announcements').insert({
-          title: values.title,
-          content: values.description || '',
-          school_id: school?.id,
-          created_by: user?.id,
+            description: values.description,
+            event_date: values.event_date,
+            start_time: values.start_time,
+            end_time: values.end_time,
+            location: values.location
+          }
         });
-        if (error) throw error;
-        toast({ title: 'Event created successfully' });
+      } else {
+        createEvent({
+          title: values.title,
+          description: values.description,
+          event_date: values.event_date,
+          start_time: values.start_time,
+          end_time: values.end_time,
+          location: values.location
+        });
       }
       onSuccess();
     } catch (error: any) {
@@ -107,12 +111,25 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSuccess }) => {
         />
         <FormField
           control={form.control}
+          name="event_date"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Event Date</FormLabel>
+              <FormControl>
+                <Input type="date" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
           name="start_time"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Start Time</FormLabel>
               <FormControl>
-                <Input type="datetime-local" {...field} />
+                <Input type="time" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -125,14 +142,27 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSuccess }) => {
             <FormItem>
               <FormLabel>End Time</FormLabel>
               <FormControl>
-                <Input type="datetime-local" {...field} />
+                <Input type="time" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        <Button type="submit">
-          {event ? 'Update' : 'Create'}
+        <FormField
+          control={form.control}
+          name="location"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Location</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button type="submit" disabled={isCreating || isUpdating}>
+          {isCreating || isUpdating ? 'Saving...' : event ? 'Update' : 'Create'}
         </Button>
       </form>
     </Form>

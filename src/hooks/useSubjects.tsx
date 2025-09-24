@@ -23,8 +23,8 @@ interface SubjectMutation extends Omit<Subject, "id" | "created_at" | "updated_a
   teacher_id: string;
 }
 
-async function getSubjects(): Promise<Subject[]> {
-  const { data, error } = await supabase
+async function getSubjects(schoolId?: string): Promise<Subject[]> {
+  let query = supabase
     .from("subjects")
     .select(`
       *,
@@ -32,21 +32,28 @@ async function getSubjects(): Promise<Subject[]> {
         class_id,
         teacher_id,
         classes ( name ),
-        teachers ( first_name, last_name )
+        teachers ( profiles ( first_name, last_name ) )
       )
     `)
     .order("name", { ascending: true });
+
+  if (schoolId) {
+    query = query.eq("school_id", schoolId);
+  }
+
+  const { data, error } = await query;
 
   if (error) throw new Error(error.message);
 
   return data?.map(s => {
     const assignment = s.teacher_subjects && s.teacher_subjects.length > 0 ? s.teacher_subjects[0] : null;
+    const teacher = assignment?.teachers?.profiles;
     return {
       ...s,
       class_id: assignment?.class_id,
       teacher_id: assignment?.teacher_id,
       class_name: assignment?.classes?.name,
-      teacher_name: `${assignment?.teachers?.first_name || ''} ${assignment?.teachers?.last_name || ''}`.trim(),
+      teacher_name: teacher ? `${teacher.first_name || ''} ${teacher.last_name || ''}`.trim() : '',
     }
   }) || [];
 }
@@ -108,9 +115,12 @@ async function deleteSubject(id: string): Promise<void> {
 }
 
 export function useSubjects() {
+  const { schoolId } = useSchool();
+  
   return useQuery({
-    queryKey: ["subjects"],
-    queryFn: getSubjects,
+    queryKey: ["subjects", schoolId],
+    queryFn: () => getSubjects(schoolId),
+    enabled: !!schoolId,
   });
 }
 

@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -37,6 +38,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useAuth } from "@/hooks/useAuth";
+import { useSchool } from "@/hooks/useSchool";
+import { useClasses } from "@/hooks/useClasses";
+import { useSubjects } from "@/hooks/useSubjects";
+import { useSyllabus } from "@/hooks/useSyllabus";
 
 const lessonPlanSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -45,89 +50,74 @@ const lessonPlanSchema = z.object({
   planned_date: z.string().min(1, "Planned date is required"),
   class_id: z.string().min(1, "Class is required"),
   subject_id: z.string().min(1, "Subject is required"),
+  syllabus_id: z.string().optional(),
 });
-
-const getLessonPlans = async () => {
-  const { data, error } = await supabase
-    .from("lesson_plans")
-    .select("*, classes(name), subjects(name)");
-  if (error) throw new Error(error.message);
-  return data;
-};
-
-const createLessonPlan = async (
-  newLessonPlan: z.infer<typeof lessonPlanSchema> & { teacher_id: string },
-) => {
-  const { data, error } = await supabase
-    .from("lesson_plans")
-    .insert({
-      title: newLessonPlan.title,
-      objectives: newLessonPlan.objectives,
-      content: newLessonPlan.content,
-      planned_date: newLessonPlan.planned_date,
-      class_id: newLessonPlan.class_id,
-      subject_id: newLessonPlan.subject_id,
-      teacher_id: newLessonPlan.teacher_id,
-    })
-    .select();
-  if (error) throw new Error(error.message);
-  return data;
-};
-
-const updateLessonPlan = async (
-  updatedLessonPlan: { id: string } & z.infer<typeof lessonPlanSchema>,
-) => {
-  const { id, ...rest } = updatedLessonPlan;
-  const { data, error } = await supabase
-    .from("lesson_plans")
-    .update(rest)
-    .eq("id", id)
-    .select();
-  if (error) throw new Error(error.message);
-  return data;
-};
-
-const deleteLessonPlan = async (id: string) => {
-  const { data, error } = await supabase
-    .from("lesson_plans")
-    .delete()
-    .eq("id", id);
-  if (error) throw new Error(error.message);
-  return data;
-};
 
 export default function LessonPlans() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const { schoolId } = useSchool();
   const [open, setOpen] = useState(false);
   const [selectedLessonPlan, setSelectedLessonPlan] = useState<any>(null);
+
+  const { data: classes } = useClasses();
+  const { data: subjects } = useSubjects();
+  const { syllabuses } = useSyllabus();
 
   const {
     data: lessonPlans,
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["lessonPlans"],
-    queryFn: getLessonPlans,
-  });
-
-  const { data: classes } = useQuery({
-    queryKey: ["classes"],
+    queryKey: ["lessonPlans", schoolId],
     queryFn: async () => {
-      const { data, error } = await supabase.from("classes").select("*");
+      if (!schoolId) return [];
+      const { data, error } = await supabase
+        .from("lesson_plans")
+        .select("*, classes(name), subjects(name), syllabus(title)")
+        .eq("school_id", schoolId);
       if (error) throw new Error(error.message);
       return data;
     },
+    enabled: !!schoolId,
   });
 
-  const { data: subjects } = useQuery({
-    queryKey: ["subjects"],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("subjects").select("*");
-      if (error) throw new Error(error.message);
-      return data;
-    },
-  });
+  const createLessonPlan = async (
+    newLessonPlan: z.infer<typeof lessonPlanSchema> & { teacher_id: string },
+  ) => {
+    const { data, error } = await supabase
+      .from("lesson_plans")
+      .insert({
+        ...newLessonPlan,
+        school_id: schoolId,
+        teacher_id: user?.id,
+      })
+      .select();
+    if (error) throw new Error(error.message);
+    return data;
+  };
+
+  const updateLessonPlan = async (
+    updatedLessonPlan: { id: string } & z.infer<typeof lessonPlanSchema>,
+  ) => {
+    const { id, ...rest } = updatedLessonPlan;
+    const { data, error } = await supabase
+      .from("lesson_plans")
+      .update(rest)
+      .eq("id", id)
+      .select();
+    if (error) throw new Error(error.message);
+    return data;
+  };
+
+  const deleteLessonPlan = async (id: string) => {
+    const { data, error } = await supabase
+      .from("lesson_plans")
+      .delete()
+      .eq("id", id);
+    if (error) throw new Error(error.message);
+    return data;
+  };
 
   const createMutation = useMutation({
     mutationFn: createLessonPlan,
@@ -193,6 +183,7 @@ export default function LessonPlans() {
       planned_date: "",
       class_id: "",
       subject_id: "",
+      syllabus_id: "",
     });
     setOpen(true);
   };
@@ -248,8 +239,32 @@ export default function LessonPlans() {
                   <FormItem>
                     <FormLabel>Content</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Textarea {...field} />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="syllabus_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Syllabus</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Syllabus" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {syllabuses?.map((syllabus) => (
+                          <SelectItem key={syllabus.id} value={syllabus.id}>
+                            {syllabus.title}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -328,6 +343,7 @@ export default function LessonPlans() {
             <TableHead>Title</TableHead>
             <TableHead>Class</TableHead>
             <TableHead>Subject</TableHead>
+            <TableHead>Syllabus</TableHead>
             <TableHead>Planned Date</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
@@ -336,8 +352,9 @@ export default function LessonPlans() {
           {lessonPlans?.map((lp) => (
             <TableRow key={lp.id}>
               <TableCell>{lp.title}</TableCell>
-              <TableCell>{lp.classes.name}</TableCell>
-              <TableCell>{lp.subjects.name}</TableCell>
+              <TableCell>{lp.classes?.name}</TableCell>
+              <TableCell>{lp.subjects?.name}</TableCell>
+              <TableCell>{lp.syllabus?.title || 'N/A'}</TableCell>
               <TableCell>
                 {new Date(lp.planned_date).toLocaleDateString()}
               </TableCell>

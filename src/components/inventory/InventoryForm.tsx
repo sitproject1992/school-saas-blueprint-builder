@@ -2,7 +2,6 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { supabase } from '../../integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -13,28 +12,37 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { useToast } from '@/components/ui/use-toast';
-import { useSchool } from '@/hooks/useSchool';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
+import { useInventory, InventoryItem } from '@/hooks/useInventory';
 
 const formSchema = z.object({
   name: z.string().min(1, 'Name is required'),
+  description: z.string().optional(),
   quantity: z.coerce.number().min(0, 'Quantity must be a positive number'),
-  category_id: z.string().min(1, 'Category is required'),
+  unit_price: z.coerce.number().optional(),
+  location: z.string().optional(),
+  category_id: z.string().optional(),
 });
 
 interface InventoryFormProps {
-  item?: any;
+  item?: InventoryItem;
   onSuccess: () => void;
 }
 
 const InventoryForm: React.FC<InventoryFormProps> = ({ item, onSuccess }) => {
   const { toast } = useToast();
-  const { school } = useSchool();
+  const { createItem, updateItem, categories, isCreating, isUpdating } = useInventory();
+  
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: item || {
       name: '',
+      description: '',
       quantity: 0,
+      unit_price: 0,
+      location: '',
       category_id: '',
     },
   });
@@ -42,21 +50,26 @@ const InventoryForm: React.FC<InventoryFormProps> = ({ item, onSuccess }) => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       if (item) {
-        const { error } = await supabase
-          .from('inventory_items')
-          .update(values)
-          .eq('id', item.id);
-        if (error) throw error;
-        toast({ title: 'Item updated successfully' });
-      } else {
-        const { error } = await supabase.from('inventory_items').insert({
-          name: values.name,
-          quantity: values.quantity,
-          category_id: values.category_id,
-          school_id: school?.id,
+        updateItem({
+          id: item.id,
+          updates: {
+            name: values.name,
+            description: values.description,
+            quantity: values.quantity,
+            unit_price: values.unit_price,
+            location: values.location,
+            category_id: values.category_id
+          }
         });
-        if (error) throw error;
-        toast({ title: 'Item created successfully' });
+      } else {
+        createItem({
+          name: values.name,
+          description: values.description,
+          quantity: values.quantity,
+          unit_price: values.unit_price,
+          location: values.location,
+          category_id: values.category_id
+        });
       }
       onSuccess();
     } catch (error: any) {
@@ -86,6 +99,19 @@ const InventoryForm: React.FC<InventoryFormProps> = ({ item, onSuccess }) => {
         />
         <FormField
           control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Description</FormLabel>
+              <FormControl>
+                <Textarea {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
           name="quantity"
           render={({ field }) => (
             <FormItem>
@@ -99,10 +125,23 @@ const InventoryForm: React.FC<InventoryFormProps> = ({ item, onSuccess }) => {
         />
         <FormField
           control={form.control}
-          name="category_id"
+          name="unit_price"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Category ID</FormLabel>
+              <FormLabel>Unit Price</FormLabel>
+              <FormControl>
+                <Input type="number" step="0.01" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="location"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Location</FormLabel>
               <FormControl>
                 <Input {...field} />
               </FormControl>
@@ -110,8 +149,32 @@ const InventoryForm: React.FC<InventoryFormProps> = ({ item, onSuccess }) => {
             </FormItem>
           )}
         />
-        <Button type="submit">
-          {item ? 'Update' : 'Create'}
+        <FormField
+          control={form.control}
+          name="category_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Category</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {categories.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button type="submit" disabled={isCreating || isUpdating}>
+          {isCreating || isUpdating ? 'Saving...' : item ? 'Update' : 'Create'}
         </Button>
       </form>
     </Form>
