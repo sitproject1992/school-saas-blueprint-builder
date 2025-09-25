@@ -56,7 +56,10 @@ export const useInventory = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data as InventoryItem[];
+  return (data as any[])?.map((item: any) => ({
+    ...item,
+    inventory_categories: item.inventory_categories || { name: 'Unknown' }
+  })) || [] as InventoryItem[];
     },
     enabled: !!schoolId,
   });

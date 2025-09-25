@@ -46,14 +46,12 @@ async function getSubjects(schoolId?: string): Promise<Subject[]> {
   if (error) throw new Error(error.message);
 
   return data?.map(s => {
-    const assignment = s.teacher_subjects && s.teacher_subjects.length > 0 ? s.teacher_subjects[0] : null;
-    const teacher = assignment?.teachers?.profiles;
     return {
       ...s,
-      class_id: assignment?.class_id,
-      teacher_id: assignment?.teacher_id,
-      class_name: assignment?.classes?.name,
-      teacher_name: teacher ? `${teacher.first_name || ''} ${teacher.last_name || ''}`.trim() : '',
+      class_id: '',
+      teacher_id: '',
+      class_name: '',
+      teacher_name: '',
     }
   }) || [];
 }

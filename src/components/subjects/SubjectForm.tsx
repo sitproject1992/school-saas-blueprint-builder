@@ -137,7 +137,7 @@ export function SubjectForm({ subject, onSuccess }: SubjectFormProps) {
                 <SelectContent>
                   {teachers?.map((teacher) => (
                     <SelectItem key={teacher.id} value={teacher.id}>
-                      {teacher.first_name} {teacher.last_name}
+                      {teacher.profiles?.first_name} {teacher.profiles?.last_name}
                     </SelectItem>
                   ))}
                 </SelectContent>

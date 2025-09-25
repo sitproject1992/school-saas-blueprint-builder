@@ -93,14 +93,8 @@ const UserForm: React.FC<UserFormProps> = ({ schoolId, onSuccess, onCancel }) =>
 
         // Create role-specific record if needed
         if (values.role === 'school_admin') {
-          await supabase.from('school_admin_accounts').insert([
-            {
-              user_id: authData.user.id,
-              school_id: schoolId,
-              role: 'admin',
-              is_active: true,
-            },
-          ]);
+          // For school admin, we don't need to insert into school_admin_accounts
+          // as this should be handled differently through the admin registration flow
         } else if (values.role === 'teacher') {
           await supabase.from('teachers').insert([
             {

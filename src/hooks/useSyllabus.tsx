@@ -45,7 +45,11 @@ export const useSyllabus = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data as Syllabus[];
+  return (data as any[])?.map((item: any) => ({
+    ...item,
+    subjects: { name: item.subjects?.name || 'Unknown Subject', code: item.subjects?.code || 'UNK' },
+    classes: { name: item.classes?.name || 'Unknown Class' }
+  })) || [] as Syllabus[];
     },
     enabled: !!schoolId,
   });

@@ -53,18 +53,21 @@ const TestForm: React.FC<TestFormProps> = ({ test, onSuccess }) => {
       if (test) {
         const { error } = await supabase
           .from('exams')
-          .update(values)
+          .update({
+            title: values.name,
+            exam_date: values.start_date,
+          })
           .eq('id', test.id);
         if (error) throw error;
         toast({ title: 'Exam updated successfully' });
       } else {
         if (!schoolId) throw new Error('No school selected');
         const { error } = await supabase.from('exams').insert({
-          name: values.name,
-          type: values.type,
-          start_date: values.start_date,
-          end_date: values.end_date,
+          title: values.name,
+          exam_date: values.start_date,
           school_id: schoolId,
+          class_id: classes?.[0]?.id || '', // Use first available class or make this selectable
+          subject_id: subjects?.[0]?.id || '', // Use first available subject or make this selectable
         });
         if (error) throw error;
         toast({ title: 'Exam created successfully' });

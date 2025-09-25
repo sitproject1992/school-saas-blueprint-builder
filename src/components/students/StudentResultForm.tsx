@@ -94,7 +94,7 @@ const StudentResultForm: React.FC<StudentResultFormProps> = ({
                   <option value="">Select a test</option>
                   {tests?.map((t) => (
                     <option key={t.id} value={t.id}>
-                      {t.name}
+                      {t.title}
                     </option>
                   ))}
                 </select>

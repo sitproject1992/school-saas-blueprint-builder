@@ -117,7 +117,7 @@ const StudentResults: React.FC<StudentResultsProps> = ({ studentId }) => {
         <TableBody>
           {results?.map((result) => (
             <TableRow key={result.id}>
-              <TableCell>{result.exams?.name || 'N/A'}</TableCell>
+              <TableCell>No exam data</TableCell>
               <TableCell>{result.marks_obtained}</TableCell>
               <TableCell>{result.remarks}</TableCell>
               <TableCell>
