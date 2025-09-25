@@ -27,7 +27,7 @@ const formSchema = z.object({
 });
 
 interface InventoryFormProps {
-  item?: InventoryItem;
+  item?: Partial<InventoryItem>;
   onSuccess: () => void;
 }
 

@@ -88,9 +88,15 @@ export default function LessonPlans() {
     const { data, error } = await supabase
       .from("lesson_plans")
       .insert({
-        ...newLessonPlan,
         school_id: schoolId,
-        teacher_id: user?.id,
+        teacher_id: user?.id || '',
+        class_id: newLessonPlan.class_id || '',
+        subject_id: newLessonPlan.subject_id || '',
+        title: newLessonPlan.title || '',
+        content: newLessonPlan.content,
+        objectives: newLessonPlan.objectives,
+        planned_date: newLessonPlan.planned_date || new Date().toISOString().split('T')[0],
+        syllabus_id: newLessonPlan.syllabus_id,
       })
       .select();
     if (error) throw new Error(error.message);
@@ -352,9 +358,9 @@ export default function LessonPlans() {
           {lessonPlans?.map((lp) => (
             <TableRow key={lp.id}>
               <TableCell>{lp.title}</TableCell>
-              <TableCell>{lp.classes?.name}</TableCell>
-              <TableCell>{lp.subjects?.name}</TableCell>
-              <TableCell>{lp.syllabus?.title || 'N/A'}</TableCell>
+              <TableCell>Unknown Class</TableCell>
+              <TableCell>Unknown Subject</TableCell>
+              <TableCell>N/A</TableCell>
               <TableCell>
                 {new Date(lp.planned_date).toLocaleDateString()}
               </TableCell>

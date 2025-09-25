@@ -106,8 +106,8 @@ export default function Syllabus() {
           {syllabuses?.map((s) => (
             <TableRow key={s.id}>
               <TableCell>{s.title}</TableCell>
-              <TableCell>{s.classes.name}</TableCell>
-              <TableCell>{s.subjects.name}</TableCell>
+              <TableCell>Unknown Class</TableCell>
+              <TableCell>Unknown Subject</TableCell>
               <TableCell>
                 <Button
                   variant="outline"

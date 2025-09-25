@@ -187,7 +187,7 @@ export function useTeacherDashboardData() {
           .from('lesson_plans')
           .select('id', { count: 'exact' })
           .eq('teacher_id', teacher.id)
-          .eq('is_completed', false),
+          .eq('status', 'planned'),
         
         // Upcoming exams
         supabase

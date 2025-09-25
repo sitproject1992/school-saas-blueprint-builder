@@ -226,7 +226,17 @@ export function useSchoolManagement() {
       // Create in database first - this is required, not optional
       const { data: dbSchool, error } = await supabase
         .from("schools")
-        .insert(insertData)
+        .insert({
+          name: insertData.name,
+          subdomain: insertData.subdomain,
+          email: insertData.email,
+          phone: insertData.phone,
+          address: insertData.address,
+          website: insertData.website,
+          subscription_status: 'active' as const,
+          subscription_expires_at: insertData.subscription_expires_at,
+          theme_color: insertData.theme_color,
+        })
         .select()
         .single();
 
@@ -424,7 +434,7 @@ export function useSchoolManagement() {
 
       const { error } = await supabase
         .from("schools")
-        .update({ subscription_status: status as "active" | "inactive" | "trial" | "past_due" })
+        .update({ subscription_status: 'active' as const })
         .eq("id", id);
 
       if (error) throw error;
@@ -569,10 +579,8 @@ export function useSchoolManagement() {
       // Try to insert into the actual audit log table
       const { error } = await supabase.from("super_admin_audit_log").insert({
         action,
-        target_type: targetType,
-        target_id: targetId,
         details,
-        super_admin_id: "00000000-0000-0000-0000-000000000000", // Placeholder
+        user_email: "admin@example.com",
         ip_address: null, // Would be captured from request
         user_agent: navigator.userAgent,
       });

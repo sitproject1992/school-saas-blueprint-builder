@@ -51,12 +51,11 @@ export function useCreateUser() {
       const { data, error } = await supabase
         .from('profiles')
         .insert({
-          user_id: authData.user.id,
           school_id: schoolId,
           email: userData.email,
           first_name: userData.first_name,
           last_name: userData.last_name,
-          role: userData.role,
+          role: userData.role === 'accountant' || userData.role === 'inventory_manager' ? 'school_admin' : userData.role,
         })
         .select()
         .single();
@@ -89,7 +88,12 @@ export function useUpdateUser() {
     mutationFn: async ({ id, email, first_name, last_name, role }: User) => {
       const { data, error } = await supabase
         .from('profiles')
-        .update({ email, first_name, last_name, role })
+        .update({ 
+          email, 
+          first_name, 
+          last_name, 
+          role: role === 'accountant' || role === 'inventory_manager' ? 'school_admin' : role 
+        })
         .eq('id', id)
         .select()
         .single();

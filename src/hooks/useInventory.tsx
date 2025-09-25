@@ -21,6 +21,7 @@ export interface InventoryItem {
   unit_price: number | null;
   total_value: number | null;
   location: string | null;
+  minimum_stock?: number;
   created_at: string;
   updated_at: string;
   inventory_categories?: InventoryCategory;

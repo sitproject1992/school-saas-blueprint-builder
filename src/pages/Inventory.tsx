@@ -96,7 +96,11 @@ const Inventory = () => {
         .order("created_at", { ascending: false });
 
       if (error) throw new Error(error.message);
-      return data as InventoryItem[];
+      return (data as any[])?.map(item => ({
+        ...item,
+        minimum_stock: item.minimum_stock || 0,
+        inventory_categories: item.inventory_categories || { name: 'Unknown' }
+      })) as InventoryItem[];
     },
   });
 
@@ -238,7 +242,10 @@ const Inventory = () => {
                   {editingItem ? "Edit" : "Add New"} Inventory Item
                 </DialogTitle>
               </DialogHeader>
-              <InventoryForm item={editingItem} onSuccess={handleSuccess} />
+              <InventoryForm item={editingItem ? {
+                ...editingItem,
+                inventory_categories: undefined
+              } : undefined} onSuccess={handleSuccess} />
             </DialogContent>
           </Dialog>
         </div>
