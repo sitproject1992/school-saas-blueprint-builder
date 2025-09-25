@@ -31,8 +31,10 @@ async function getSubjects(schoolId?: string): Promise<Subject[]> {
       teacher_subjects (
         class_id,
         teacher_id,
-        classes ( name ),
-        teachers ( profiles ( first_name, last_name ) )
+        classes ( name, section ),
+        teachers ( 
+          profiles ( first_name, last_name ) 
+        )
       )
     `)
     .order("name", { ascending: true });
@@ -46,12 +48,21 @@ async function getSubjects(schoolId?: string): Promise<Subject[]> {
   if (error) throw new Error(error.message);
 
   return data?.map(s => {
+    // Get the first teacher_subject assignment if it exists
+    const assignment = Array.isArray(s.teacher_subjects) && s.teacher_subjects.length > 0 
+      ? s.teacher_subjects[0] 
+      : null;
+
     return {
       ...s,
-      class_id: '',
-      teacher_id: '',
-      class_name: '',
-      teacher_name: '',
+      class_id: assignment?.class_id || '',
+      teacher_id: assignment?.teacher_id || '',
+      class_name: assignment?.classes?.name 
+        ? `${assignment.classes.name}${assignment.classes.section ? ` - ${assignment.classes.section}` : ''}`
+        : '',
+      teacher_name: assignment?.teachers?.profiles
+        ? `${assignment.teachers.profiles.first_name} ${assignment.teachers.profiles.last_name}`
+        : '',
     }
   }) || [];
 }

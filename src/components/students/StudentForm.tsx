@@ -18,6 +18,9 @@ const studentSchema = z.object({
   admission_number: z.string().optional(),
   digital_id_card_url: z.string().optional(),
   health_records: z.string().optional(),
+  parent_name: z.string().optional(),
+  parent_phone: z.string().optional(),
+  parent_email: z.string().optional(),
 });
 
 type StudentFormValues = z.infer<typeof studentSchema>;
@@ -60,6 +63,9 @@ export function StudentForm({ student, onSuccess }: StudentFormProps) {
           admission_number: data.admission_number || `STU${Date.now()}`,
           digital_id_card_url: data.digital_id_card_url || '',
           health_records: data.health_records || '',
+          parent_name: data.parent_name,
+          parent_phone: data.parent_phone,
+          parent_email: data.parent_email,
         });
       }
       onSuccess();
@@ -129,6 +135,24 @@ export function StudentForm({ student, onSuccess }: StudentFormProps) {
           <div className="grid gap-2">
             <Label htmlFor="health_records">Health Records</Label>
             <Input id="health_records" {...register("health_records")} />
+          </div>
+
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium">Parent Information</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="parent_name">Parent Name</Label>
+                <Input id="parent_name" {...register("parent_name")} />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="parent_phone">Parent Phone</Label>
+                <Input id="parent_phone" {...register("parent_phone")} />
+              </div>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="parent_email">Parent Email</Label>
+              <Input id="parent_email" type="email" {...register("parent_email")} />
+            </div>
           </div>
           
           <Button type="submit" className="w-full" disabled={createStudent.isPending || updateStudent.isPending}>

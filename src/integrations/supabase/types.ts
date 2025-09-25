@@ -612,6 +612,33 @@ export type Database = {
         }
         Relationships: []
       }
+      parents: {
+        Row: {
+          created_at: string
+          id: string
+          occupation: string | null
+          profile_id: string
+          school_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          occupation?: string | null
+          profile_id: string
+          school_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          occupation?: string | null
+          profile_id?: string
+          school_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       password_history: {
         Row: {
           created_at: string | null
@@ -833,6 +860,9 @@ export type Database = {
           emergency_contact_phone: string | null
           id: string
           medical_conditions: string | null
+          parent_email: string | null
+          parent_name: string | null
+          parent_phone: string | null
           profile_id: string
           school_id: string
           updated_at: string
@@ -847,6 +877,9 @@ export type Database = {
           emergency_contact_phone?: string | null
           id?: string
           medical_conditions?: string | null
+          parent_email?: string | null
+          parent_name?: string | null
+          parent_phone?: string | null
           profile_id: string
           school_id: string
           updated_at?: string
@@ -861,6 +894,9 @@ export type Database = {
           emergency_contact_phone?: string | null
           id?: string
           medical_conditions?: string | null
+          parent_email?: string | null
+          parent_name?: string | null
+          parent_phone?: string | null
           profile_id?: string
           school_id?: string
           updated_at?: string
@@ -1121,6 +1157,17 @@ export type Database = {
         Args: { p_school_id: string }
         Returns: undefined
       }
+      create_parent_with_profile: {
+        Args: {
+          p_email: string
+          p_first_name: string
+          p_last_name: string
+          p_occupation?: string
+          p_phone?: string
+          p_school_id: string
+        }
+        Returns: string
+      }
       create_school_admin_account: {
         Args: {
           p_email: string
@@ -1133,15 +1180,28 @@ export type Database = {
         Returns: string
       }
       create_student_with_profile: {
-        Args: {
-          p_admission_number: string
-          p_class_id: string
-          p_date_of_birth: string
-          p_email: string
-          p_first_name: string
-          p_last_name: string
-          p_school_id: string
-        }
+        Args:
+          | {
+              p_admission_number: string
+              p_class_id: string
+              p_date_of_birth: string
+              p_email: string
+              p_first_name: string
+              p_last_name: string
+              p_parent_email?: string
+              p_parent_name?: string
+              p_parent_phone?: string
+              p_school_id: string
+            }
+          | {
+              p_admission_number: string
+              p_class_id: string
+              p_date_of_birth: string
+              p_email: string
+              p_first_name: string
+              p_last_name: string
+              p_school_id: string
+            }
         Returns: string
       }
       create_subject_and_assign_teacher: {
@@ -1170,6 +1230,14 @@ export type Database = {
       is_super_admin: {
         Args: Record<PropertyKey, never>
         Returns: boolean
+      }
+      link_parent_to_student: {
+        Args: {
+          p_parent_id: string
+          p_relationship?: string
+          p_student_id: string
+        }
+        Returns: undefined
       }
       update_subject_assignment: {
         Args: { p_class_id: string; p_subject_id: string; p_teacher_id: string }
