@@ -28,7 +28,7 @@ interface SubjectFormProps {
 
 export function SubjectForm({ subject, onSuccess }: SubjectFormProps) {
   const { data: classes } = useClasses();
-  const { data: teachers } = useTeachers();
+  const { teachers } = useTeachers();
   const { schoolId } = useSchool();
   const createSubject = useCreateSubject();
   const updateSubject = useUpdateSubject();

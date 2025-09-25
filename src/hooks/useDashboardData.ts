@@ -92,8 +92,8 @@ export function useAdminDashboardData() {
       const totalStudents = studentsResult.count || 0;
       const totalTeachers = teachersResult.count || 0;
       const totalClasses = classesResult.count || 0;
-      const totalRevenue = revenueResult.data?.reduce((sum, payment) => sum + payment.amount, 0) || 0;
-      const pendingFees = pendingFeesResult.data?.reduce((sum, payment) => sum + payment.amount, 0) || 0;
+      const totalRevenue = revenueResult.data?.reduce((sum, payment) => sum + payment.amount_paid, 0) || 0;
+      const pendingFees = pendingFeesResult.data?.reduce((sum, payment) => sum + payment.amount_paid, 0) || 0;
       
       // Calculate attendance rate
       const attendanceData = attendanceResult.data || [];
@@ -293,7 +293,7 @@ export function useStudentDashboardData() {
       // Calculate overall grade
       const grades = gradesResult.data || [];
       const averageScore = grades.length > 0 
-        ? grades.reduce((sum, g) => sum + (g.marks_obtained || 0) / (g.max_marks || 1), 0) / grades.length * 100
+        ? grades.reduce((sum, g) => sum + (g.marks_obtained || 0) / 100, 0) / grades.length * 100
         : 0;
       
       const overallGrade = averageScore >= 90 ? 'A+' : 
@@ -385,7 +385,7 @@ export function useParentDashboardData() {
       const presentCount = attendanceData.filter(a => a.status === 'present').length;
       const totalAttendance = attendanceData.length > 0 ? (presentCount / attendanceData.length) * 100 : 0;
 
-      const pendingFees = feesResult.data?.reduce((sum, fee) => sum + fee.amount, 0) || 0;
+      const pendingFees = feesResult.data?.reduce((sum, fee) => sum + fee.amount_paid, 0) || 0;
       const upcomingEvents = eventsResult.count || 0;
 
       return {

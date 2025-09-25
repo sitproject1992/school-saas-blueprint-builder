@@ -248,6 +248,7 @@ export type Database = {
           end_time: string | null
           exam_date: string
           id: string
+          max_marks: number | null
           school_id: string
           start_time: string | null
           subject_id: string
@@ -262,6 +263,7 @@ export type Database = {
           end_time?: string | null
           exam_date: string
           id?: string
+          max_marks?: number | null
           school_id: string
           start_time?: string | null
           subject_id: string
@@ -276,6 +278,7 @@ export type Database = {
           end_time?: string | null
           exam_date?: string
           id?: string
+          max_marks?: number | null
           school_id?: string
           start_time?: string | null
           subject_id?: string
@@ -367,6 +370,36 @@ export type Database = {
           id?: string
           is_active?: boolean
           name?: string
+          school_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      grading_systems: {
+        Row: {
+          created_at: string
+          id: string
+          is_default: boolean
+          name: string
+          scale: Json
+          school_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          name: string
+          scale?: Json
+          school_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          name?: string
+          scale?: Json
           school_id?: string
           updated_at?: string
         }
@@ -522,6 +555,60 @@ export type Database = {
           sender_id?: string
           subject?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      notification_settings: {
+        Row: {
+          created_at: string
+          email_notifications: Json
+          id: string
+          in_app_notifications: Json
+          school_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email_notifications?: Json
+          id?: string
+          in_app_notifications?: Json
+          school_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email_notifications?: Json
+          id?: string
+          in_app_notifications?: Json
+          school_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      parent_students: {
+        Row: {
+          created_at: string
+          id: string
+          parent_id: string
+          relationship: string
+          student_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          parent_id: string
+          relationship?: string
+          student_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          parent_id?: string
+          relationship?: string
+          student_id?: string
         }
         Relationships: []
       }

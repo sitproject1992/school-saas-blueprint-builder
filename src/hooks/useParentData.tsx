@@ -41,7 +41,7 @@ const getParentData = async (userId: string) => {
           subjects (name)
         )
       ),
-      attendance (date, status),
+      attendance (attendance_date, status),
       exam_results (
         grade,
         marks_obtained,

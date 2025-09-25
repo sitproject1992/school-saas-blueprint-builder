@@ -59,7 +59,7 @@ export function StudentInfo({ student }: { student: Student }) {
             <TableBody>
               {student.attendance.slice(0, 5).map((att) => (
                 <TableRow key={att.id}>
-                  <TableCell>{new Date(att.date).toLocaleDateString()}</TableCell>
+                  <TableCell>{new Date(att.attendance_date).toLocaleDateString()}</TableCell>
                   <TableCell>{att.status}</TableCell>
                 </TableRow>
               ))}
@@ -125,15 +125,15 @@ export function StudentInfo({ student }: { student: Student }) {
               <TableRow>
                 <TableHead>Fee Structure</TableHead>
                 <TableHead>Amount</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead>Payment Date</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {student.fee_payments?.map((payment) => (
                 <TableRow key={payment.id}>
                   <TableCell>{payment.fee_structures.name}</TableCell>
-                  <TableCell>${payment.amount}</TableCell>
-                  <TableCell>{payment.status}</TableCell>
+                  <TableCell>₹{payment.fee_structures.amount}</TableCell>
+                  <TableCell>{payment.payment_date}</TableCell>
                 </TableRow>
               )) || (
                 <TableRow>
@@ -161,7 +161,7 @@ export function StudentInfo({ student }: { student: Student }) {
                 <TableRow key={result.id}>
                   <TableCell>{result.subjects?.name}</TableCell>
                   <TableCell>{result.marks_obtained}</TableCell>
-                  <TableCell>{result.max_marks}</TableCell>
+                  <TableCell>100</TableCell>
                   <TableCell>{result.grade}</TableCell>
                 </TableRow>
               ))}
